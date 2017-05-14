@@ -1,0 +1,213 @@
+<html>
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+        <title>Logistimo</title>
+        <style>
+            .body{
+                font-size: 13px !important;
+            }
+
+            .table{
+                font-size: 13px !important;
+            }
+
+            .info-box-litetext{
+                font-size: 11px;
+                color: #777;
+                vertical-align: bottom;
+                padding-right: 7px;
+            }
+
+            .c-aqua {
+                color: #00c0ef !important;
+            }
+
+            .c-green {
+                color: #00a65a !important;
+            }
+
+            .c-red {
+                color: #f56954 !important;
+            }
+            .c-orange {
+                color: darkorange;
+            }
+
+            .c-grey{
+                color: #999999;
+            }
+        </style>
+        <link rel="stylesheet" href="/assets/stylesheets/bootstrap.min.css" />
+    </head>
+    <body>
+        <div class="container">
+            <div id="loader" style="display : none">
+                <div class='row'>
+                    <div class='col-sm-12' style="text-align : center">
+                        <img src='/assets/images/loader.gif' /> Loading
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-12">
+                    <h3>Logistimo Device ready & temperatures</h3>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-12">
+                    <label for="serialNumber">Serial number: </label>
+                    <input type="text" class="form-control" id="serialNumber" placeholder="Serial number">
+                    <button type="button" class="btn btn-default" onclick="getData()">Get</button>
+                </div>
+            </div>
+            <div class="row" style="margin-top: 10px">
+                <div class="col-sm-12">
+                    <div id="content">
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <div class="alert alert-info">
+                                Please enter serial number.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <script>
+            var xmlhttp = new XMLHttpRequest();
+            var url = "v2/devices/details/nexleaf/";
+            var rowStart =  "<div class='row'><div class='col-sm-12'>";
+            var rowEnd = "</div></div>";
+            var deviceAlarms = {
+                "0-1": "Device disconnected",
+                "1-1": "Disconnected",
+                "2-1": "Low battery",
+                "2-2": "Battery alarm",
+                "2-3": "Battery charging",
+                "3": "Firmware error",
+                "4-1": "Inactive",
+                "5-1": "Power outage"
+            };
+
+            var temperatureAbnormalState = {
+                "0": "c-green",
+                "1": "c-orange",
+                "2": "c-orange",
+                "3-1": "c-aqua",
+                "3-2": "c-red"
+            };
+
+            function get(serialNumber){
+                xmlhttp.open("GET", url + serialNumber, true);
+                render(document.getElementById("loader").innerHTML);
+                xmlhttp.onreadystatechange = function() {
+                    if (xmlhttp.readyState == 4){
+                        if(xmlhttp.status == 404) {
+                            var deviceInfo = "<div class='row'><div class=col-sm-12'><div class='alert alert-warning'>Temperature logger not found, please enter correct serial number</div></div></div>";
+                            render(deviceInfo);
+                            return;
+                        }
+
+                        if (xmlhttp.status == 200) {
+                            var myArr = JSON.parse(xmlhttp.responseText);
+                            constructData(myArr);
+                        }else{
+                            render("<div class='row'><div class='col-sm-12'><div class='alert alert-danger'>Unable to fetch data, please try again after sometimes.</div></div></div>");
+                        }
+                    }
+                };
+                xmlhttp.send();
+            }
+
+            function getData(){
+                get(document.getElementById("serialNumber").value);
+            }
+
+            function formatDate(date){
+              var hours = date.getHours();
+              var minutes = date.getMinutes();
+              var ampm = hours >= 12 ? 'PM' : 'AM';
+              hours = hours % 12;
+              hours = hours ? hours : 12;
+              minutes = minutes < 10 ? '0'+minutes : minutes;
+              return date.getDate() + '/' + (date.getMonth() + 1) + '/' + date.getFullYear() + ' ' + hours + ':' + minutes + ' ' + ampm;
+            }
+
+            function constructData(deviceData){
+                var r = [], j = -1;
+
+                r[++j] = rowStart;
+                r[++j] = "<h4>Device: " + deviceData.dId + "</h4>";
+                    r[++j] = "<table class='table table-striped table-bordered'>";
+                    if(deviceData.drdy && deviceData.drdy.time){
+                        r[++j] = "<tr><td>Device ready received time</td><td nowrap>" + formatDate(new Date(deviceData.drdy.time * 1000)) + "</td></tr>";
+                    }else{
+                        r[++j] = "<tr><td>Device ready received time</td><td nowrap>Not received.</td></tr>";
+                    }
+                    r[++j] = "<tr><td>Phone number</td><td>" + ((deviceData.meta && deviceData.meta.gsm && deviceData.meta.gsm.sim && deviceData.meta.gsm.sim.phn) ? deviceData.meta.gsm.sim.phn : "N/A") + "</td></tr>";
+                    r[++j] = "<tr><td>SIM Id</td><td>" + ((deviceData.meta && deviceData.meta.gsm && deviceData.meta.gsm.sim && deviceData.meta.gsm.sim.sid) ? deviceData.meta.gsm.sim.sid : "N/A") + "</td></tr>";
+                    r[++j] = "<tr><td>Alternate phone number</td><td>" + ((deviceData.meta && deviceData.meta.gsm && deviceData.meta.gsm.altSim && deviceData.meta.gsm.altSim.phn) ? deviceData.meta.gsm.altSim.phn : "N/A") + "</td></tr>";
+                    r[++j] = "<tr><td>Alternate SIM Id</td><td>" + ((deviceData.meta && deviceData.meta.gsm && deviceData.meta.gsm.altSim && deviceData.meta.gsm.altSim.sid) ? deviceData.meta.gsm.altSim.sid : "N/A") + "</td></tr>";
+                    r[++j] = "</table>";
+
+                r[++j] = rowEnd;
+
+                r[++j] = rowStart;
+                r[++j] = "<h4>Temperatures</h4>";
+                r[++j] = rowEnd;
+                r[++j] = rowStart;
+                r[++j] = "<table class='table table-striped table-hover table-bordered'><tr><th>Channel</th><th>Status</th>";
+                for(var item in deviceData.tmp){
+                    r[++j] = "<tr><td>";
+                    r[++j] = deviceData.tmp[item].sId ? deviceData.tmp[item].sId : 'Device';
+                    r[++j] = "</td>";
+                    if(deviceData.tmp[item].time > 0){
+                        r[++j] = "<td>";
+                        if(deviceData.tmp[item].st > 2){
+                            r[++j] =  "<div class='pull-left " + temperatureAbnormalState[deviceData.tmp[item].st + '-' + deviceData.tmp[item].aSt] + "'>" + (deviceData.tmp[item].tmp).toFixed(1) + "&#8451;</div><br/>";
+                        }else{
+                            r[++j] =  "<div class='pull-left " + temperatureAbnormalState[deviceData.tmp[item].st] + "'>" + (deviceData.tmp[item].tmp).toFixed(1) + "&#8451;</div><br/>";
+                        }
+                        r[++j] = "<div class='pull-left info-box-litetext'>" + formatDate(new Date(deviceData.tmp[item].time * 1000)) + "</div>";
+                        r[++j] = "</td>";
+                    }else{
+                        r[++j] = "<td><div class='c-grey'>Unknown</div></td>"
+                    }
+                    r[++j] = "</tr>";
+                }
+                r[++j] = "</table>";
+                r[++j] = rowEnd;
+
+                r[++j] = rowStart;
+                r[++j] = "<h4>Device alarms</h4>";
+                r[++j] = rowEnd;
+                r[++j] = rowStart;
+                r[++j] = "<table class='table table-striped table-bordered'><tr><th>Channel</th><th>Status</th>";
+                var inAlarm = false;
+                for(var item in deviceData.alrm){
+                    if(deviceData.alrm[item].stat > 0){
+                        r[++j] = "<tr><td>";
+                        r[++j] = deviceData.alrm[item].sId ? deviceData.alrm[item].sId : 'Device' + "<br />";
+                        r[++j] = "</td><td>";
+                        r[++j] =  "<div class='pull-left c-orange'>" + deviceAlarms[deviceData.alrm[item].typ + '-' + deviceData.alrm[item].stat] + "</div><br/>";
+                        r[++j] = "<div class='pull-left info-box-litetext'>" + formatDate(new Date(deviceData.alrm[item].time * 1000)) + "</div>";
+                        r[++j] = "</td></tr>";
+                        inAlarm = true;
+                    }
+                }
+                if(!inAlarm){
+                    r[++j] = "<tr><td colspan='2'><div class='alert alert-success'>No temperature logger alarms.</div></td></tr>";
+                }
+                r[++j] = "</table>";
+                r[++j] = rowEnd;
+
+                render(r.join(''));
+            }
+
+            function render(data){
+                document.getElementById("content").innerHTML = data;
+            }
+        </script>
+    </body>
+</html>
