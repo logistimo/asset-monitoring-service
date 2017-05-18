@@ -1,10 +1,10 @@
 import com.github.play2war.plugin._
 
-name := "temperature-monitoring-service"
+name := "asset-monitoring-service"
 
 version := "1.0"
 
-lazy val `tms` = (project in file(".")).enablePlugins(PlayJava)
+lazy val `asset-management-service` = (project in file(".")).enablePlugins(PlayJava)
 
 scalaVersion := "2.10.4"
 

@@ -24,11 +24,18 @@
 package com.logistimo.db;
 
 import com.logistimo.utils.AssetStatusConstants;
-import play.db.jpa.JPA;
 
-import javax.persistence.*;
-import java.util.Date;
 import java.util.List;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
+
+import play.db.jpa.JPA;
 
 /**
  * Created by kaniyarasu on 19/11/15.
@@ -36,59 +43,63 @@ import java.util.List;
 @Entity
 @Table(name = "device_status")
 public class DeviceStatus {
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(name = "id")
-    public Long id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.AUTO)
+  @Column(name = "id")
+  public Long id;
 
-    @Column(name = "status_key")
-    public String statusKey;
+  @Column(name = "status_key")
+  public String statusKey;
 
-    @Column(name = "status")
-    public Integer status = AssetStatusConstants.STATUS_OK;
+  @Column(name = "status")
+  public Integer status = AssetStatusConstants.STATUS_OK;
 
-    @Column(name = "status_ut")
-    public Integer statusUpdatedTime;
+  @Column(name = "status_ut")
+  public Integer statusUpdatedTime;
 
-    @Column(name = "location_id")
-    public Integer locationId;
+  @Column(name = "location_id")
+  public Integer locationId;
 
-    @Column(name = "sensor_id")
-    public String sensorId;
+  @Column(name = "sensor_id")
+  public String sensorId;
 
-    @Column(name = "temperature")
-    public Double temperature = 0d;
+  @Column(name = "temperature")
+  public Double temperature = 0d;
 
-    @Column(name = "temperature_ut")
-    public Integer temperatureUpdatedTime = 0;
+  @Column(name = "temperature_ut")
+  public Integer temperatureUpdatedTime = 0;
 
-    @Column(name = "temperature_abnormal_status")
-    public Integer temperatureAbnormalStatus  = AssetStatusConstants.STATUS_OK;
+  @Column(name = "temperature_abnormal_status")
+  public Integer temperatureAbnormalStatus = AssetStatusConstants.STATUS_OK;
 
-    @ManyToOne
-    public Device device;
+  @ManyToOne
+  public Device device;
 
-    public static List<DeviceStatus> getDeviceStatus(Device device){
-        return JPA.em().createQuery("from DeviceStatus where device = ?1 order by status_key, location_id, sensor_id", DeviceStatus.class)
-                .setParameter(1, device)
-                .getResultList();
-    }
+  public static List<DeviceStatus> getDeviceStatus(Device device) {
+    return JPA.em().createQuery(
+        "from DeviceStatus where device = ?1 order by status_key, location_id, sensor_id",
+        DeviceStatus.class)
+        .setParameter(1, device)
+        .getResultList();
+  }
 
-    public static List<DeviceStatus> getDeviceStatus(List<Device> deviceList){
-        return JPA.em().createQuery("from DeviceStatus where device in :inclList", DeviceStatus.class)
-                .setParameter("inclList", deviceList)
-                .getResultList();
-    }
+  public static List<DeviceStatus> getDeviceStatus(List<Device> deviceList) {
+    return JPA.em().createQuery("from DeviceStatus where device in :inclList", DeviceStatus.class)
+        .setParameter("inclList", deviceList)
+        .getResultList();
+  }
 
-    public static DeviceStatus getDeviceStatus(Device device, String key){
-        return JPA.em().createQuery("from DeviceStatus where device = ?1 and statusKey = ?2 and locationId IS NULL and sensorId IS NULL", DeviceStatus.class)
-                .setParameter(1, device)
-                .setParameter(2, key)
-                .setMaxResults(1)
-                .getSingleResult();
-    }
+  public static DeviceStatus getDeviceStatus(Device device, String key) {
+    return JPA.em().createQuery(
+        "from DeviceStatus where device = ?1 and statusKey = ?2 and locationId IS NULL and sensorId IS NULL",
+        DeviceStatus.class)
+        .setParameter(1, device)
+        .setParameter(2, key)
+        .setMaxResults(1)
+        .getSingleResult();
+  }
 
-  public static List<DeviceStatus> getDeviceStatuses(Device device, String key){
+  public static List<DeviceStatus> getDeviceStatuses(Device device, String key) {
     return JPA.em().createQuery("from DeviceStatus where device = ?1 and statusKey = ?2",
         DeviceStatus.class)
         .setParameter(1, device)
@@ -96,42 +107,48 @@ public class DeviceStatus {
         .getResultList();
   }
 
-    public static DeviceStatus getDeviceStatus(Device device, String key, String sensorId){
-        return JPA.em().createQuery("from DeviceStatus where device = ?1 and sensorId = ?3 and statusKey = ?2", DeviceStatus.class)
-                .setParameter(1, device)
-                .setParameter(2, key)
-                .setParameter(3, sensorId)
-                .setMaxResults(1)
-                .getSingleResult();
-    }
+  public static DeviceStatus getDeviceStatus(Device device, String key, String sensorId) {
+    return JPA.em()
+        .createQuery("from DeviceStatus where device = ?1 and sensorId = ?3 and statusKey = ?2",
+            DeviceStatus.class)
+        .setParameter(1, device)
+        .setParameter(2, key)
+        .setParameter(3, sensorId)
+        .setMaxResults(1)
+        .getSingleResult();
+  }
 
-    public static DeviceStatus getDeviceStatus(Device device, String key, Integer monitoringPositionId){
-        return JPA.em().createQuery("from DeviceStatus where device = ?1 and locationId = ?2 and statusKey = ?3", DeviceStatus.class)
-                .setParameter(1, device)
-                .setParameter(2, monitoringPositionId)
-                .setParameter(3, key)
-                .setMaxResults(1)
-                .getSingleResult();
-    }
+  public static DeviceStatus getDeviceStatus(Device device, String key,
+                                             Integer monitoringPositionId) {
+    return JPA.em()
+        .createQuery("from DeviceStatus where device = ?1 and locationId = ?2 and statusKey = ?3",
+            DeviceStatus.class)
+        .setParameter(1, device)
+        .setParameter(2, monitoringPositionId)
+        .setParameter(3, key)
+        .setMaxResults(1)
+        .getSingleResult();
+  }
 
-    public static List<DeviceStatus> getDeviceStatus(List<Device> deviceList, String key){
-        return JPA.em().createQuery("from DeviceStatus where device in :inclList and statusKey = ?2", DeviceStatus.class)
-                .setParameter("inclList", deviceList)
-                .setParameter(2, key)
-                .getResultList();
-    }
+  public static List<DeviceStatus> getDeviceStatus(List<Device> deviceList, String key) {
+    return JPA.em().createQuery("from DeviceStatus where device in :inclList and statusKey = ?2",
+        DeviceStatus.class)
+        .setParameter("inclList", deviceList)
+        .setParameter(2, key)
+        .getResultList();
+  }
 
-    public void save() {
-        JPA.em().persist(this);
-    }
+  public void save() {
+    JPA.em().persist(this);
+  }
 
-    public void update() {
-        JPA.em().merge(this);
-    }
+  public void update() {
+    JPA.em().merge(this);
+  }
 
-    public void delete() {
-        JPA.em().remove(this);
-    }
+  public void delete() {
+    JPA.em().remove(this);
+  }
 
   public void copyStatus(DeviceStatus deviceStatus) {
     this.status = deviceStatus.status;

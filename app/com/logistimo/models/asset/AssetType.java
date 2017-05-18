@@ -27,13 +27,15 @@ package com.logistimo.models.asset;
  * Created by kaniyarasu on 12/08/15.
  */
 public enum AssetType {
-    TEMPERATURE_DEVICE(0), TEMPERATURE_SENSOR(1), FRIDGE(2);
+  TEMPERATURE_DEVICE(0), TEMPERATURE_SENSOR(1), FRIDGE(2);
 
-    private final int value;
+  private final int value;
 
-    AssetType(int value) {
-        this.value = value;
-    }
+  AssetType(int value) {
+    this.value = value;
+  }
 
-    public int getValue() { return value; }
+  public int getValue() {
+    return value;
+  }
 }

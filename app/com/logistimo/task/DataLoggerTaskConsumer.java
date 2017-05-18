@@ -24,11 +24,11 @@
 package com.logistimo.task;
 
 public class DataLoggerTaskConsumer extends TaskConsumer {
-    public String getEndpointUri() {
-        return "activemq:queue:tms-data";
-    }
+  public String getEndpointUri() {
+    return "activemq:queue:tms-data";
+  }
 
-    public void onReceive(Object message) {
-        super.onReceive(message);
-    }
+  public void onReceive(Object message) {
+    super.onReceive(message);
+  }
 }

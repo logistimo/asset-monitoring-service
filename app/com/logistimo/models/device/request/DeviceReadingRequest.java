@@ -25,6 +25,7 @@ package com.logistimo.models.device.request;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.logistimo.models.temperature.request.TemperatureRequest;
+
 import org.hibernate.validator.constraints.NotEmpty;
 
 import java.util.ArrayList;
@@ -32,30 +33,30 @@ import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DeviceReadingRequest {
-    @NotEmpty
-    public String dId;
+  @NotEmpty
+  public String dId;
 
-    public String trId;
+  public String trId;
 
-    @NotEmpty
-    public List<TemperatureRequest> tmps = new ArrayList<TemperatureRequest>();
+  @NotEmpty
+  public List<TemperatureRequest> tmps = new ArrayList<TemperatureRequest>();
 
-    public DevicePowerAvailabilityRequest pwa;
+  public DevicePowerAvailabilityRequest pwa;
 
-    public DeviceReadingRequest() {
-    }
+  public DeviceReadingRequest() {
+  }
 
-    public DeviceReadingRequest(String dId, List<TemperatureRequest> tmps) {
-        this.dId = dId;
-        this.tmps = tmps;
-    }
+  public DeviceReadingRequest(String dId, List<TemperatureRequest> tmps) {
+    this.dId = dId;
+    this.tmps = tmps;
+  }
 
-    @Override
-    public String toString() {
-        return "DeviceReadingRequest{" +
-                "dId='" + dId + '\'' +
-                ", trId='" + trId + '\'' +
-                ", tmps=" + tmps +
-                '}';
-    }
+  @Override
+  public String toString() {
+    return "DeviceReadingRequest{" +
+        "dId='" + dId + '\'' +
+        ", trId='" + trId + '\'' +
+        ", tmps=" + tmps +
+        '}';
+  }
 }

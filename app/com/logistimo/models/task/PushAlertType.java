@@ -27,13 +27,15 @@ package com.logistimo.models.task;
  * Created by kaniyarasu on 12/08/15.
  */
 public enum PushAlertType {
-    TEMPERATURE_ALERT(0), DEVICE_ALERT(1);
+  TEMPERATURE_ALERT(0), DEVICE_ALERT(1);
 
-    private final int value;
+  private final int value;
 
-    PushAlertType(int value) {
-        this.value = value;
-    }
+  PushAlertType(int value) {
+    this.value = value;
+  }
 
-    public int getValue() { return value; }
+  public int getValue() {
+    return value;
+  }
 }

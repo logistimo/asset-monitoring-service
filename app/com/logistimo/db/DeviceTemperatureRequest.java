@@ -24,49 +24,59 @@
 package com.logistimo.db;
 
 import com.logistimo.models.temperature.common.DeviceTemperatureRequestStatus;
-import play.db.jpa.JPA;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
+
+import play.db.jpa.JPA;
 
 @Entity
 @Table(name = "device_temperature_request")
 public class DeviceTemperatureRequest {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(name = "id")
-    public Long id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.AUTO)
+  @Column(name = "id")
+  public Long id;
 
-    @Column(name = "number_of_request", nullable = false)
-    public int numberOfRequest;
+  @Column(name = "number_of_request", nullable = false)
+  public int numberOfRequest;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "status", nullable = false)
-    public DeviceTemperatureRequestStatus status;
+  @Enumerated(EnumType.STRING)
+  @Column(name = "status", nullable = false)
+  public DeviceTemperatureRequestStatus status;
 
-    @ManyToOne
-    public Device device;
+  @ManyToOne
+  public Device device;
 
-    public DeviceTemperatureRequest() {
-    }
+  public DeviceTemperatureRequest() {
+  }
 
-    public static DeviceTemperatureRequest getDeviceStatusByDevice(Device device) {
-        return JPA.em()
-                .createQuery("from DeviceTemperatureRequest where device = ?1", DeviceTemperatureRequest.class)
-                .setParameter(1, device)
-                .getSingleResult();
-    }
+  public static DeviceTemperatureRequest getDeviceStatusByDevice(Device device) {
+    return JPA.em()
+        .createQuery("from DeviceTemperatureRequest where device = ?1",
+            DeviceTemperatureRequest.class)
+        .setParameter(1, device)
+        .getSingleResult();
+  }
 
-    public void save() {
-        JPA.em().persist(this);
-    }
+  public void save() {
+    JPA.em().persist(this);
+  }
 
-    public void update() {
-        JPA.em().merge(this);
-    }
+  public void update() {
+    JPA.em().merge(this);
+  }
 
-    public void delete() {
-        JPA.em().remove(this);
-    }
+  public void delete() {
+    JPA.em().remove(this);
+  }
 
 }

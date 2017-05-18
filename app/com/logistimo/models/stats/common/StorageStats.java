@@ -30,9 +30,9 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class StorageStats {
-    public Double dsk;
+  public Double dsk;
 
-    public Integer ntmp;
+  public Integer ntmp;
 
-    public Integer ndvc;
+  public Integer ndvc;
 }

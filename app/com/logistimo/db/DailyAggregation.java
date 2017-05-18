@@ -23,47 +23,55 @@
 
 package com.logistimo.db;
 
-import play.db.jpa.JPA;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
 
-import javax.persistence.*;
+import play.db.jpa.JPA;
 
 @Entity
 @Table(name = "daily_aggregations")
 public class DailyAggregation {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(name = "id")
-    public Long id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.AUTO)
+  @Column(name = "id")
+  public Long id;
 
-    @Column(nullable = false)
-    public int year;
-    @Column(nullable = false)
-    public int month;
-    @Column(nullable = false)
-    public int day;
-    @Column(nullable = false)
-    public long durationOutOfRange;
+  @Column(nullable = false)
+  public int year;
+  @Column(nullable = false)
+  public int month;
+  @Column(nullable = false)
+  public int day;
+  @Column(nullable = false)
+  public long durationOutOfRange;
 
-    @ManyToOne
-    public Device device;
+  @ManyToOne
+  public Device device;
 
-    public static DailyAggregation findbyYearAndMonthAndDayAndDevice(int year, int month, int day, Device device) {
-        return JPA.em()
-                .createQuery("from DailyAggregation where year = ?1 and month = ?2 and day = ?3 and device = ?4",
-                        DailyAggregation.class)
-                .setParameter(1, year)
-                .setParameter(2, month)
-                .setParameter(3, day)
-                .setParameter(4, device)
-                .getSingleResult();
-    }
+  public static DailyAggregation findbyYearAndMonthAndDayAndDevice(int year, int month, int day,
+                                                                   Device device) {
+    return JPA.em()
+        .createQuery(
+            "from DailyAggregation where year = ?1 and month = ?2 and day = ?3 and device = ?4",
+            DailyAggregation.class)
+        .setParameter(1, year)
+        .setParameter(2, month)
+        .setParameter(3, day)
+        .setParameter(4, device)
+        .getSingleResult();
+  }
 
-    public void save() {
-        JPA.em().persist(this);
-    }
+  public void save() {
+    JPA.em().persist(this);
+  }
 
-    public void update() {
-        JPA.em().merge(this);
-    }
+  public void update() {
+    JPA.em().merge(this);
+  }
 }

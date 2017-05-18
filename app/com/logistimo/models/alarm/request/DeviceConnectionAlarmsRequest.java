@@ -32,18 +32,18 @@ import javax.validation.constraints.Min;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_DEFAULT)
 public class DeviceConnectionAlarmsRequest {
-    @Min(0)
-    @Max(4)
-    public Integer stat = 0;
+  @Min(0)
+  @Max(4)
+  public Integer stat = 0;
 
-    @Min(0)
-    public Integer time = 0;
+  @Min(0)
+  public Integer time = 0;
 
-    @Override
-    public String toString() {
-        return "DeviceConnectionStatsRequest{" +
-                "stat=" + stat +
-                ", time=" + time +
-                '}';
-    }
+  @Override
+  public String toString() {
+    return "DeviceConnectionStatsRequest{" +
+        "stat=" + stat +
+        ", time=" + time +
+        '}';
+  }
 }

@@ -32,54 +32,45 @@ import javax.validation.constraints.NotNull;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_DEFAULT)
 public class BatteryStats {
-    public Integer stat = -1;
+  public Integer stat = -1;
+  @NotNull
+  public Double actv;
+  @Min(0)
+  public int time = 0;
+  @Min(0)
+  public double lowv = 0;
+  @Min(0)
+  public double highv = 0;
+  @Min(0)
+  public int chgt = 0;
+  @Min(0)
+  public int wdur = 0;
+  @Min(0)
+  public int adur = 0;
+  public int pwrt;
+  private int nAlrms = 0;
 
-    private int nAlrms = 0;
+  public int getnAlrms() {
+    return nAlrms;
+  }
 
-    @NotNull
-    public Double actv;
+  public void setnAlrms(int nAlrms) {
+    this.nAlrms = nAlrms;
+  }
 
-    @Min(0)
-    public int time = 0;
-
-    @Min(0)
-    public double lowv = 0;
-
-    @Min(0)
-    public double highv = 0;
-
-    @Min(0)
-    public int chgt = 0;
-
-    @Min(0)
-    public int wdur = 0;
-
-    @Min(0)
-    public int adur = 0;
-
-    public int pwrt;
-
-    public int getnAlrms() {
-        return nAlrms;
-    }
-
-    public void setnAlrms(int nAlrms) {
-        this.nAlrms = nAlrms;
-    }
-
-    @Override
-    public String toString() {
-        return "BatteryStats{" +
-                "stat=" + stat +
-                ", nAlrms=" + nAlrms +
-                ", actv=" + actv +
-                ", time=" + time +
-                ", lowv=" + lowv +
-                ", highv=" + highv +
-                ", chgt=" + chgt +
-                ", wdur=" + wdur +
-                ", adur=" + adur +
-                ", pwrt=" + pwrt +
-                '}';
-    }
+  @Override
+  public String toString() {
+    return "BatteryStats{" +
+        "stat=" + stat +
+        ", nAlrms=" + nAlrms +
+        ", actv=" + actv +
+        ", time=" + time +
+        ", lowv=" + lowv +
+        ", highv=" + highv +
+        ", chgt=" + chgt +
+        ", wdur=" + wdur +
+        ", adur=" + adur +
+        ", pwrt=" + pwrt +
+        '}';
+  }
 }

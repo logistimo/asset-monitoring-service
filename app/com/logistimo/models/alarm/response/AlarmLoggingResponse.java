@@ -27,15 +27,13 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.logistimo.models.common.ErrorResponse;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class AlarmLoggingResponse {
-    public List<ErrorResponse> errs;
+  public List<ErrorResponse> errs;
 
-    public AlarmLoggingResponse() {
-        errs = new ArrayList<>(1);
-    }
+  public AlarmLoggingResponse() {
+    errs = new ArrayList<>(1);
+  }
 }

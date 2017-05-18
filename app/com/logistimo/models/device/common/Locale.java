@@ -32,11 +32,11 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class Locale {
-    public Double tz;
+  public Double tz;
 
-    public String cn;
+  public String cn;
 
-    public String ln;
+  public String ln;
 
-    public String tznm;
+  public String tznm;
 }

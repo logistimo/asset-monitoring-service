@@ -26,6 +26,9 @@ package com.logistimo.controllers;
 import com.logistimo.models.user.request.AddApiConsumerRequest;
 import com.logistimo.services.ServiceFactory;
 import com.logistimo.services.UserService;
+
+import javax.persistence.NoResultException;
+
 import play.Logger;
 import play.Logger.ALogger;
 import play.db.jpa.Transactional;
@@ -33,49 +36,48 @@ import play.libs.Json;
 import play.mvc.Result;
 import play.mvc.With;
 
-import javax.persistence.NoResultException;
-
 public class AdminController extends BaseController {
-    private static final ALogger LOGGER = Logger.of(AdminController.class);
-    private static final UserService userService = ServiceFactory.getService(UserService.class);
+  private static final ALogger LOGGER = Logger.of(AdminController.class);
+  private static final UserService userService = ServiceFactory.getService(UserService.class);
 
 
-    @Transactional
-    @With(AdminAuthentication.class)
-    public static Result createUser(String callback) {
-        AddApiConsumerRequest addApiConsumerRequest;
+  @Transactional
+  @With(AdminAuthentication.class)
+  public static Result createUser(String callback) {
+    AddApiConsumerRequest addApiConsumerRequest;
 
-        try {
-            addApiConsumerRequest = getValidatedObject(request().body().asJson(), AddApiConsumerRequest.class);
-        } catch (Exception e) {
-            LOGGER.warn("Bad Request - Invalid JSON", e);
-            return prepareResult(BAD_REQUEST, callback, e.getMessage());
-        }
-
-        try {
-            try {
-                userService.getUserAccount(addApiConsumerRequest.userName);
-                LOGGER.warn("Bad Request - User already exists : " + addApiConsumerRequest.toString());
-                return prepareResult(BAD_REQUEST, callback, "User already exists.");
-            } catch (NoResultException e) {
-                userService.addUser(addApiConsumerRequest);
-                return prepareResult(CREATED, callback, "User account created.");
-            }
-        } catch (Exception e) {
-            LOGGER.error("Error while creating user account", e);
-            return prepareResult(INTERNAL_SERVER_ERROR, callback, e.getMessage());
-        }
-
+    try {
+      addApiConsumerRequest =
+          getValidatedObject(request().body().asJson(), AddApiConsumerRequest.class);
+    } catch (Exception e) {
+      LOGGER.warn("Bad Request - Invalid JSON", e);
+      return prepareResult(BAD_REQUEST, callback, e.getMessage());
     }
 
-    @Transactional(readOnly = true)
-    @With(AdminAuthentication.class)
-    public static Result getUsers(String callback) {
-        try {
-            return prepareResult(OK, callback, Json.toJson(userService.getAllUsers()));
-        } catch (NoResultException e) {
-            LOGGER.warn("No users found");
-            return prepareResult(NO_CONTENT, callback, "No users found - " + e.getMessage());
-        }
+    try {
+      try {
+        userService.getUserAccount(addApiConsumerRequest.userName);
+        LOGGER.warn("Bad Request - User already exists : " + addApiConsumerRequest.toString());
+        return prepareResult(BAD_REQUEST, callback, "User already exists.");
+      } catch (NoResultException e) {
+        userService.addUser(addApiConsumerRequest);
+        return prepareResult(CREATED, callback, "User account created.");
+      }
+    } catch (Exception e) {
+      LOGGER.error("Error while creating user account", e);
+      return prepareResult(INTERNAL_SERVER_ERROR, callback, e.getMessage());
     }
+
+  }
+
+  @Transactional(readOnly = true)
+  @With(AdminAuthentication.class)
+  public static Result getUsers(String callback) {
+    try {
+      return prepareResult(OK, callback, Json.toJson(userService.getAllUsers()));
+    } catch (NoResultException e) {
+      LOGGER.warn("No users found");
+      return prepareResult(NO_CONTENT, callback, "No users found - " + e.getMessage());
+    }
+  }
 }

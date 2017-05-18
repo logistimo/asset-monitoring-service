@@ -27,28 +27,28 @@ package com.logistimo.exception;
  * Created by kaniyarasu on 27/10/14.
  */
 public class ServiceException extends Exception {
-    private String message = null;
+  private String message = null;
 
-    public ServiceException() {
-        super();
-    }
+  public ServiceException() {
+    super();
+  }
 
-    public ServiceException(String message) {
-        super(message);
-        this.message = message;
-    }
+  public ServiceException(String message) {
+    super(message);
+    this.message = message;
+  }
 
-    public ServiceException(Throwable cause) {
-        super(cause);
-    }
+  public ServiceException(Throwable cause) {
+    super(cause);
+  }
 
-    @Override
-    public String toString() {
-        return message;
-    }
+  @Override
+  public String toString() {
+    return message;
+  }
 
-    @Override
-    public String getMessage() {
-        return message;
-    }
+  @Override
+  public String getMessage() {
+    return message;
+  }
 }

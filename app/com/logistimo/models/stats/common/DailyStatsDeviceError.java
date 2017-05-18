@@ -31,20 +31,20 @@ import javax.validation.constraints.Min;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_DEFAULT)
 public class DailyStatsDeviceError {
-    public String code;
+  public String code;
 
-    @Min(0)
-    public int cnt = 0;
+  @Min(0)
+  public int cnt = 0;
 
-    @Min(0)
-    public int time = 0;
+  @Min(0)
+  public int time = 0;
 
-    @Override
-    public String toString() {
-        return "DailyStatsDeviceErrorRequest{" +
-                "code=" + code +
-                ", cnt=" + cnt +
-                ", time=" + time +
-                '}';
-    }
+  @Override
+  public String toString() {
+    return "DailyStatsDeviceErrorRequest{" +
+        "code=" + code +
+        ", cnt=" + cnt +
+        ", time=" + time +
+        '}';
+  }
 }

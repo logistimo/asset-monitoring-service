@@ -25,35 +25,37 @@ package com.logistimo.models.device.request;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.logistimo.models.device.common.DeviceDetails;
+
 import org.hibernate.validator.constraints.NotEmpty;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Created by kaniyarasu on 11/11/14.
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ConfigurationPushRequest {
-    @NotEmpty
-    public String vId;
+  @NotEmpty
+  public String vId;
 
-    @NotEmpty
-    public String dId;
+  @NotEmpty
+  public String dId;
 
-    public List<DeviceDetails> dvs;
+  public List<DeviceDetails> dvs;
 
-    @NotNull
-    public Integer typ = 1;
+  @NotNull
+  public Integer typ = 1;
 
-    public String url;
+  public String url;
 
-    @Valid
-    public ConfigurationRequest data;
+  @Valid
+  public ConfigurationRequest data;
 
-    public ConfigurationPushRequest() {
-        dvs = new ArrayList<>(1);
-    }
+  public ConfigurationPushRequest() {
+    dvs = new ArrayList<>(1);
+  }
 }

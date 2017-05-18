@@ -27,5 +27,5 @@ package com.logistimo.models.temperature.common;
  * Created by kaniyarasu on 04/11/14.
  */
 public enum DeviceTemperatureRequestStatus {
-    SMS_INIT, SMS_SENT
+  SMS_INIT, SMS_SENT
 }

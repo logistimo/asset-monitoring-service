@@ -32,28 +32,28 @@ import javax.validation.constraints.Min;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_DEFAULT)
 public class BatteryAlarmsRequest {
-    @Min(0)
-    @Max(4)
-    public Integer stat = 0;
+  @Min(0)
+  @Max(4)
+  public Integer stat = 0;
 
-    @Min(0)
-    public Integer time = 0;
+  @Min(0)
+  public Integer time = 0;
 
-    public Integer avl;
+  public Integer avl;
 
-    public BatteryAlarmsRequest() {
-    }
+  public BatteryAlarmsRequest() {
+  }
 
-    public BatteryAlarmsRequest(Integer stat, Integer time) {
-        this.stat = stat;
-        this.time = time;
-    }
+  public BatteryAlarmsRequest(Integer stat, Integer time) {
+    this.stat = stat;
+    this.time = time;
+  }
 
-    @Override
-    public String toString() {
-        return "BatteryStatsRequest{" +
-                "stat=" + stat +
-                ", time=" + time +
-                '}';
-    }
+  @Override
+  public String toString() {
+    return "BatteryStatsRequest{" +
+        "stat=" + stat +
+        ", time=" + time +
+        '}';
+  }
 }

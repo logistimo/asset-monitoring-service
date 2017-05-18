@@ -24,6 +24,7 @@
 package com.logistimo.models.device.request;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import org.hibernate.validator.constraints.NotEmpty;
 
 /**
@@ -31,8 +32,8 @@ import org.hibernate.validator.constraints.NotEmpty;
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class APNRequest {
-    @NotEmpty
-    public String name;
+  @NotEmpty
+  public String name;
 
-    public String addr;
+  public String addr;
 }

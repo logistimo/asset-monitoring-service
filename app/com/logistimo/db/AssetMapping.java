@@ -23,10 +23,17 @@
 
 package com.logistimo.db;
 
-import play.db.jpa.JPA;
-
-import javax.persistence.*;
 import java.util.List;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
+
+import play.db.jpa.JPA;
 
 /**
  * Created by kaniyarasu on 22/09/15.
@@ -34,84 +41,88 @@ import java.util.List;
 @Entity
 @Table(name = "asset_mapping")
 public class AssetMapping {
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(name = "id")
-    public Long id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.AUTO)
+  @Column(name = "id")
+  public Long id;
 
-    @Column(name = "location_id")
-    public Integer monitoringPositionId;
+  @Column(name = "location_id")
+  public Integer monitoringPositionId;
 
-    @Column(name = "relation_type")
-    public Integer relationType;
+  @Column(name = "relation_type")
+  public Integer relationType;
 
-    @Column(name = "is_primary")
-    public Integer isPrimary;
+  @Column(name = "is_primary")
+  public Integer isPrimary;
 
-    @ManyToOne
-    public Device asset;
+  @ManyToOne
+  public Device asset;
 
-    @ManyToOne
-    public Device relatedAsset;
+  @ManyToOne
+  public Device relatedAsset;
 
-    public static AssetMapping findAssetMapping(Device asset, Device relatedAsset) {
-        return JPA.em()
-                .createQuery("from AssetMapping where asset=?1 and relatedAsset=?2", AssetMapping.class)
-                .setParameter(1, asset)
-                .setParameter(2, relatedAsset)
-                .setMaxResults(1)
-                .getSingleResult();
-    }
+  public static AssetMapping findAssetMapping(Device asset, Device relatedAsset) {
+    return JPA.em()
+        .createQuery("from AssetMapping where asset=?1 and relatedAsset=?2", AssetMapping.class)
+        .setParameter(1, asset)
+        .setParameter(2, relatedAsset)
+        .setMaxResults(1)
+        .getSingleResult();
+  }
 
-    public static List<AssetMapping> findAssetMappingByRelatedAsset(Device relatedAsset) {
-        return JPA.em()
-                .createQuery("from AssetMapping where relatedAsset=?1", AssetMapping.class)
-                .setParameter(1, relatedAsset)
-                .getResultList();
-    }
+  public static List<AssetMapping> findAssetMappingByRelatedAsset(Device relatedAsset) {
+    return JPA.em()
+        .createQuery("from AssetMapping where relatedAsset=?1", AssetMapping.class)
+        .setParameter(1, relatedAsset)
+        .getResultList();
+  }
 
-    public static AssetMapping findAssetMappingByRelatedAssetAndType(Device relatedAsset, Integer type) {
-        return JPA.em()
-                .createQuery("from AssetMapping where relatedAsset=?1 and relationType = ?2", AssetMapping.class)
-                .setParameter(1, relatedAsset)
-                .setParameter(2, type)
-                .setMaxResults(1)
-                .getSingleResult();
-    }
+  public static AssetMapping findAssetMappingByRelatedAssetAndType(Device relatedAsset,
+                                                                   Integer type) {
+    return JPA.em()
+        .createQuery("from AssetMapping where relatedAsset=?1 and relationType = ?2",
+            AssetMapping.class)
+        .setParameter(1, relatedAsset)
+        .setParameter(2, type)
+        .setMaxResults(1)
+        .getSingleResult();
+  }
 
-    public static AssetMapping findAssetMappingByAssetAndMonitoringPosition(Device asset, Integer mpId) {
-        return JPA.em()
-                .createQuery("from AssetMapping where asset=?1 and monitoringPositionId = ?2", AssetMapping.class)
-                .setParameter(1, asset)
-                .setParameter(2, mpId)
-                .setMaxResults(1)
-                .getSingleResult();
-    }
+  public static AssetMapping findAssetMappingByAssetAndMonitoringPosition(Device asset,
+                                                                          Integer mpId) {
+    return JPA.em()
+        .createQuery("from AssetMapping where asset=?1 and monitoringPositionId = ?2",
+            AssetMapping.class)
+        .setParameter(1, asset)
+        .setParameter(2, mpId)
+        .setMaxResults(1)
+        .getSingleResult();
+  }
 
-    public static List<AssetMapping> findAssetRelationByAsset(Device asset) {
-        return JPA.em()
-                .createQuery("from AssetMapping where asset=?1", AssetMapping.class)
-                .setParameter(1, asset)
-                .getResultList();
-    }
+  public static List<AssetMapping> findAssetRelationByAsset(Device asset) {
+    return JPA.em()
+        .createQuery("from AssetMapping where asset=?1", AssetMapping.class)
+        .setParameter(1, asset)
+        .getResultList();
+  }
 
-    public static List<AssetMapping> findAssetRelationByAssetAndType(Device asset, Integer type) {
-        return JPA.em()
-                .createQuery("from AssetMapping where asset=?1 and relationType =?2", AssetMapping.class)
-                .setParameter(1, asset)
-                .setParameter(2, type)
-                .getResultList();
-    }
+  public static List<AssetMapping> findAssetRelationByAssetAndType(Device asset, Integer type) {
+    return JPA.em()
+        .createQuery("from AssetMapping where asset=?1 and relationType =?2", AssetMapping.class)
+        .setParameter(1, asset)
+        .setParameter(2, type)
+        .getResultList();
+  }
 
-    public void save() {
-        JPA.em().persist(this);
-    }
+  public void save() {
+    JPA.em().persist(this);
+  }
 
-    public void update() {
-        JPA.em().merge(this);
-    }
+  public void update() {
+    JPA.em().merge(this);
+  }
 
-    public void delete() {
-        JPA.em().remove(this);
-    }
+  public void delete() {
+    JPA.em().remove(this);
+  }
 }

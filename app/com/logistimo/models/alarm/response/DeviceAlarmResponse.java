@@ -30,15 +30,15 @@ import java.util.List;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class DeviceAlarmResponse {
-    public List<AlarmResponse> data = new ArrayList<AlarmResponse>();
+  public List<AlarmResponse> data = new ArrayList<AlarmResponse>();
 
-    private long nPages;
+  private long nPages;
 
-    public long getnPages() {
-        return nPages;
-    }
+  public long getnPages() {
+    return nPages;
+  }
 
-    public void setnPages(long nPages) {
-        this.nPages = nPages;
-    }
+  public void setnPages(long nPages) {
+    this.nPages = nPages;
+  }
 }

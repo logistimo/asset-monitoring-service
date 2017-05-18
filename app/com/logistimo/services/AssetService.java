@@ -24,51 +24,51 @@
 package com.logistimo.services;
 
 import com.logistimo.db.Asset;
-import com.logistimo.db.AssetMapping;
 import com.logistimo.db.Device;
-import com.logistimo.models.asset.*;
-import com.logistimo.utils.LogistimoUtils;
-import play.Logger;
+import com.logistimo.models.asset.AssetModel;
+import com.logistimo.models.asset.AssetRegistrationModel;
 
 import javax.persistence.NoResultException;
+
+import play.Logger;
 
 /**
  * Created by kaniyarasu on 22/09/15.
  */
 public class AssetService extends ServiceImpl {
-    private static final Logger.ALogger LOGGER = Logger.of(AssetService.class);
-    private static final DeviceService deviceService = ServiceFactory.getService(DeviceService.class);
+  private static final Logger.ALogger LOGGER = Logger.of(AssetService.class);
+  private static final DeviceService deviceService = ServiceFactory.getService(DeviceService.class);
 
-    public void createOrUpdateAssets(AssetRegistrationModel assetRegistrationModel){
-        if(assetRegistrationModel != null && assetRegistrationModel.data != null){
-            for(AssetModel assetModel : assetRegistrationModel.data){
-                createOrUpdateAsset(assetModel);
-            }
-        }
+  public void createOrUpdateAssets(AssetRegistrationModel assetRegistrationModel) {
+    if (assetRegistrationModel != null && assetRegistrationModel.data != null) {
+      for (AssetModel assetModel : assetRegistrationModel.data) {
+        createOrUpdateAsset(assetModel);
+      }
     }
+  }
 
-    public void createOrUpdateAsset(AssetModel assetModel){
-        try{
-            //Updating asset
-            Asset asset = Asset.findAsset(assetModel.vId, assetModel.dId);
-            asset.assetType = assetModel.at;
-            asset.update();
-            return;
-        }catch (NoResultException e){
-            //do nothing
-        }
+  public void createOrUpdateAsset(AssetModel assetModel) {
+    try {
+      //Updating asset
+      Asset asset = Asset.findAsset(assetModel.vId, assetModel.dId);
+      asset.assetType = assetModel.at;
+      asset.update();
+      return;
+    } catch (NoResultException e) {
+      //do nothing
     }
+  }
 
-    public Asset getAsset(String mancId, String assetId){
-        return Asset.findAsset(mancId, assetId);
-    }
+  public Asset getAsset(String mancId, String assetId) {
+    return Asset.findAsset(mancId, assetId);
+  }
 
-    public Asset createAssetFromDevice(Device device, Integer assetType){
-        Asset asset = new Asset();
-        asset.assetId = device.deviceId;
-        asset.mancId = device.vendorId;
-        asset.assetType = assetType;
-        asset.save();
-        return asset;
-    }
+  public Asset createAssetFromDevice(Device device, Integer assetType) {
+    Asset asset = new Asset();
+    asset.assetId = device.deviceId;
+    asset.mancId = device.vendorId;
+    asset.assetType = assetType;
+    asset.save();
+    return asset;
+  }
 }

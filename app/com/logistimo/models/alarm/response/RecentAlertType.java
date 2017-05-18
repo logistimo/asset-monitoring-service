@@ -27,22 +27,22 @@ package com.logistimo.models.alarm.response;
  * Created by kaniyarasu on 12/01/15.
  */
 public enum RecentAlertType {
-    HIGH_EXCURSION("High temperature excursion"),
-    LOW_EXCURSION("Low temperature excursion"),
-    BATTERY_WARNING("Battery warning"),
-    BATTERY_ALARM("Battery alarm"),
-    DEVICE_CONNECTION("Device connection error"),
-    EXTERNAL_SENSOR("External sensor error"),
-    FIRMWARE_ERROR("Firmware error");
+  HIGH_EXCURSION("High temperature excursion"),
+  LOW_EXCURSION("Low temperature excursion"),
+  BATTERY_WARNING("Battery warning"),
+  BATTERY_ALARM("Battery alarm"),
+  DEVICE_CONNECTION("Device connection error"),
+  EXTERNAL_SENSOR("External sensor error"),
+  FIRMWARE_ERROR("Firmware error");
 
-    private final String value;
+  private final String value;
 
-    RecentAlertType(String value) {
-        this.value = value;
-    }
+  RecentAlertType(String value) {
+    this.value = value;
+  }
 
-    @Override
-    public String toString() {
-        return value;
-    }
+  @Override
+  public String toString() {
+    return value;
+  }
 }

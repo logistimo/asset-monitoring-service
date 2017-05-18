@@ -32,11 +32,11 @@ import java.util.List;
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AssetModel {
-    public String dId;
+  public String dId;
 
-    public String vId;
+  public String vId;
 
-    public Integer at;
+  public Integer at;
 
-    public List<String> sIds;
+  public List<String> sIds;
 }

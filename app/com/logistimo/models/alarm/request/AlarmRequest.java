@@ -24,35 +24,36 @@
 package com.logistimo.models.alarm.request;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.validation.constraints.NotNull;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AlarmRequest {
-    @NotEmpty
-    public String dId;
+  @NotEmpty
+  public String dId;
 
-    public String trId;
+  public String trId;
 
-    public String sId;
+  public String sId;
 
-    @NotNull
-    public DeviceAlarmRequest dvc;
+  @NotNull
+  public DeviceAlarmRequest dvc;
 
-    public AlarmRequest() {
+  public AlarmRequest() {
+  }
+
+  public AlarmRequest(String dId, DeviceAlarmRequest dvc) {
+    this.dId = dId;
+    this.dvc = dvc;
+  }
+
+  public AlarmRequest(String dId, String sId, DeviceAlarmRequest dvc) {
+    this.dId = dId;
+    if (sId != null) {
+      this.sId = sId;
     }
-
-    public AlarmRequest(String dId, DeviceAlarmRequest dvc) {
-        this.dId = dId;
-        this.dvc = dvc;
-    }
-
-    public AlarmRequest(String dId, String sId, DeviceAlarmRequest dvc) {
-        this.dId = dId;
-        if(sId != null){
-            this.sId = sId;
-        }
-        this.dvc = dvc;
-    }
+    this.dvc = dvc;
+  }
 }

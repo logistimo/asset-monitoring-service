@@ -26,12 +26,12 @@ package com.logistimo.task;
 import akka.camel.javaapi.UntypedProducerActor;
 
 public class DataLoggerTaskProducer extends UntypedProducerActor {
-        public String getEndpointUri() {
-            return "activemq:queue:tms-data";
-        }
+  public String getEndpointUri() {
+    return "activemq:queue:tms-data";
+  }
 
-        @Override
-        public boolean isOneway() {
-            return  true;
-        }
-    }
+  @Override
+  public boolean isOneway() {
+    return true;
+  }
+}

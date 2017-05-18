@@ -24,6 +24,7 @@
 package com.logistimo.controllers;
 
 import com.logistimo.utils.LogistimoUtils;
+
 import play.Logger;
 import play.Logger.ALogger;
 import play.Play;
@@ -34,41 +35,37 @@ import play.mvc.Result;
 import play.mvc.Results;
 
 public class AdminAuthentication extends Action.Simple {
-    private final static String AUTH_TOKEN_HEADER = "Authorization";
-    private static final ALogger LOGGER = Logger.of(AdminAuthentication.class);
+  private final static String AUTH_TOKEN_HEADER = "Authorization";
+  private static final ALogger LOGGER = Logger.of(AdminAuthentication.class);
 
-    private static boolean isValidPassword(String actual, String supplied) {
-        return actual.equals(supplied);
+  private static boolean isValidPassword(String actual, String supplied) {
+    return actual.equals(supplied);
+  }
+
+  /**
+   * Verify the authorization header with admin credentials
+   */
+  public F.Promise<Result> call(Http.Context ctx) throws Throwable {
+    String[] authTokenHeaderValues = ctx.request().headers().get(AUTH_TOKEN_HEADER);
+    if (!ctx.request().headers().containsKey(AUTH_TOKEN_HEADER)) {
+      authTokenHeaderValues = ctx.request().headers().get(AUTH_TOKEN_HEADER.toUpperCase());
     }
 
-    /**
-     * Verify the authorization header with admin credentials
-     *
-     * @param ctx
-     * @return
-     * @throws Throwable
-     */
-    public F.Promise<Result> call(Http.Context ctx) throws Throwable {
-        String[] authTokenHeaderValues = ctx.request().headers().get(AUTH_TOKEN_HEADER);
-        if(!ctx.request().headers().containsKey(AUTH_TOKEN_HEADER)){
-            authTokenHeaderValues = ctx.request().headers().get(AUTH_TOKEN_HEADER.toUpperCase());
-        }
+    Result unauthorized = Results.unauthorized("unauthorized");
 
-        Result unauthorized = Results.unauthorized("unauthorized");
-
-        if (authTokenHeaderValues == null) {
-            ctx.response().setHeader("WWW-Authenticate", "Basic realm='Secured'");
-            return F.Promise.pure(unauthorized);
-        }
-
-        String[] credentials = LogistimoUtils.decodeHeader(authTokenHeaderValues[0]);
-        if ((credentials != null) && (credentials.length == 2) && (credentials[0] != null)) {
-            String adminPassword = Play.application().configuration().getString("admin.password");
-            if (credentials[0].equals("admin") && isValidPassword(adminPassword, credentials[1])) {
-                return delegate.call(ctx);
-            }
-        }
-        ctx.response().setHeader("WWW-Authenticate", "Basic realm='Secured'");
-        return F.Promise.pure(unauthorized);
+    if (authTokenHeaderValues == null) {
+      ctx.response().setHeader("WWW-Authenticate", "Basic realm='Secured'");
+      return F.Promise.pure(unauthorized);
     }
+
+    String[] credentials = LogistimoUtils.decodeHeader(authTokenHeaderValues[0]);
+    if ((credentials != null) && (credentials.length == 2) && (credentials[0] != null)) {
+      String adminPassword = Play.application().configuration().getString("admin.password");
+      if (credentials[0].equals("admin") && isValidPassword(adminPassword, credentials[1])) {
+        return delegate.call(ctx);
+      }
+    }
+    ctx.response().setHeader("WWW-Authenticate", "Basic realm='Secured'");
+    return F.Promise.pure(unauthorized);
+  }
 }

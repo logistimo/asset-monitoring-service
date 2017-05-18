@@ -27,65 +27,67 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.logistimo.models.device.common.TemperatureSensorRequest;
 import com.logistimo.models.device.response.DeviceStatusModel;
+
 import org.hibernate.validator.constraints.NotEmpty;
 
-import javax.validation.constraints.Size;
 import java.io.Serializable;
 import java.util.List;
 
+import javax.validation.constraints.Size;
+
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DeviceRequest implements Serializable {
-    private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 1L;
 
-    @NotEmpty
-    @Size(max = 100)
-    public String dId;
+  @NotEmpty
+  @Size(max = 100)
+  public String dId;
 
-    @NotEmpty
-    @Size(max = 50)
-    public String vId;
+  @NotEmpty
+  @Size(max = 50)
+  public String vId;
 
-    public String ovId;
+  public String ovId;
 
-    @Size(max = 100)
-    public String trId;
+  @Size(max = 100)
+  public String trId;
 
-    public JsonNode meta;
+  public JsonNode meta;
 
-    public Integer typ;
+  public Integer typ;
 
-    //Image URLs
-    public List<String> iUs;
+  //Image URLs
+  public List<String> iUs;
 
-    public String vNm;
+  public String vNm;
 
-    //Asset owners
-    public List<String> ons;
+  //Asset owners
+  public List<String> ons;
 
-    //Asset maintainers
-    public List<String> mts;
+  //Asset maintainers
+  public List<String> mts;
 
-    public List<String> tags;
+  public List<String> tags;
 
-    public List<TemperatureSensorRequest> sns;
+  public List<TemperatureSensorRequest> sns;
 
-    public List<Integer> mps;
+  public List<Integer> mps;
 
-    //Created by user
-    public String cb;
+  //Created by user
+  public String cb;
 
-    //Updated by user
-    public String ub;
+  //Updated by user
+  public String ub;
 
-    public DeviceStatusModel ws;
+  public DeviceStatusModel ws;
 
-    private String lId;
+  private String lId;
 
-    public String getlId() {
-        return lId;
-    }
+  public String getlId() {
+    return lId;
+  }
 
-    public void setlId(String lId) {
-        this.lId = lId;
-    }
+  public void setlId(String lId) {
+    this.lId = lId;
+  }
 }

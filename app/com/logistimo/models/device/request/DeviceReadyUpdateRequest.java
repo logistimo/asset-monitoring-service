@@ -24,19 +24,21 @@
 package com.logistimo.models.device.request;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import org.hibernate.validator.constraints.NotEmpty;
 
-import javax.validation.Valid;
 import java.util.List;
+
+import javax.validation.Valid;
 
 /**
  * Created by kaniyarasu on 31/10/14.
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DeviceReadyUpdateRequest {
-    @NotEmpty
-    public String vId;
+  @NotEmpty
+  public String vId;
 
-    @Valid
-    public List<DeviceReadyRequest> data;
+  @Valid
+  public List<DeviceReadyRequest> data;
 }

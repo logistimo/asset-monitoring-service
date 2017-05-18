@@ -23,12 +23,20 @@
 
 package com.logistimo.db;
 
-import com.logistimo.models.asset.AssetType;
 import org.apache.commons.codec.digest.DigestUtils;
-import play.db.jpa.JPA;
 
-import javax.persistence.*;
 import java.util.Date;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.PrePersist;
+import javax.persistence.PreUpdate;
+import javax.persistence.Table;
+
+import play.db.jpa.JPA;
 
 /**
  * Created by kaniyarasu on 22/09/15.
@@ -36,93 +44,93 @@ import java.util.Date;
 @Entity
 @Table(name = "asset")
 public class Asset {
-    public static int TEMP_NORMAL = 0;
-    public static int TEMP_EXCURSION = 1;
-    public static int TEMP_WARNING = 2;
-    public static int TEMP_ALARM = 3;
+  public static int TEMP_NORMAL = 0;
+  public static int TEMP_EXCURSION = 1;
+  public static int TEMP_WARNING = 2;
+  public static int TEMP_ALARM = 3;
 
-    public static int ASSET_NORMAL = 0;
-    public static int ASSET_ABNORMAL = 1;
+  public static int ASSET_NORMAL = 0;
+  public static int ASSET_ABNORMAL = 1;
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(name = "id")
-    public Long id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.AUTO)
+  @Column(name = "id")
+  public Long id;
 
-    @Column(name = "uniquehash", nullable = false, unique = true)
-    public String uniqueHash;
+  @Column(name = "uniquehash", nullable = false, unique = true)
+  public String uniqueHash;
 
-    @Column(name = "asset_id", nullable = false)
-    public String assetId;
+  @Column(name = "asset_id", nullable = false)
+  public String assetId;
 
-    @Column(name = "manc_id", nullable = false)
-    public String mancId;
+  @Column(name = "manc_id", nullable = false)
+  public String mancId;
 
-    @Column(name = "asset_type", nullable = false)
-    public Integer assetType;
+  @Column(name = "asset_type", nullable = false)
+  public Integer assetType;
 
-    //Only for temperature monitored assets
-    @Column(name = "temperature_state")
-    public Integer temperatureState = TEMP_NORMAL;
+  //Only for temperature monitored assets
+  @Column(name = "temperature_state")
+  public Integer temperatureState = TEMP_NORMAL;
 
-    //Only for temperature monitored assets
-    @Column(name = "temperature_state_updated_time")
-    public Integer temperatureStateUpdatedTime;
+  //Only for temperature monitored assets
+  @Column(name = "temperature_state_updated_time")
+  public Integer temperatureStateUpdatedTime;
 
-    @Column(name = "status")
-    public Integer status = ASSET_NORMAL;
+  @Column(name = "status")
+  public Integer status = ASSET_NORMAL;
 
-    @Column(name = "status_updated_time")
-    public Integer statusUpdatedTime;
+  @Column(name = "status_updated_time")
+  public Integer statusUpdatedTime;
 
-    @Column(name = "created_on", updatable = false)
-    public Date createdOn;
+  @Column(name = "created_on", updatable = false)
+  public Date createdOn;
 
-    @Column(name = "updated_on")
-    public Date updatedOn;
+  @Column(name = "updated_on")
+  public Date updatedOn;
 
-    @PrePersist
-    @PreUpdate
-    public void updateDevice(){
-        //Inserting createdOn time only once, i.e., first time
-        if(this.createdOn == null){
-            this.createdOn = new Date();
-        }
-        this.updatedOn = new Date();
+  public static Asset findAsset(String mancId, String assetId) {
+    return JPA.em()
+        .createQuery("from Asset where mancId=?1 and assetId=?2", Asset.class)
+        .setParameter(1, mancId)
+        .setParameter(2, assetId)
+        .setMaxResults(1)
+        .getSingleResult();
+  }
 
-        if(this.temperatureStateUpdatedTime == null){
-            this.temperatureStateUpdatedTime = (int) (System.currentTimeMillis() / 1000);
-        }
+  @PrePersist
+  @PreUpdate
+  public void updateDevice() {
+    //Inserting createdOn time only once, i.e., first time
+    if (this.createdOn == null) {
+      this.createdOn = new Date();
+    }
+    this.updatedOn = new Date();
 
-        if(this.statusUpdatedTime == null){
-            this.statusUpdatedTime = (int) (System.currentTimeMillis() / 1000);
-        }
+    if (this.temperatureStateUpdatedTime == null) {
+      this.temperatureStateUpdatedTime = (int) (System.currentTimeMillis() / 1000);
     }
 
-    public static Asset findAsset(String mancId, String assetId) {
-        return JPA.em()
-                .createQuery("from Asset where mancId=?1 and assetId=?2", Asset.class)
-                .setParameter(1, mancId)
-                .setParameter(2, assetId)
-                .setMaxResults(1)
-                .getSingleResult();
+    if (this.statusUpdatedTime == null) {
+      this.statusUpdatedTime = (int) (System.currentTimeMillis() / 1000);
     }
+  }
 
-    public void save() {
-        //Creating unique hash value for device as unique key.
-        hash();
-        JPA.em().persist(this);
-    }
+  public void save() {
+    //Creating unique hash value for device as unique key.
+    hash();
+    JPA.em().persist(this);
+  }
 
-    public void update() {
-        JPA.em().merge(this);
-    }
+  public void update() {
+    JPA.em().merge(this);
+  }
 
-    public void delete() {
-        JPA.em().remove(this);
-    }
+  public void delete() {
+    JPA.em().remove(this);
+  }
 
-    public void hash() {
-        this.uniqueHash = DigestUtils.md5Hex(mancId + assetId);
-    }
+  public void hash() {
+    this.uniqueHash = DigestUtils.md5Hex(mancId + assetId);
+  }
 }

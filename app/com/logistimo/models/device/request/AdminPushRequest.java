@@ -24,6 +24,7 @@
 package com.logistimo.models.device.request;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.validation.Valid;
@@ -34,33 +35,31 @@ import javax.validation.constraints.NotNull;
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AdminPushRequest {
-    @NotEmpty
-    private String vId;
+  @NotNull
+  @Valid
+  public AdminUserRequest adm;
+  @NotEmpty
+  private String vId;
+  @NotEmpty
+  private String dId;
 
-    @NotEmpty
-    private String dId;
+  public AdminPushRequest() {
+    adm = new AdminUserRequest();
+  }
 
-    @NotNull
-    @Valid
-    public AdminUserRequest adm;
+  public String getvId() {
+    return vId;
+  }
 
-    public AdminPushRequest() {
-        adm = new AdminUserRequest();
-    }
+  public void setvId(String vId) {
+    this.vId = vId;
+  }
 
-    public String getvId() {
-        return vId;
-    }
+  public String getdId() {
+    return dId;
+  }
 
-    public void setvId(String vId) {
-        this.vId = vId;
-    }
-
-    public String getdId() {
-        return dId;
-    }
-
-    public void setdId(String dId) {
-        this.dId = dId;
-    }
+  public void setdId(String dId) {
+    this.dId = dId;
+  }
 }

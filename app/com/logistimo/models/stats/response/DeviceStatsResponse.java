@@ -30,12 +30,12 @@ import com.logistimo.models.stats.common.DailyStats;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class DeviceStatsResponse {
 
-    public String trId;
+  public String trId;
 
-    public DailyStats stats;
+  public DailyStats stats;
 
-    public DeviceStatsResponse() {
-        stats = new DailyStats();
-    }
+  public DeviceStatsResponse() {
+    stats = new DailyStats();
+  }
 
 }

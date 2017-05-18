@@ -24,15 +24,16 @@
 package com.logistimo.models.stats.request;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import org.hibernate.validator.constraints.NotEmpty;
 
 import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DailyStatsLoggingRequest {
-    @NotEmpty
-    public String vId;
+  @NotEmpty
+  public String vId;
 
-    @NotEmpty
-    public List<DeviceStatsRequest> data;
+  @NotEmpty
+  public List<DeviceStatsRequest> data;
 }

@@ -27,9 +27,9 @@ package com.logistimo.services;
  * Created by kaniyarasu on 05/11/14.
  */
 public interface Service {
-    public void init(ServiceFactory serviceFactory);
+  public void init(ServiceFactory serviceFactory);
 
-    public void destroy();
+  public void destroy();
 
-    public Class<? extends Service> getInterface();
+  public Class<? extends Service> getInterface();
 }

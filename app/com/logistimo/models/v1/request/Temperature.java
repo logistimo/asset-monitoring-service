@@ -24,6 +24,7 @@
 package com.logistimo.models.v1.request;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.validation.constraints.Min;
@@ -31,11 +32,11 @@ import javax.validation.constraints.Min;
 @Deprecated
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Temperature {
-    @NotEmpty
-    public String type;
+  @NotEmpty
+  public String type;
 
-    @Min(0)
-    public Long timestamp;
+  @Min(0)
+  public Long timestamp;
 
-    public Double temperature;
+  public Double temperature;
 }

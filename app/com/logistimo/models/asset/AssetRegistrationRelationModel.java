@@ -29,5 +29,5 @@ import java.util.List;
  * Created by kaniyarasu on 22/09/15.
  */
 public class AssetRegistrationRelationModel {
-    public List<AssetRelationModel> data;
+  public List<AssetRelationModel> data;
 }

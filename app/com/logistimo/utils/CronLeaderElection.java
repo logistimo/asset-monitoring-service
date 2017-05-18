@@ -26,15 +26,21 @@ package com.logistimo.utils;
 import com.logistimo.jobs.InactiveDeviceDetectionJob;
 import com.logistimo.services.ServiceFactory;
 import com.logistimo.services.TaskService;
+
 import org.apache.zookeeper.KeeperException;
-import org.quartz.*;
+import org.quartz.CronTrigger;
+import org.quartz.JobDetail;
+import org.quartz.Scheduler;
+import org.quartz.SchedulerException;
+import org.quartz.SchedulerFactory;
 import org.quartz.impl.StdSchedulerFactory;
+
+import java.io.IOException;
+
 import play.Logger;
 import play.Play;
 import play.db.jpa.JPA;
 import play.libs.F;
-
-import java.io.IOException;
 
 import static org.quartz.CronScheduleBuilder.cronSchedule;
 import static org.quartz.JobBuilder.newJob;
@@ -45,25 +51,66 @@ import static org.quartz.TriggerBuilder.newTrigger;
  */
 public class CronLeaderElection extends ZooElectableClient {
 
-    private final static Logger.ALogger LOGGER = Logger.of(CronLeaderElection.class);
+  private final static Logger.ALogger LOGGER = Logger.of(CronLeaderElection.class);
 
-    public static Scheduler scheduler;
+  public static Scheduler scheduler;
 
-    private static CronLeaderElection _instance;
-    private boolean shutDown = false;
+  private static CronLeaderElection _instance;
+  private boolean shutDown = false;
 
-    protected CronLeaderElection() throws InterruptedException, IOException, KeeperException {
-        super(Play.application().configuration().getString("cron.zoo.path", "/amsCronLeader"));
+  protected CronLeaderElection() throws InterruptedException, IOException, KeeperException {
+    super(Play.application().configuration().getString("cron.zoo.path", "/amsCronLeader"));
+  }
+
+  public static void start() {
+    if (_instance == null) {
+      synchronized (CronLeaderElection.class) {
+        if (_instance == null) {
+          try {
+            _instance = new CronLeaderElection();
+          } catch (Exception e) {
+            LOGGER.error("Failed to start Zoo Keeper Leader Election for Cron scheduler {0}",
+                e.getLocalizedMessage(), e);
+          }
+        }
+      }
     }
 
-    @Override
-    public void performRole() {
-        if(getCachedIsLeader()) {
-            LOGGER.info("Elected as cron leader");
-            try {
-                SchedulerFactory schedulerFactory = new StdSchedulerFactory();
-                scheduler = schedulerFactory.getScheduler();
-                scheduler.start();
+  }
+
+  public static void stop() {
+    if (null != _instance) {
+      _instance.shutDown = true;
+      if (scheduler != null) {
+        LOGGER.info("Shutting down Cron scheduler");
+        try {
+          scheduler.shutdown();
+          scheduler = null;
+        } catch (SchedulerException e) {
+          LOGGER.warn("Failed to close scheduler on shutdown", e);
+        }
+      }
+      if (null != _instance.hZooKeeper) {
+        try {
+          LOGGER.info("Shutting down Zookeeper client");
+          _instance.hZooKeeper.close();
+        } catch (Exception e) {
+          LOGGER.warn("Failed to close zookeeper on shutdown", e);
+        }
+      }
+      _instance = null;
+    }
+
+  }
+
+  @Override
+  public void performRole() {
+    if (getCachedIsLeader()) {
+      LOGGER.info("Elected as cron leader");
+      try {
+        SchedulerFactory schedulerFactory = new StdSchedulerFactory();
+        scheduler = schedulerFactory.getScheduler();
+        scheduler.start();
 
                 /*JobDetail job = newJob(DailyAggregationJob.class)
                         .withIdentity("DailyAgg", "DailyAggGroup")
@@ -76,120 +123,80 @@ public class CronLeaderElection extends ZooElectableClient {
 
                 scheduler.scheduleJob(job, trigger);*/
 
-                JobDetail job = newJob(InactiveDeviceDetectionJob.class)
-                        .withIdentity("InactiveDetection", "DeviceAlarmGroup")
-                        .build();
+        JobDetail job = newJob(InactiveDeviceDetectionJob.class)
+            .withIdentity("InactiveDetection", "DeviceAlarmGroup")
+            .build();
 
-                CronTrigger trigger = newTrigger()
-                        .withIdentity("InactiveDetectionTrigger", "DeviceAlarmGroup")
-                        .withSchedule(cronSchedule("0 0 * * * ?"))
-                        .build();
+        CronTrigger trigger = newTrigger()
+            .withIdentity("InactiveDetectionTrigger", "DeviceAlarmGroup")
+            .withSchedule(cronSchedule("0 0 * * * ?"))
+            .build();
 
-                scheduler.scheduleJob(job, trigger);
-            } catch (SchedulerException e) {
-                e.printStackTrace();
+        scheduler.scheduleJob(job, trigger);
+      } catch (SchedulerException e) {
+        e.printStackTrace();
+      }
+
+      try {
+        final TaskService taskService = ServiceFactory.getService(TaskService.class);
+        taskService.init();
+        try {
+          JPA.withTransaction(new F.Function0<Void>() {
+            public Void apply() throws Throwable {
+              taskService.rescheduleUnprocessedTasks();
+              return null;
             }
-
-            try {
-                final TaskService taskService = ServiceFactory.getService(TaskService.class);
-                taskService.init();
-                try {
-                    JPA.withTransaction(new F.Function0<Void>() {
-                        public Void apply() throws Throwable {
-                            taskService.rescheduleUnprocessedTasks();
-                            return null;
-                        }
-                    });
-                } catch (Throwable throwable) {
-                    throwable.printStackTrace();
-                }
-            }catch(Exception e) {
-                LOGGER.error("Error while initiating task service", e);
-            }
+          });
+        } catch (Throwable throwable) {
+          throwable.printStackTrace();
         }
+      } catch (Exception e) {
+        LOGGER.error("Error while initiating task service", e);
+      }
     }
+  }
 
-    @Override
-    public void onZooKeeperDisconnected() {
-        if (scheduler != null) {
-            LOGGER.info("Shutting down Cron scheduler");
-            try {
-                scheduler.shutdown();
-                scheduler = null;
-            } catch (SchedulerException e) {
-                LOGGER.warn("Failed to close scheduler on shutdown", e);
-            }
+  @Override
+  public void onZooKeeperDisconnected() {
+    if (scheduler != null) {
+      LOGGER.info("Shutting down Cron scheduler");
+      try {
+        scheduler.shutdown();
+        scheduler = null;
+      } catch (SchedulerException e) {
+        LOGGER.warn("Failed to close scheduler on shutdown", e);
+      }
+    }
+  }
+
+  @Override
+  public void onZooKeeperSessionClosed() {
+    if (!shutDown) {
+      LOGGER.info("Session closed.. Re init connections");
+
+      if (scheduler != null) {
+        LOGGER.info("Shutting down Cron scheduler");
+        try {
+          scheduler.shutdown();
+          scheduler = null;
+        } catch (SchedulerException e) {
+          LOGGER.warn("Failed to close scheduler on shutdown", e);
         }
-    }
+      }
 
-    @Override
-    public void onZooKeeperSessionClosed() {
-        if(!shutDown) {
-            LOGGER.info("Session closed.. Re init connections");
-
-            if (scheduler != null) {
-                LOGGER.info("Shutting down Cron scheduler");
-                try {
-                    scheduler.shutdown();
-                    scheduler = null;
-                } catch (SchedulerException e) {
-                    LOGGER.warn("Failed to close scheduler on shutdown", e);
-                }
-            }
-
-            if (hZooKeeper != null) {
-                try {
-                    hZooKeeper.close();
-                } catch (InterruptedException e) {
-                    LOGGER.warn("Exception while closing session {0}", e.getMessage());
-                }
-            }
-
-            try {
-                init();
-            } catch (Exception e) {
-                LOGGER.error("Fatal error while initializing zoo keeper connections ", e);
-            }
+      if (hZooKeeper != null) {
+        try {
+          hZooKeeper.close();
+        } catch (InterruptedException e) {
+          LOGGER.warn("Exception while closing session {0}", e.getMessage());
         }
+      }
+
+      try {
+        init();
+      } catch (Exception e) {
+        LOGGER.error("Fatal error while initializing zoo keeper connections ", e);
+      }
     }
-
-    public static void start() {
-        if (_instance == null) {
-            synchronized (CronLeaderElection.class) {
-                if (_instance == null) {
-                    try {
-                        _instance = new CronLeaderElection();
-                    } catch (Exception e) {
-                        LOGGER.error("Failed to start Zoo Keeper Leader Election for Cron scheduler {0}", e.getLocalizedMessage(), e);
-                    }
-                }
-            }
-        }
-
-    }
-
-    public static void stop() {
-        if(null != _instance) {
-            _instance.shutDown = true;
-            if (scheduler != null) {
-                LOGGER.info("Shutting down Cron scheduler");
-                try {
-                    scheduler.shutdown();
-                    scheduler = null;
-                } catch (SchedulerException e) {
-                    LOGGER.warn("Failed to close scheduler on shutdown", e);
-                }
-            }
-            if (null != _instance.hZooKeeper) {
-                try {
-                    LOGGER.info("Shutting down Zookeeper client");
-                    _instance.hZooKeeper.close();
-                } catch (Exception e) {
-                    LOGGER.warn("Failed to close zookeeper on shutdown", e);
-                }
-            }
-            _instance = null;
-        }
-
-    }
+  }
 }

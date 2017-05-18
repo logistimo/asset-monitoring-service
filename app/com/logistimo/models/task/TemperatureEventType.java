@@ -27,13 +27,15 @@ package com.logistimo.models.task;
  * Created by kaniyarasu on 17/08/15.
  */
 public enum TemperatureEventType {
-    RAW(0), INCURSION(1), EXCURSION(2), WARNING(3), ALARM(4);
+  RAW(0), INCURSION(1), EXCURSION(2), WARNING(3), ALARM(4);
 
-    private final int value;
+  private final int value;
 
-    TemperatureEventType(int value) {
-        this.value = value;
-    }
+  TemperatureEventType(int value) {
+    this.value = value;
+  }
 
-    public int getValue() { return value; }
+  public int getValue() {
+    return value;
+  }
 }

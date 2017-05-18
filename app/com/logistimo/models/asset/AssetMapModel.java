@@ -31,48 +31,42 @@ import com.fasterxml.jackson.databind.JsonNode;
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AssetMapModel {
-    private String vId;
+  public Integer mpId;
+  public Integer typ;
+  public Integer isP;
+  public JsonNode meta;
+  private String vId;
+  private String dId;
+  private String sId;
 
-    private String dId;
+  public AssetMapModel() {
+  }
 
-    private String sId;
+  public AssetMapModel(Integer typ) {
+    this.typ = typ;
+  }
 
-    public Integer mpId;
+  public String getvId() {
+    return vId;
+  }
 
-    public Integer typ;
+  public void setvId(String vId) {
+    this.vId = vId;
+  }
 
-    public Integer isP;
+  public String getdId() {
+    return dId;
+  }
 
-    public JsonNode meta;
+  public void setdId(String dId) {
+    this.dId = dId;
+  }
 
-    public AssetMapModel() {
-    }
+  public String getsId() {
+    return sId;
+  }
 
-    public AssetMapModel(Integer typ) {
-        this.typ = typ;
-    }
-
-    public String getvId() {
-        return vId;
-    }
-
-    public void setvId(String vId) {
-        this.vId = vId;
-    }
-
-    public String getdId() {
-        return dId;
-    }
-
-    public void setdId(String dId) {
-        this.dId = dId;
-    }
-
-    public String getsId() {
-        return sId;
-    }
-
-    public void setsId(String sId) {
-        this.sId = sId;
-    }
+  public void setsId(String sId) {
+    this.sId = sId;
+  }
 }

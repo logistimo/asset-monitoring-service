@@ -34,19 +34,19 @@ import com.logistimo.models.device.common.DeviceReadySim;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class DeviceReadyResponse {
-    public String trId;
-    public DeviceReadyModel dev;
-    public DeviceReadySim sim;
-    public DeviceReadySim altSim;
-    public Long time;
+  public String trId;
+  public DeviceReadyModel dev;
+  public DeviceReadySim sim;
+  public DeviceReadySim altSim;
+  public Long time;
 
-    public DeviceReadyResponse() {
-        this.dev = new DeviceReadyModel();
-        this.sim = new DeviceReadySim();
-        this.altSim = new DeviceReadySim();
-    }
+  public DeviceReadyResponse() {
+    this.dev = new DeviceReadyModel();
+    this.sim = new DeviceReadySim();
+    this.altSim = new DeviceReadySim();
+  }
 
-    public DeviceReadyResponse(Long time) {
-        this.time = time;
-    }
+  public DeviceReadyResponse(Long time) {
+    this.time = time;
+  }
 }

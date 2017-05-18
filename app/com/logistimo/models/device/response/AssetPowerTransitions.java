@@ -30,15 +30,15 @@ import java.util.List;
  * Created by kaniyarasu on 12/01/16.
  */
 public class AssetPowerTransitions {
-    public List<AssetPowerTransition> data;
+  public List<AssetPowerTransition> data;
 
-    public AssetPowerTransitions() {
-        data = new ArrayList<>(1);
-    }
+  public AssetPowerTransitions() {
+    data = new ArrayList<>(1);
+  }
 
-    public static class AssetPowerTransition{
-        public Integer st;
+  public static class AssetPowerTransition {
+    public Integer st;
 
-        public Integer time;
-    }
+    public Integer time;
+  }
 }

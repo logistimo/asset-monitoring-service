@@ -25,38 +25,39 @@ package com.logistimo.models.alarm.request;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
-import javax.validation.Valid;
 import java.util.List;
+
+import javax.validation.Valid;
 
 /**
  * Created by kaniyarasu on 30/10/14.
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DeviceAlarmRequest {
-    @Valid
-    public DeviceConnectionAlarmsRequest dCon;
+  @Valid
+  public DeviceConnectionAlarmsRequest dCon;
 
-    @Valid
-    public ExternalSensorAlarmsRequest xSns;
+  @Valid
+  public ExternalSensorAlarmsRequest xSns;
 
-    @Valid
-    public BatteryAlarmsRequest batt;
+  @Valid
+  public BatteryAlarmsRequest batt;
 
-    @Valid
-    public GenericAlarmRequest iAct;
+  @Valid
+  public GenericAlarmRequest iAct;
 
-    @Valid
-    public GenericAlarmRequest poa;
+  @Valid
+  public GenericAlarmRequest poa;
 
-    @Valid
-    public List<DeviceErrorRequest> errs;
+  @Valid
+  public List<DeviceErrorRequest> errs;
 
 
-    public DeviceAlarmRequest(GenericAlarmRequest genericAlarmRequest) {
-        this.iAct = genericAlarmRequest;
-    }
+  public DeviceAlarmRequest(GenericAlarmRequest genericAlarmRequest) {
+    this.iAct = genericAlarmRequest;
+  }
 
-    public DeviceAlarmRequest(){
+  public DeviceAlarmRequest() {
 
-    }
+  }
 }

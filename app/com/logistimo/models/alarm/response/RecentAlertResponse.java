@@ -30,20 +30,20 @@ import java.util.List;
  * Created by kaniyarasu on 12/02/15.
  */
 public class RecentAlertResponse {
-    public List<AlertResponse> data = new ArrayList<>(1);
+  public List<AlertResponse> data = new ArrayList<>(1);
 
-    private long nPages;
+  private long nPages;
 
-    public long getnPages() {
-        return nPages;
-    }
+  public RecentAlertResponse(List<AlertResponse> data, long nPages) {
+    this.data = data;
+    this.nPages = nPages;
+  }
 
-    public void setnPages(long nPages) {
-        this.nPages = nPages;
-    }
+  public long getnPages() {
+    return nPages;
+  }
 
-    public RecentAlertResponse(List<AlertResponse> data, long nPages) {
-        this.data = data;
-        this.nPages = nPages;
-    }
+  public void setnPages(long nPages) {
+    this.nPages = nPages;
+  }
 }

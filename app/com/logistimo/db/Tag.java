@@ -23,92 +23,101 @@
 
 package com.logistimo.db;
 
-import play.db.jpa.JPA;
-
-import javax.persistence.*;
 import java.util.List;
 import java.util.Set;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.ManyToMany;
+import javax.persistence.NoResultException;
+import javax.persistence.Table;
+
+import play.db.jpa.JPA;
 
 @Entity
 @Table(name = "tags")
 public class Tag implements Comparable<Tag> {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(name = "id")
-    public Long id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.AUTO)
+  @Column(name = "id")
+  public Long id;
 
-    @Column(name = "tagname", nullable = false)
-    public String tagName;
+  @Column(name = "tagname", nullable = false)
+  public String tagName;
 
-    @ManyToMany(fetch = FetchType.LAZY, mappedBy = "tags")
-    public Set<Device> device;
+  @ManyToMany(fetch = FetchType.LAZY, mappedBy = "tags")
+  public Set<Device> device;
 
-    public Tag() {
+  public Tag() {
 
+  }
+
+  public Tag(String name) {
+    this.tagName = name;
+  }
+
+  public static Tag findOrCreateByName(String tagName) {
+    Tag tag;
+    try {
+      tag = find(tagName);
+    } catch (NoResultException e) {
+      tag = new Tag(tagName);
+      tag.save();
     }
 
-    public Tag(String name) {
-        this.tagName = name;
-    }
+    return tag;
+  }
 
-    public static Tag findOrCreateByName(String tagName) {
-        Tag tag;
-        try {
-            tag = find(tagName);
-        } catch (NoResultException e) {
-            tag = new Tag(tagName);
-            tag.save();
-        }
+  public static Tag find(String tagName) {
+    return JPA.em()
+        .createQuery("from Tag where tagName=?1", Tag.class)
+        .setParameter(1, tagName)
+        .setMaxResults(1)
+        .getSingleResult();
+  }
 
-        return tag;
-    }
+  @SuppressWarnings("unchecked")
+  public static List<Tag> findChildTags(String tagName) {
+    tagName = tagName.trim();
+    return (List<Tag>) JPA.em()
+        .createNativeQuery("select * from tags where tagname REGEXP ?1", Tag.class)
+        .setParameter(1, tagName)
+        .getResultList();
+  }
 
-    public static Tag find(String tagName) {
-        return JPA.em()
-                .createQuery("from Tag where tagName=?1", Tag.class)
-                .setParameter(1, tagName)
-                .setMaxResults(1)
-                .getSingleResult();
-    }
+  public static List<Tag> findByTagName(String tagName) {
+    return JPA.em()
+        .createQuery("from Tag where tagName = ?1", Tag.class)
+        .setParameter(1, tagName)
+        .getResultList();
+  }
 
-    @SuppressWarnings("unchecked")
-    public static List<Tag> findChildTags(String tagName) {
-        tagName = tagName.trim();
-        return (List<Tag>) JPA.em()
-                .createNativeQuery("select * from tags where tagname REGEXP ?1", Tag.class)
-                .setParameter(1, tagName)
-                .getResultList();
-    }
+  public static int getNumber(String tagName) {
+    return JPA.em()
+        .createQuery("from Tag where tagName = ?1", Tag.class)
+        .setParameter(1, tagName)
+        .getResultList().size();
+  }
 
-    public static List<Tag> findByTagName(String tagName) {
-        return JPA.em()
-                .createQuery("from Tag where tagName = ?1", Tag.class)
-                .setParameter(1, tagName)
-                .getResultList();
-    }
+  @Override
+  public int compareTo(Tag o) {
+    return tagName.compareTo(o.tagName);
+  }
 
-    public static int getNumber(String tagName) {
-        return JPA.em()
-                .createQuery("from Tag where tagName = ?1", Tag.class)
-                .setParameter(1, tagName)
-                .getResultList().size();
-    }
+  public void save() {
+    JPA.em().persist(this);
+  }
 
-    @Override
-    public int compareTo(Tag o) {
-        return tagName.compareTo(o.tagName);
-    }
+  public void update() {
+    JPA.em().merge(this);
+  }
 
-    public void save() {
-        JPA.em().persist(this);
-    }
-
-    public void update() {
-        JPA.em().merge(this);
-    }
-
-    public void delete() {
-        JPA.em().remove(this);
-    }
+  public void delete() {
+    JPA.em().remove(this);
+  }
 }

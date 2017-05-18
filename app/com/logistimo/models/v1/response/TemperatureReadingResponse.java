@@ -27,7 +27,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class TemperatureReadingResponse {
-    public List<TemperatureResponse> data = new ArrayList<TemperatureResponse>();
+  public List<TemperatureResponse> data = new ArrayList<TemperatureResponse>();
 
-    public long numberOfPages;
+  public long numberOfPages;
 }

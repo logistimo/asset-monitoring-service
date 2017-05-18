@@ -30,47 +30,40 @@ import com.fasterxml.jackson.annotation.JsonInclude;
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class AssetTemperatureResponse {
-    public Integer st;
+  public Integer st;
 
-    public Double tmp;
+  public Double tmp;
+  public Integer time;
+  public Integer stut;
+  public Double min;
+  public Double max;
+  //Abnormality status
+  private Integer aSt;
+  //Asset monitoring location id, if any
+  private Integer mpId = null;
+  private String sId;
 
-    //Abnormality status
-    private Integer aSt;
+  public String getsId() {
+    return sId;
+  }
 
-    public Integer time;
+  public void setsId(String sId) {
+    this.sId = sId;
+  }
 
-    public Integer stut;
+  public Integer getaSt() {
+    return aSt;
+  }
 
-    //Asset monitoring location id, if any
-    private Integer mpId = null;
+  public void setaSt(Integer aSt) {
+    this.aSt = aSt;
+  }
 
-    public Double min;
+  public Integer getMpId() {
+    return mpId;
+  }
 
-    public Double max;
-
-    private String sId;
-
-    public String getsId() {
-        return sId;
-    }
-
-    public void setsId(String sId) {
-        this.sId = sId;
-    }
-
-    public Integer getaSt() {
-        return aSt;
-    }
-
-    public void setaSt(Integer aSt) {
-        this.aSt = aSt;
-    }
-
-    public Integer getMpId() {
-        return mpId;
-    }
-
-    public void setMpId(Integer mpId) {
-        this.mpId = mpId;
-    }
+  public void setMpId(Integer mpId) {
+    this.mpId = mpId;
+  }
 }

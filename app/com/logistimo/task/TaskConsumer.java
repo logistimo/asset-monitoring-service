@@ -23,12 +23,13 @@
 
 package com.logistimo.task;
 
-import akka.camel.CamelMessage;
-import akka.camel.javaapi.UntypedConsumerActor;
 import com.logistimo.exception.ServiceException;
 import com.logistimo.models.task.TaskOptions;
 import com.logistimo.services.ServiceFactory;
 import com.logistimo.services.TaskService;
+
+import akka.camel.CamelMessage;
+import akka.camel.javaapi.UntypedConsumerActor;
 import play.Logger;
 import play.db.jpa.JPA;
 
@@ -36,72 +37,76 @@ import play.db.jpa.JPA;
  * Created by kaniyarasu on 12/08/15.
  */
 public class TaskConsumer extends UntypedConsumerActor {
-    private static final TaskService taskService = ServiceFactory.getService(TaskService.class);
-    private static final Logger.ALogger LOGGER = Logger.of(TaskConsumer.class);
-    private static final int MAX_NUMBER_OF_RETRY = 5;
+  private static final TaskService taskService = ServiceFactory.getService(TaskService.class);
+  private static final Logger.ALogger LOGGER = Logger.of(TaskConsumer.class);
+  private static final int MAX_NUMBER_OF_RETRY = 5;
 
-    //Defaulting to task, if there is new queue should be overridden in sub class
-    @Override
-    public String getEndpointUri() {
-        return "activemq:queue:tms-task";
-    }
+  //Defaulting to task, if there is new queue should be overridden in sub class
+  @Override
+  public String getEndpointUri() {
+    return "activemq:queue:tms-task";
+  }
 
-    @Override
-    public void onReceive(Object message) {
-        if (message != null && message instanceof CamelMessage) {
-            final TaskOptions taskOptions = ((CamelMessage) message).getBodyAs(TaskOptions.class, getCamelContext());
-            if(taskOptions != null){
-                try {
-                    JPA.withTransaction(new play.libs.F.Function0<Void>() {
-                        public Void apply() throws Throwable {
-                            taskService.consumeMessage(taskOptions);
-                            return null;
-                        }
-                    });
-                } catch (Throwable throwable) {
-                    LOGGER.warn("Error while executing task {}", taskOptions, throwable);
-                    try {
-                        JPA.withTransaction(new play.libs.F.Function0<Void>() {
-                            public Void apply() throws Throwable {
-                                retryTask(taskOptions);
-                                return null;
-                            }
-                        });
-                    } catch (Throwable throwable1) {
-                        LOGGER.warn("Error while retrying task {}", taskOptions, throwable);
-                    }
-                }
-            }else {
-                LOGGER.warn("Error while logging temperature, invalid task options received from queue");
-            }
-        } else{
-            LOGGER.warn("Error while logging temperature, invalid message received from queue");
-        }
-    }
-
-    private void retryTask(TaskOptions taskOptions){
+  @Override
+  public void onReceive(Object message) {
+    if (message != null && message instanceof CamelMessage) {
+      final TaskOptions
+          taskOptions =
+          ((CamelMessage) message).getBodyAs(TaskOptions.class, getCamelContext());
+      if (taskOptions != null) {
         try {
-            taskOptions.incrNumberOfRetry();
-            //Retrying for maximum of five times
-            if (taskOptions.getNumberOfRetry() <= MAX_NUMBER_OF_RETRY) { //Use constant
-                LOGGER.info("Retrying task {} for {}", taskOptions.toString(), taskOptions.getNumberOfRetry());
-                taskOptions.setDelayInMillis(getRetryETAMillis(taskOptions.getNumberOfRetry()));
-                taskService.produceMessage(taskOptions, null);
-            } else {
-                LOGGER.error("Reached the maximum retry, stopping the further execution for task: {}", taskOptions.toString());
+          JPA.withTransaction(new play.libs.F.Function0<Void>() {
+            public Void apply() throws Throwable {
+              taskService.consumeMessage(taskOptions);
+              return null;
             }
-        } catch (ServiceException e) {
-            LOGGER.error("{} while retrying task {}", e.getMessage(), taskOptions.toString(), e);
+          });
+        } catch (Throwable throwable) {
+          LOGGER.warn("Error while executing task {}", taskOptions, throwable);
+          try {
+            JPA.withTransaction(new play.libs.F.Function0<Void>() {
+              public Void apply() throws Throwable {
+                retryTask(taskOptions);
+                return null;
+              }
+            });
+          } catch (Throwable throwable1) {
+            LOGGER.warn("Error while retrying task {}", taskOptions, throwable);
+          }
         }
+      } else {
+        LOGGER.warn("Error while logging temperature, invalid task options received from queue");
+      }
+    } else {
+      LOGGER.warn("Error while logging temperature, invalid message received from queue");
+    }
+  }
 
+  private void retryTask(TaskOptions taskOptions) {
+    try {
+      taskOptions.incrNumberOfRetry();
+      //Retrying for maximum of five times
+      if (taskOptions.getNumberOfRetry() <= MAX_NUMBER_OF_RETRY) { //Use constant
+        LOGGER.info("Retrying task {} for {}", taskOptions.toString(),
+            taskOptions.getNumberOfRetry());
+        taskOptions.setDelayInMillis(getRetryETAMillis(taskOptions.getNumberOfRetry()));
+        taskService.produceMessage(taskOptions, null);
+      } else {
+        LOGGER.error("Reached the maximum retry, stopping the further execution for task: {}",
+            taskOptions.toString());
+      }
+    } catch (ServiceException e) {
+      LOGGER.error("{} while retrying task {}", e.getMessage(), taskOptions.toString(), e);
     }
 
-    private long getRetryETAMillis(int numberOfRetry){
-        final int RETRY_F_MILLISECONDS = 5000;
-        long factorial = 1;
-        for(int index = 1; index <= numberOfRetry; index++){
-            factorial *= index;
-        }
-        return factorial * RETRY_F_MILLISECONDS;
+  }
+
+  private long getRetryETAMillis(int numberOfRetry) {
+    final int RETRY_F_MILLISECONDS = 5000;
+    long factorial = 1;
+    for (int index = 1; index <= numberOfRetry; index++) {
+      factorial *= index;
     }
+    return factorial * RETRY_F_MILLISECONDS;
+  }
 }

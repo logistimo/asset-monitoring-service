@@ -30,7 +30,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class DeviceConfigurationStatusResponse {
-    public Integer time;
+  public Integer time;
 
-    public Integer typ;
+  public Integer typ;
 }

@@ -27,27 +27,27 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class TemperatureResponse {
-    public int time;
+  public int time;
 
-    public int typ;
+  public int typ;
 
-    public double tmp;
+  public double tmp;
 
-    public Integer pwa;
+  public Integer pwa;
 
-    public Integer src;
+  public Integer src;
 
-    public TemperatureResponse() {
-    }
+  public TemperatureResponse() {
+  }
 
-    public TemperatureResponse(int typ, double tmp) {
-        this.typ = typ;
-        this.tmp = tmp;
-    }
+  public TemperatureResponse(int typ, double tmp) {
+    this.typ = typ;
+    this.tmp = tmp;
+  }
 
-    public TemperatureResponse(int time, int typ, double tmp) {
-        this.time = time;
-        this.typ = typ;
-        this.tmp = tmp;
-    }
+  public TemperatureResponse(int time, int typ, double tmp) {
+    this.time = time;
+    this.typ = typ;
+    this.tmp = tmp;
+  }
 }

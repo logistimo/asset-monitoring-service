@@ -25,6 +25,7 @@ package com.logistimo.models.temperature.request;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.logistimo.models.device.request.DeviceReadingRequest;
+
 import org.hibernate.validator.constraints.NotEmpty;
 
 import java.io.Serializable;
@@ -34,25 +35,25 @@ import java.util.List;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class TemperatureLoggingRequest implements Serializable {
 
-    @NotEmpty
-    public String vId;
+  @NotEmpty
+  public String vId;
 
-    @NotEmpty
-    public List<DeviceReadingRequest> data = new ArrayList<DeviceReadingRequest>();
+  @NotEmpty
+  public List<DeviceReadingRequest> data = new ArrayList<DeviceReadingRequest>();
 
-    public TemperatureLoggingRequest() {
-    }
+  public TemperatureLoggingRequest() {
+  }
 
-    public TemperatureLoggingRequest(String vId, List<DeviceReadingRequest> data) {
-        this.vId = vId;
-        this.data = data;
-    }
+  public TemperatureLoggingRequest(String vId, List<DeviceReadingRequest> data) {
+    this.vId = vId;
+    this.data = data;
+  }
 
-    @Override
-    public String toString() {
-        return "TemperatureLoggingRequest{" +
-                "vId='" + vId + '\'' +
-                ", data=" + data +
-                '}';
-    }
+  @Override
+  public String toString() {
+    return "TemperatureLoggingRequest{" +
+        "vId='" + vId + '\'' +
+        ", data=" + data +
+        '}';
+  }
 }

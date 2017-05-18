@@ -32,27 +32,27 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class DeviceModel {
-    public String mdl;
+  public String mdl;
 
-    public String imei;
+  public String imei;
 
-    private String dVr;
+  private String dVr;
 
-    private String mVr;
+  private String mVr;
 
-    public String getdVr() {
-        return dVr;
-    }
+  public String getdVr() {
+    return dVr;
+  }
 
-    public void setdVr(String dVr) {
-        this.dVr = dVr;
-    }
+  public void setdVr(String dVr) {
+    this.dVr = dVr;
+  }
 
-    public String getmVr() {
-        return mVr;
-    }
+  public String getmVr() {
+    return mVr;
+  }
 
-    public void setmVr(String mVr) {
-        this.mVr = mVr;
-    }
+  public void setmVr(String mVr) {
+    this.mVr = mVr;
+  }
 }

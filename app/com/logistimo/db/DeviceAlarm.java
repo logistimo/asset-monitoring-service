@@ -23,102 +23,116 @@
 
 package com.logistimo.db;
 
-import play.db.jpa.JPA;
-
-import javax.persistence.*;
 import java.math.BigInteger;
 import java.util.List;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
+
+import play.db.jpa.JPA;
 
 @Entity
 @Table(name = "device_alarms")
 public class DeviceAlarm {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
-    public Long id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @Column(name = "id")
+  public Long id;
 
-    @Column(name = "type")
-    public int type;
+  @Column(name = "type")
+  public int type;
 
-    @Column(name = "status")
-    public int status;
+  @Column(name = "status")
+  public int status;
 
-    @Column(name = "time")
-    public int time;
+  @Column(name = "time")
+  public int time;
 
-    @Column(name = "error_code")
-    public String errorCode;
+  @Column(name = "error_code")
+  public String errorCode;
 
-    @Column(name = "error_message")
-    public String errorMessage;
+  @Column(name = "error_message")
+  public String errorMessage;
 
-    @Column(name = "power_availability")
-    public Integer powerAvailability;
+  @Column(name = "power_availability")
+  public Integer powerAvailability;
 
-    @ManyToOne
-    public Device device;
+  @ManyToOne
+  public Device device;
 
-    @Column(name = "sensor_id")
-    public String sensorId;
+  @Column(name = "sensor_id")
+  public String sensorId;
 
-    public DeviceAlarm() {
-        errorCode = "";
-        status = -1;
+  public DeviceAlarm() {
+    errorCode = "";
+    status = -1;
+  }
+
+  public static List<DeviceAlarm> getDeviceAlarms(Device device, int offset, int limit) {
+    return JPA.em()
+        .createQuery("from DeviceAlarm where device = ?1 order by time desc", DeviceAlarm.class)
+        .setParameter(1, device)
+        .setFirstResult(offset)
+        .setMaxResults(limit)
+        .getResultList();
+  }
+
+  public static int getDeviceAlarmCount(Device device) {
+    return new BigInteger(JPA.em()
+        .createNativeQuery("select count(1) from device_alarms where device_id = ?1")
+        .setParameter(1, device)
+        .getSingleResult().toString()).intValue();
+  }
+
+  public static List<DeviceAlarm> getAbnormal(List<Device> device) {
+    return JPA.em()
+        .createQuery("from DeviceAlarm where device in :inclList", DeviceAlarm.class)
+        .setParameter("inclList", device)
+        .getResultList();
+  }
+
+  public static List<DeviceAlarm> getRecentAlarmForDevice(Device device, int limit) {
+    if (limit > 0) {
+      return JPA.em()
+          .createNativeQuery(
+              "select * from device_alarms where device_id = ?1 order by type, device_id, time desc",
+              DeviceAlarm.class)
+          .setParameter(1, device)
+          .setMaxResults(limit)
+          .getResultList();
     }
-
-    public static List<DeviceAlarm> getDeviceAlarms(Device device, int offset, int limit) {
-        return JPA.em()
-                .createQuery("from DeviceAlarm where device = ?1 order by time desc", DeviceAlarm.class)
-                .setParameter(1, device)
-                .setFirstResult(offset)
-                .setMaxResults(limit)
-                .getResultList();
-    }
-
-    public static int getDeviceAlarmCount(Device device) {
-        return new BigInteger(JPA.em()
-                .createNativeQuery("select count(1) from device_alarms where device_id = ?1")
-                .setParameter(1, device)
-                .getSingleResult().toString()).intValue();
-    }
-
-    public static List<DeviceAlarm> getAbnormal(List<Device> device) {
-        return JPA.em()
-                .createQuery("from DeviceAlarm where device in :inclList", DeviceAlarm.class)
-                .setParameter("inclList", device)
-                .getResultList();
-    }
-
-    public static List<DeviceAlarm> getRecentAlarmForDevice(Device device, int limit) {
-        if(limit > 0){
-            return JPA.em()
-                    .createNativeQuery("select * from device_alarms where device_id = ?1 order by type, device_id, time desc", DeviceAlarm.class)
-                    .setParameter(1, device)
-                    .setMaxResults(limit)
-                    .getResultList();
-        }
-        return JPA.em()
-                .createNativeQuery("select * from device_alarms where device_id = ?1 order by type, device_id, time desc", DeviceAlarm.class)
-                .setParameter(1, device)
-                .getResultList();
-    }
+    return JPA.em()
+        .createNativeQuery(
+            "select * from device_alarms where device_id = ?1 order by type, device_id, time desc",
+            DeviceAlarm.class)
+        .setParameter(1, device)
+        .getResultList();
+  }
 
 
-    public static List<DeviceAlarm> getRecentAlarmForDevices(List<Device> deviceList) {
-        return JPA.em()
-                .createNativeQuery("select da.* from device_alarms da JOIN (select device_id, type, max(time) as latestDateTime from device_alarms where device_id in :inclList and type != 3 group by device_id, type) groupda on da.device_id = groupda.device_id and da.type = groupda.type and da.time = groupda.latestDateTime order by da.device_id", DeviceAlarm.class)
-                .setParameter("inclList", deviceList)
-                .getResultList();
-    }
+  public static List<DeviceAlarm> getRecentAlarmForDevices(List<Device> deviceList) {
+    return JPA.em()
+        .createNativeQuery(
+            "select da.* from device_alarms da JOIN (select device_id, type, max(time) as latestDateTime from device_alarms where device_id in :inclList and type != 3 group by device_id, type) groupda on da.device_id = groupda.device_id and da.type = groupda.type and da.time = groupda.latestDateTime order by da.device_id",
+            DeviceAlarm.class)
+        .setParameter("inclList", deviceList)
+        .getResultList();
+  }
 
-    public static int getAbnormalAlarmCountForDevices(List<Device> deviceList) {
-        return new BigInteger(JPA.em()
-                .createNativeQuery("select count(1) from (select distinct da.device_id from device_alarms da JOIN (select device_id, type, max(time) as latestDateTime from device_alarms where device_id in :inclList and type != 3 group by device_id, type) groupda on da.device_id = groupda.device_id and da.type = groupda.type and da.time = groupda.latestDateTime where status > 0) final")
-                .setParameter("inclList", deviceList)
-                .getSingleResult().toString()).intValue();
-    }
+  public static int getAbnormalAlarmCountForDevices(List<Device> deviceList) {
+    return new BigInteger(JPA.em()
+        .createNativeQuery(
+            "select count(1) from (select distinct da.device_id from device_alarms da JOIN (select device_id, type, max(time) as latestDateTime from device_alarms where device_id in :inclList and type != 3 group by device_id, type) groupda on da.device_id = groupda.device_id and da.type = groupda.type and da.time = groupda.latestDateTime where status > 0) final")
+        .setParameter("inclList", deviceList)
+        .getSingleResult().toString()).intValue();
+  }
 
-    public void save() {
-        JPA.em().persist(this);
-    }
+  public void save() {
+    JPA.em().persist(this);
+  }
 }

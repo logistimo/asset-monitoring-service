@@ -25,7 +25,6 @@ package com.logistimo.models.device.common;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import org.hibernate.validator.constraints.NotEmpty;
 
 /**
  * Created by kaniyarasu on 10/10/14.
@@ -33,7 +32,7 @@ import org.hibernate.validator.constraints.NotEmpty;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class DeviceReadySim {
-    public String sid;
+  public String sid;
 
-    public String phn;
+  public String phn;
 }

@@ -27,13 +27,15 @@ package com.logistimo.models.task;
  * Created by kaniyarasu on 11/08/15.
  */
 public enum TaskType {
-    BACKGROUND_TASK(0), DATA_LOGGER_TASK(1);
+  BACKGROUND_TASK(0), DATA_LOGGER_TASK(1);
 
-    private final int value;
+  private final int value;
 
-    TaskType(int value) {
-        this.value = value;
-    }
+  TaskType(int value) {
+    this.value = value;
+  }
 
-    public int getValue() { return value; }
+  public int getValue() {
+    return value;
+  }
 }

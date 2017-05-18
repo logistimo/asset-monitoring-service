@@ -27,62 +27,62 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 
 @JsonInclude(JsonInclude.Include.NON_DEFAULT)
 public class AlarmResponse {
-    public int typ = -1;
+  public int typ = -1;
 
-    public int stat = -1;
+  public int stat = -1;
 
-    public int time = 0;
+  public int time = 0;
 
-    public String code = "-1";
+  public String code = "-1";
 
-    public String msg;
+  public String msg;
 
-    public Integer avl;
+  public Integer avl;
 
-    private String sId = null;
+  private String sId = null;
 
-    private Integer mpId = null;
+  private Integer mpId = null;
 
-    public AlarmResponse() {
-    }
+  public AlarmResponse() {
+  }
 
-    public AlarmResponse(int typ, int stat,  String code, String sId) {
-        this.typ = typ;
-        this.stat = stat;
-        this.code = code;
-        this.sId = sId;
-    }
+  public AlarmResponse(int typ, int stat, String code, String sId) {
+    this.typ = typ;
+    this.stat = stat;
+    this.code = code;
+    this.sId = sId;
+  }
 
-    public AlarmResponse(int typ, int stat, int time, String code, String msg){
-        this.typ = typ;
-        this.stat = stat;
-        this.time = time;
-        this.code = code;
-        this.msg = msg;
-    }
+  public AlarmResponse(int typ, int stat, int time, String code, String msg) {
+    this.typ = typ;
+    this.stat = stat;
+    this.time = time;
+    this.code = code;
+    this.msg = msg;
+  }
 
-    public AlarmResponse(int typ, int stat, int time, String code, String msg, String sId) {
-        this.typ = typ;
-        this.stat = stat;
-        this.time = time;
-        this.code = code;
-        this.msg = msg;
-        this.sId = sId;
-    }
+  public AlarmResponse(int typ, int stat, int time, String code, String msg, String sId) {
+    this.typ = typ;
+    this.stat = stat;
+    this.time = time;
+    this.code = code;
+    this.msg = msg;
+    this.sId = sId;
+  }
 
-    public String getsId() {
-        return sId;
-    }
+  public String getsId() {
+    return sId;
+  }
 
-    public void setsId(String sId) {
-        this.sId = sId;
-    }
+  public void setsId(String sId) {
+    this.sId = sId;
+  }
 
-    public Integer getMpId() {
-        return mpId;
-    }
+  public Integer getMpId() {
+    return mpId;
+  }
 
-    public void setMpId(Integer mpId) {
-        this.mpId = mpId;
-    }
+  public void setMpId(Integer mpId) {
+    this.mpId = mpId;
+  }
 }

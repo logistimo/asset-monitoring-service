@@ -27,9 +27,9 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class TaggedDeviceReadingResponse {
-    public String deviceId;
+  public String deviceId;
 
-    public String vendorId;
+  public String vendorId;
 
-    public TemperatureResponse temperature;
+  public TemperatureResponse temperature;
 }

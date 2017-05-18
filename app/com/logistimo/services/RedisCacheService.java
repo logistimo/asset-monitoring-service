@@ -24,7 +24,20 @@
 package com.logistimo.services;
 
 import com.logistimo.utils.LogistimoConstant;
+
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
+
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
+
 import play.Logger;
 import play.Play;
 import redis.clients.jedis.Jedis;
@@ -36,251 +49,252 @@ import redis.clients.jedis.ZParams;
 import redis.clients.util.Pool;
 import redis.clients.util.SafeEncoder;
 
-import java.io.*;
-import java.util.*;
-
 /**
  * Created by kaniyarasu on 13/04/17.
  */
 public class RedisCacheService extends ServiceImpl {
 
-    private static final byte[] NX = "NX".getBytes();
-    private static final byte[] EX = "EX".getBytes();
-    private static final byte[]
-            DOUBLE_LOCK_SCRIPT =
-            "if redis.call('get',KEYS[1]) == false then if redis.call('get',KEYS[2]) == false  then redis.call('setex',KEYS[1],30,ARGV[1]) redis.call('setex',KEYS[2],30,ARGV[2]) return 1 else return 0 end else return 0 end"
-                    .getBytes();
-    private static final String DELETE_SCRIPT_IN_LUA = "local keys = redis.call('keys', '%s')" +
-            "  for i,k in ipairs(keys) do" +
-            "    local res = redis.call('del', k)" +
-            "  end";
-    private static final Logger.ALogger LOGGER = Logger.of(RedisCacheService.class);
+  private static final byte[] NX = "NX".getBytes();
+  private static final byte[] EX = "EX".getBytes();
+  private static final byte[]
+      DOUBLE_LOCK_SCRIPT =
+      "if redis.call('get',KEYS[1]) == false then if redis.call('get',KEYS[2]) == false  then redis.call('setex',KEYS[1],30,ARGV[1]) redis.call('setex',KEYS[2],30,ARGV[2]) return 1 else return 0 end else return 0 end"
+          .getBytes();
+  private static final String DELETE_SCRIPT_IN_LUA = "local keys = redis.call('keys', '%s')" +
+      "  for i,k in ipairs(keys) do" +
+      "    local res = redis.call('del', k)" +
+      "  end";
+  private static final Logger.ALogger LOGGER = Logger.of(RedisCacheService.class);
 
-    private static byte[] MIN_INF = SafeEncoder.encode("-inf");
-    private static byte[] MAX_INF = SafeEncoder.encode("+inf");
-    private final int expiry;
-    Pool<Jedis> pool = null;
+  private static byte[] MIN_INF = SafeEncoder.encode("-inf");
+  private static byte[] MAX_INF = SafeEncoder.encode("+inf");
+  private final int expiry;
+  Pool<Jedis> pool = null;
 
-    public RedisCacheService() {
-        List<String> sentinelsStr = Play.application().configuration().getStringList("redis.sentinels");
-        if (sentinelsStr != null && sentinelsStr.size() > 0) {
-            Set<String> sentinels = new LinkedHashSet<>();
-            sentinels.addAll(sentinelsStr);
-            pool = new JedisSentinelPool("mymaster", sentinels, new GenericObjectPoolConfig(), 5000, null, 0);
-        } else {
-            pool = new JedisPool(new JedisPoolConfig(), Play.application().configuration().getString("redis.server.url", "localhost"),
-                            Play.application().configuration().getInt("redis.server.port", 6379), 5000, null, 0);
-        }
-        expiry = Play.application().configuration().getInt("cache.expiry", 84400);
+  public RedisCacheService() {
+    List<String> sentinelsStr = Play.application().configuration().getStringList("redis.sentinels");
+    if (sentinelsStr != null && sentinelsStr.size() > 0) {
+      Set<String> sentinels = new LinkedHashSet<>();
+      sentinels.addAll(sentinelsStr);
+      pool =
+          new JedisSentinelPool("mymaster", sentinels, new GenericObjectPoolConfig(), 5000, null,
+              0);
+    } else {
+      pool =
+          new JedisPool(new JedisPoolConfig(),
+              Play.application().configuration().getString("redis.server.url", "localhost"),
+              Play.application().configuration().getInt("redis.server.port", 6379), 5000, null, 0);
     }
+    expiry = Play.application().configuration().getInt("cache.expiry", 84400);
+  }
 
-    public Object get(String cacheKey) {
-        Jedis jedis = null;
-        Object value = null;
+  public Object get(String cacheKey) {
+    Jedis jedis = null;
+    Object value = null;
+    try {
+      jedis = pool.getResource();
+      value = getObject(jedis.get(cacheKey.getBytes()));
+      pool.returnResource(jedis);
+    } catch (Exception e) {
+      LOGGER.warn("Failed to get key from cache {0}", cacheKey, e);
+      pool.returnBrokenResource(jedis);
+    }
+    return value;
+  }
+
+  public void put(String cacheKey, Object obj) {
+    put(cacheKey, obj, expiry);
+  }
+
+  public void put(String cacheKey, Object obj, int expiry) {
+    Jedis jedis = null;
+    try {
+      jedis = pool.getResource();
+      jedis.setex(cacheKey.getBytes(), expiry, getBytes(obj));
+      pool.returnResource(jedis);
+    } catch (Exception e) {
+      LOGGER.warn("Failed to put key in cache {0}", cacheKey, e);
+      pool.returnBrokenResource(jedis);
+    }
+  }
+
+  public boolean putIfNotExist(String cacheKey, Object obj) {
+    Jedis jedis = null;
+    try {
+      jedis = pool.getResource();
+      String status = jedis.set(cacheKey.getBytes(), getBytes(obj), NX, EX, 30);
+      pool.returnResource(jedis);
+      return LogistimoConstant.OK.equals(status);
+    } catch (Exception e) {
+      LOGGER.warn("Failed to put key in cache {0}", cacheKey, e);
+      pool.returnBrokenResource(jedis);
+    }
+    return false;
+  }
+
+  private byte[] getBytes(Object obj) throws IOException {
+    ByteArrayOutputStream bos = new ByteArrayOutputStream();
+    ObjectOutputStream outputStream;
+    outputStream = new ObjectOutputStream(bos);
+    outputStream.writeObject(obj);
+    return bos.toByteArray();
+
+  }
+
+  public boolean putMultiIfNotExists(String cacheKey1, Object obj1, String cacheKey2, Object obj2) {
+    Jedis jedis = null;
+    try {
+      jedis = pool.getResource();
+      List<byte[]> keys = new ArrayList<>(2);
+      keys.add(cacheKey1.getBytes());
+      keys.add(cacheKey2.getBytes());
+      List<byte[]> args = new ArrayList<>(2);
+      args.add(getBytes(obj1));
+      args.add(getBytes(obj2));
+      Long response = (Long) jedis.eval(DOUBLE_LOCK_SCRIPT, keys, args);
+      pool.returnResource(jedis);
+      return response == 1;
+    } catch (Exception e) {
+      LOGGER.warn("Failed to put key in cache {0}", cacheKey1, e);
+      pool.returnBrokenResource(jedis);
+    }
+    return false;
+  }
+
+  private Object getObject(byte[] bytes) throws IOException {
+    Object o = null;
+    if (bytes != null) {
+      ByteArrayInputStream bis = new ByteArrayInputStream(bytes);
+      ObjectInput in = null;
+
+      try {
+        in = new ObjectInputStream(bis);
+        o = in.readObject();
+      } catch (ClassNotFoundException e) {
+        LOGGER.warn("Failed to convert object", e);
+        throw new IOException(e);
+      } catch (IOException e) {
+        LOGGER.warn("Failed to convert object", e);
+        throw new IOException(e);
+      } finally {
         try {
-            jedis = pool.getResource();
-            value = getObject(jedis.get(cacheKey.getBytes()));
-            pool.returnResource(jedis);
-        } catch (Exception e) {
-            LOGGER.warn("Failed to get key from cache {0}", cacheKey, e);
-            pool.returnBrokenResource(jedis);
+          bis.close();
+        } catch (IOException ex) {
+          // ignore close exception
+          LOGGER.warn("Exception while trying to close bis", ex);
         }
-        return value;
-    }
-
-    public void put(String cacheKey, Object obj) {
-        put(cacheKey, obj, expiry);
-    }
-
-    public void put(String cacheKey, Object obj, int expiry) {
-        Jedis jedis = null;
         try {
-            jedis = pool.getResource();
-            jedis.setex(cacheKey.getBytes(), expiry, getBytes(obj));
-            pool.returnResource(jedis);
-        } catch (Exception e) {
-            LOGGER.warn("Failed to put key in cache {0}", cacheKey, e);
-            pool.returnBrokenResource(jedis);
+          if (in != null) {
+            in.close();
+          }
+        } catch (IOException ex) {
+          // ignore close exception
+          LOGGER.warn("Exception while trying to close in", ex);
         }
+      }
     }
+    return o;
+  }
 
-    public boolean putIfNotExist(String cacheKey, Object obj) {
-        Jedis jedis = null;
-        try {
-            jedis = pool.getResource();
-            String status = jedis.set(cacheKey.getBytes(), getBytes(obj), NX, EX, 30);
-            pool.returnResource(jedis);
-            return LogistimoConstant.OK.equals(status);
-        } catch (Exception e) {
-            LOGGER.warn("Failed to put key in cache {0}", cacheKey, e);
-            pool.returnBrokenResource(jedis);
-        }
-        return false;
+  public boolean delete(String key) {
+    Jedis jedis = null;
+    long retVal = 0;
+    try {
+      jedis = pool.getResource();
+      retVal = jedis.del(key);
+      pool.returnResource(jedis);
+    } catch (Exception e) {
+      LOGGER.warn("Failed to delete key from cache {0}", key, e);
+      pool.returnBrokenResource(jedis);
     }
+    return retVal >= 1;
+  }
 
-    private byte[] getBytes(Object obj) throws IOException {
-        ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        ObjectOutputStream outputStream;
-        outputStream = new ObjectOutputStream(bos);
-        outputStream.writeObject(obj);
-        return bos.toByteArray();
 
+  public void deleteByPattern(String pattern) {
+    Jedis jedis = null;
+    try {
+      jedis = pool.getResource();
+      jedis.eval(String.format(DELETE_SCRIPT_IN_LUA, pattern));
+      pool.returnResource(jedis);
+    } catch (Exception e) {
+      LOGGER.warn("Failed to delete multiple pattern from cache {0}", pattern, e);
+      pool.returnBrokenResource(jedis);
     }
+  }
 
-    public boolean putMultiIfNotExists(String cacheKey1, Object obj1, String cacheKey2, Object obj2) {
-        Jedis jedis = null;
-        try {
-            jedis = pool.getResource();
-            List<byte[]> keys = new ArrayList<>(2);
-            keys.add(cacheKey1.getBytes());
-            keys.add(cacheKey2.getBytes());
-            List<byte[]> args = new ArrayList<>(2);
-            args.add(getBytes(obj1));
-            args.add(getBytes(obj2));
-            Long response = (Long) jedis.eval(DOUBLE_LOCK_SCRIPT, keys, args);
-            pool.returnResource(jedis);
-            return response == 1;
-        } catch (Exception e) {
-            LOGGER.warn("Failed to put key in cache {0}", cacheKey1, e);
-            pool.returnBrokenResource(jedis);
-        }
-        return false;
+  public boolean deleteMulti(String... keys) {
+    Jedis jedis = null;
+    try {
+      jedis = pool.getResource();
+      Transaction trans = jedis.multi();
+      for (String key : keys) {
+        trans.del(key.getBytes());
+      }
+      trans.exec();
+      pool.returnResource(jedis);
+    } catch (Exception e) {
+      LOGGER.warn("Failed to delete key from cache {0}", keys, e);
+      pool.returnBrokenResource(jedis);
+      return false;
     }
+    return true;
+  }
 
-    private Object getObject(byte[] bytes) throws IOException {
-        Object o = null;
-        if (bytes != null) {
-            ByteArrayInputStream bis = new ByteArrayInputStream(bytes);
-            ObjectInput in = null;
+  public void close() {
+    pool.close();
+  }
 
-            try {
-                in = new ObjectInputStream(bis);
-                o = in.readObject();
-            } catch (ClassNotFoundException e) {
-                LOGGER.warn("Failed to convert object", e);
-                throw new IOException(e);
-            } catch (IOException e) {
-                LOGGER.warn("Failed to convert object", e);
-                throw new IOException(e);
-            } finally {
-                try {
-                    bis.close();
-                } catch (IOException ex) {
-                    // ignore close exception
-                    LOGGER.warn("Exception while trying to close bis", ex);
-                }
-                try {
-                    if (in != null) {
-                        in.close();
-                    }
-                } catch (IOException ex) {
-                    // ignore close exception
-                    LOGGER.warn("Exception while trying to close in", ex);
-                }
-            }
-        }
-        return o;
+  public void zadd(String key, long score, String member) {
+    Jedis jedis = null;
+    try {
+      jedis = pool.getResource();
+      jedis.zadd(key, score, member);
+      pool.returnResource(jedis);
+    } catch (Exception e) {
+      LOGGER.warn("Failed to zadd key from cache {0}:{1}:{2}", key, score, member, e);
+      pool.returnBrokenResource(jedis);
+      throw e;
     }
+  }
 
-    public boolean delete(String key) {
-        Jedis jedis = null;
-        long retVal = 0;
-        try {
-            jedis = pool.getResource();
-            retVal = jedis.del(key);
-            pool.returnResource(jedis);
-        } catch (Exception e) {
-            LOGGER.warn("Failed to delete key from cache {0}", key, e);
-            pool.returnBrokenResource(jedis);
-        }
-        return retVal >= 1;
+  public Set<String> getAndRemZRange(String key, long score) {
+    Jedis jedis = null;
+    try {
+      jedis = pool.getResource();
+      Transaction trans = jedis.multi();
+      trans.zrangeByScore(key.getBytes(), MIN_INF, SafeEncoder.encode(String.valueOf(score)));
+      trans.zremrangeByScore(key.getBytes(), MIN_INF, SafeEncoder.encode(String.valueOf(score)));
+      List<Object> response = trans.exec();
+      Set<byte[]> data = (Set<byte[]>) response.get(0);
+      Set<String> members = new LinkedHashSet<>(data.size());
+      for (byte[] d : data) {
+        members.add(new String(d));
+      }
+      pool.returnResource(jedis);
+      return members;
+    } catch (Exception e) {
+      LOGGER.warn("Failed to get zrem keys from cache {0}:{1}", key, score, e);
+      pool.returnBrokenResource(jedis);
+      throw e;
     }
+  }
 
-
-    public void deleteByPattern(String pattern) {
-        Jedis jedis = null;
-        try {
-            jedis = pool.getResource();
-            jedis.eval(String.format(DELETE_SCRIPT_IN_LUA, pattern));
-            pool.returnResource(jedis);
-        } catch (Exception e) {
-            LOGGER.warn("Failed to delete multiple pattern from cache {0}", pattern, e);
-            pool.returnBrokenResource(jedis);
-        }
+  public void moveZRange(String currentKey, String destKey) {
+    Jedis jedis = null;
+    try {
+      jedis = pool.getResource();
+      ZParams zParams = new ZParams();
+      zParams.aggregate(ZParams.Aggregate.MIN);
+      Long count = jedis.zunionstore(destKey, zParams, currentKey, destKey);
+      Long removedCount = jedis.zremrangeByScore(currentKey.getBytes(), MIN_INF, MAX_INF);
+      LOGGER.info("{0} tasks in default queue", count);
+      LOGGER.info("Moved {0} tasks to default queue", removedCount);
+      pool.returnResource(jedis);
+    } catch (Exception e) {
+      LOGGER.error("Failed to get zunion keys from cache {0}:{1}", currentKey, destKey, e);
+      pool.returnBrokenResource(jedis);
+      throw e;
     }
-
-    public boolean deleteMulti(String... keys) {
-        Jedis jedis = null;
-        try {
-            jedis = pool.getResource();
-            Transaction trans = jedis.multi();
-            for (String key : keys) {
-                trans.del(key.getBytes());
-            }
-            trans.exec();
-            pool.returnResource(jedis);
-        } catch (Exception e) {
-            LOGGER.warn("Failed to delete key from cache {0}", keys, e);
-            pool.returnBrokenResource(jedis);
-            return false;
-        }
-        return true;
-    }
-
-    public void close() {
-        pool.close();
-    }
-
-    public void zadd(String key, long score, String member) {
-        Jedis jedis = null;
-        try {
-            jedis = pool.getResource();
-            jedis.zadd(key, score, member);
-            pool.returnResource(jedis);
-        } catch (Exception e) {
-            LOGGER.warn("Failed to zadd key from cache {0}:{1}:{2}", key, score, member, e);
-            pool.returnBrokenResource(jedis);
-            throw e;
-        }
-    }
-
-    public Set<String> getAndRemZRange(String key, long score) {
-        Jedis jedis = null;
-        try {
-            jedis = pool.getResource();
-            Transaction trans = jedis.multi();
-            trans.zrangeByScore(key.getBytes(), MIN_INF, SafeEncoder.encode(String.valueOf(score)));
-            trans.zremrangeByScore(key.getBytes(), MIN_INF, SafeEncoder.encode(String.valueOf(score)));
-            List<Object> response = trans.exec();
-            Set<byte[]> data = (Set<byte[]>) response.get(0);
-            Set<String> members = new LinkedHashSet<>(data.size());
-            for (byte[] d : data) {
-                members.add(new String(d));
-            }
-            pool.returnResource(jedis);
-            return members;
-        } catch (Exception e) {
-            LOGGER.warn("Failed to get zrem keys from cache {0}:{1}", key, score, e);
-            pool.returnBrokenResource(jedis);
-            throw e;
-        }
-    }
-
-    public void moveZRange(String currentKey, String destKey) {
-        Jedis jedis = null;
-        try {
-            jedis = pool.getResource();
-            ZParams zParams = new ZParams();
-            zParams.aggregate(ZParams.Aggregate.MIN);
-            Long count = jedis.zunionstore(destKey, zParams, currentKey, destKey);
-            Long removedCount = jedis.zremrangeByScore(currentKey.getBytes(), MIN_INF, MAX_INF);
-            LOGGER.info("{0} tasks in default queue", count);
-            LOGGER.info("Moved {0} tasks to default queue", removedCount);
-            pool.returnResource(jedis);
-        } catch (Exception e) {
-            LOGGER.error("Failed to get zunion keys from cache {0}:{1}", currentKey, destKey, e);
-            pool.returnBrokenResource(jedis);
-            throw e;
-        }
-    }
+  }
 }

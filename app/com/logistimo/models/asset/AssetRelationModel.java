@@ -32,9 +32,9 @@ import java.util.List;
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AssetRelationModel {
-    public String vId;
+  public String vId;
 
-    public String dId;
+  public String dId;
 
-    public List<AssetMapModel> ras;
+  public List<AssetMapModel> ras;
 }

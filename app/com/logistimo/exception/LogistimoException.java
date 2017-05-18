@@ -27,28 +27,28 @@ package com.logistimo.exception;
  * Created by kaniyarasu on 27/10/14.
  */
 public class LogistimoException extends Exception {
-    private String message = null;
+  private String message = null;
 
-    public LogistimoException() {
-        super();
-    }
+  public LogistimoException() {
+    super();
+  }
 
-    public LogistimoException(String message) {
-        super(message);
-        this.message = message;
-    }
+  public LogistimoException(String message) {
+    super(message);
+    this.message = message;
+  }
 
-    public LogistimoException(Throwable cause) {
-        super(cause);
-    }
+  public LogistimoException(Throwable cause) {
+    super(cause);
+  }
 
-    @Override
-    public String toString() {
-        return message;
-    }
+  @Override
+  public String toString() {
+    return message;
+  }
 
-    @Override
-    public String getMessage() {
-        return message;
-    }
+  @Override
+  public String getMessage() {
+    return message;
+  }
 }

@@ -23,62 +23,74 @@
 
 package com.logistimo.db;
 
-import play.db.jpa.JPA;
-import javax.persistence.*;
 import java.util.List;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
+
+import play.db.jpa.JPA;
+
 /**
  * Created by kaniyarasu on 28/10/15.
  */
 @Entity
 @Table(name = "asset_user")
 public class AssetUser {
-    public static Integer ASSET_OWNER = 0;
-    public static Integer ASSET_MAINTAINER = 1;
+  public static Integer ASSET_OWNER = 0;
+  public static Integer ASSET_MAINTAINER = 1;
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(name = "id")
-    public Long id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.AUTO)
+  @Column(name = "id")
+  public Long id;
 
-    @Column(name = "user_name")
-    public String userName;
+  @Column(name = "user_name")
+  public String userName;
 
-    @Column(name = "user_type")
-    public Integer userType;
+  @Column(name = "user_type")
+  public Integer userType;
 
-    @ManyToOne
-    public Device device;
+  @ManyToOne
+  public Device device;
 
-    public static List<AssetUser> getAssetUser(Device device){
-        return JPA.em().createQuery("from AssetUser where device = ?1", AssetUser.class)
-                .setParameter(1, device)
-                .getResultList();
-    }
+  public static List<AssetUser> getAssetUser(Device device) {
+    return JPA.em().createQuery("from AssetUser where device = ?1", AssetUser.class)
+        .setParameter(1, device)
+        .getResultList();
+  }
 
-    public static AssetUser getAssetUser(Device device, String userName, Integer assetUserType){
-        return JPA.em().createQuery("from AssetUser where device = ?1 and userName = ?2 and userType = ?3", AssetUser.class)
-                .setParameter(1, device)
-                .setParameter(2, userName)
-                .setParameter(3, assetUserType)
-                .getSingleResult();
-    }
+  public static AssetUser getAssetUser(Device device, String userName, Integer assetUserType) {
+    return JPA.em()
+        .createQuery("from AssetUser where device = ?1 and userName = ?2 and userType = ?3",
+            AssetUser.class)
+        .setParameter(1, device)
+        .setParameter(2, userName)
+        .setParameter(3, assetUserType)
+        .getSingleResult();
+  }
 
-    public static List<AssetUser> getAssetUser(Device device, Integer userType){
-        return JPA.em().createQuery("from AssetUser where device = ?1 and userType = ?2", AssetUser.class)
-                .setParameter(1, device)
-                .setParameter(2, userType)
-                .getResultList();
-    }
+  public static List<AssetUser> getAssetUser(Device device, Integer userType) {
+    return JPA.em()
+        .createQuery("from AssetUser where device = ?1 and userType = ?2", AssetUser.class)
+        .setParameter(1, device)
+        .setParameter(2, userType)
+        .getResultList();
+  }
 
-    public void save() {
-        JPA.em().persist(this);
-    }
+  public void save() {
+    JPA.em().persist(this);
+  }
 
-    public void update() {
-        JPA.em().merge(this);
-    }
+  public void update() {
+    JPA.em().merge(this);
+  }
 
-    public void delete() {
-        JPA.em().remove(this);
-    }
+  public void delete() {
+    JPA.em().remove(this);
+  }
 }

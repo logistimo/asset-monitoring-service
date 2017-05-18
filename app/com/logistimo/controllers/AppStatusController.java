@@ -23,12 +23,12 @@
 
 package com.logistimo.controllers;
 
+import java.io.File;
+
 import play.Logger;
 import play.Play;
 import play.db.jpa.Transactional;
 import play.mvc.Result;
-
-import java.io.File;
 
 import static com.logistimo.controllers.BaseController.prepareResult;
 import static play.mvc.Http.Status.OK;
@@ -38,17 +38,17 @@ import static play.mvc.Http.Status.SERVICE_UNAVAILABLE;
  * @author Smriti on 6/30/16.
  */
 public class AppStatusController {
-    private final static Logger.ALogger aLogger = Logger.of(AppStatusController.class);
+  private final static Logger.ALogger aLogger = Logger.of(AppStatusController.class);
 
-    @Transactional(readOnly = true)
-    public static Result getAppStatus() {
-      try {
-          if (new File(Play.application().configuration().getString("status.path")).exists()) {
-              return prepareResult(OK, null, (String) null);
-          }
-      } catch(Exception e) {
-          aLogger.warn("Error in getting status of file: {0}",e);
+  @Transactional(readOnly = true)
+  public static Result getAppStatus() {
+    try {
+      if (new File(Play.application().configuration().getString("status.path")).exists()) {
+        return prepareResult(OK, null, (String) null);
       }
-        return prepareResult(SERVICE_UNAVAILABLE, null, (String) null);
+    } catch (Exception e) {
+      aLogger.warn("Error in getting status of file: {0}", e);
     }
+    return prepareResult(SERVICE_UNAVAILABLE, null, (String) null);
+  }
 }

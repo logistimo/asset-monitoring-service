@@ -27,56 +27,58 @@ import com.logistimo.exception.LogistimoException;
 import com.logistimo.models.asset.AssetRegistrationModel;
 import com.logistimo.services.AssetService;
 import com.logistimo.services.ServiceFactory;
+
+import javax.persistence.NoResultException;
+
 import play.Logger;
+import play.db.jpa.Transactional;
 import play.libs.Json;
 import play.mvc.Result;
 import play.mvc.With;
 
-import javax.persistence.NoResultException;
-import play.db.jpa.Transactional;
-
 /**
  * Created by kaniyarasu on 22/09/15.
  */
-public class AssetController extends BaseController{
-    private final static Logger.ALogger LOGGER = Logger.of(AssetController.class);
-    private static final AssetService assetService = ServiceFactory.getService(AssetService.class);
+public class AssetController extends BaseController {
+  private final static Logger.ALogger LOGGER = Logger.of(AssetController.class);
+  private static final AssetService assetService = ServiceFactory.getService(AssetService.class);
 
-    @Transactional
-    @With(SecuredAction.class)
-    public static Result createAsset(String callback){
-        AssetRegistrationModel assetRegistrationModel;
-        try{
-            assetRegistrationModel = getValidatedObject(request().body().asJson(), AssetRegistrationModel.class);
-        } catch (LogistimoException e) {
-            //TODO
-            return prepareResult(BAD_REQUEST, callback, "Error parsing the request" + e.getMessage());
-        }
-
-        try {
-            assetService.createOrUpdateAssets(assetRegistrationModel);
-            return prepareResult(CREATED, callback, "Asset created successfully.");
-        } catch (NoResultException e) {
-            LOGGER.warn("Error while creating asset", e);
-            return prepareResult(NOT_FOUND, callback, e.getMessage());
-        } catch (Exception e) {
-            LOGGER.error("Error while creating asset", e);
-            return prepareResult(INTERNAL_SERVER_ERROR, callback, e.getMessage());
-        }
+  @Transactional
+  @With(SecuredAction.class)
+  public static Result createAsset(String callback) {
+    AssetRegistrationModel assetRegistrationModel;
+    try {
+      assetRegistrationModel =
+          getValidatedObject(request().body().asJson(), AssetRegistrationModel.class);
+    } catch (LogistimoException e) {
+      //TODO
+      return prepareResult(BAD_REQUEST, callback, "Error parsing the request" + e.getMessage());
     }
 
-    @Transactional(readOnly = true)
-    @With(SecuredAction.class)
-    public static Result getAsset(String mancId, String assetId, String callback) {
-        try {
-            assetId = decodeParameter(assetId);
-            return prepareResult(OK, callback, Json.toJson(assetService.getAsset(mancId, assetId)));
-        } catch (NoResultException e){
-            LOGGER.warn("Asset not found : {}, {}", mancId, assetId);
-            return prepareResult(NOT_FOUND, callback, "Asset not found.");
-        }catch (Exception e) {
-            LOGGER.error("Error while generating stats by device", e);
-            return prepareResult(INTERNAL_SERVER_ERROR, callback, e.getMessage());
-        }
+    try {
+      assetService.createOrUpdateAssets(assetRegistrationModel);
+      return prepareResult(CREATED, callback, "Asset created successfully.");
+    } catch (NoResultException e) {
+      LOGGER.warn("Error while creating asset", e);
+      return prepareResult(NOT_FOUND, callback, e.getMessage());
+    } catch (Exception e) {
+      LOGGER.error("Error while creating asset", e);
+      return prepareResult(INTERNAL_SERVER_ERROR, callback, e.getMessage());
     }
+  }
+
+  @Transactional(readOnly = true)
+  @With(SecuredAction.class)
+  public static Result getAsset(String mancId, String assetId, String callback) {
+    try {
+      assetId = decodeParameter(assetId);
+      return prepareResult(OK, callback, Json.toJson(assetService.getAsset(mancId, assetId)));
+    } catch (NoResultException e) {
+      LOGGER.warn("Asset not found : {}, {}", mancId, assetId);
+      return prepareResult(NOT_FOUND, callback, "Asset not found.");
+    } catch (Exception e) {
+      LOGGER.error("Error while generating stats by device", e);
+      return prepareResult(INTERNAL_SERVER_ERROR, callback, e.getMessage());
+    }
+  }
 }

@@ -30,43 +30,43 @@ import java.util.List;
  * Created by kaniyarasu on 27/10/14.
  */
 public interface LogistimoConstant {
-    String VALIDATION_CONFIG_SMSGYPH_NOTFOUND = "validation.config.smsGyPh.not_found";
+  String VALIDATION_CONFIG_SMSGYPH_NOTFOUND = "validation.config.smsGyPh.not_found";
 
-    //Global message variables
-    String REQUEST_INVALID_CONTENT_TYPE = "request.invalid.content_type";
-    String REQUEST_EMPTY_CONTENT_TYPE = "request.empty.content_type";
+  //Global message variables
+  String REQUEST_INVALID_CONTENT_TYPE = "request.invalid.content_type";
+  String REQUEST_EMPTY_CONTENT_TYPE = "request.empty.content_type";
 
-    //Devices
-    String DEVICES_NOT_FOUND = "device.not_found";
+  //Devices
+  String DEVICES_NOT_FOUND = "device.not_found";
 
-    //Character Constants
-    String SLASH = "/";
-    String QUESTION = "?";
-    String AMPERSAND = "&";
-    String SPACE = " ";
-    String PARAN_OPEN = "(";
-    String PARAN_CLOSE = ")";
-    String COMMA = ",";
+  //Character Constants
+  String SLASH = "/";
+  String QUESTION = "?";
+  String AMPERSAND = "&";
+  String SPACE = " ";
+  String PARAN_OPEN = "(";
+  String PARAN_CLOSE = ")";
+  String COMMA = ",";
 
-    //SMS Service Constants
-    String COUNTRY_CODE_PARAM = "%country%";
-    String PHONE_PARAM = "%phone%";
-    String VENDOR_ID_PARAM = "%vid%";
-    String DEVICE_ID_PARAM = "%did%";
-    String DEFAULT_COUNTRY_CODE = "IN";
-    String SUPPORT_VENDOR_SEP = COMMA;
+  //SMS Service Constants
+  String COUNTRY_CODE_PARAM = "%country%";
+  String PHONE_PARAM = "%phone%";
+  String VENDOR_ID_PARAM = "%vid%";
+  String DEVICE_ID_PARAM = "%did%";
+  String DEFAULT_COUNTRY_CODE = "IN";
+  String SUPPORT_VENDOR_SEP = COMMA;
 
-    //Asset relation types
-    Integer CONTAINS = 1;
-    Integer MONITORED_BY = 2;
+  //Asset relation types
+  Integer CONTAINS = 1;
+  Integer MONITORED_BY = 2;
 
-    List<Integer> FRIDGE_MONITORING_POINTS = new ArrayList<Integer>(){{
-        add(1);
-        add(2);
-        add(3);
-        add(4);
-    }};
-    String EMPTY = "";
-    String OK = "OK";
-    String DEVICE_LOCK = "DEVICE";
+  List<Integer> FRIDGE_MONITORING_POINTS = new ArrayList<Integer>() {{
+    add(1);
+    add(2);
+    add(3);
+    add(4);
+  }};
+  String EMPTY = "";
+  String OK = "OK";
+  String DEVICE_LOCK = "DEVICE";
 }

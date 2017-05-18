@@ -30,19 +30,19 @@ import java.util.List;
  * Created by kaniyarasu on 31/10/14.
  */
 public class DeviceReadyUpdateResponse {
-    public List<String> errs = new ArrayList<String>();
+  public List<String> errs = new ArrayList<String>();
 
-    public String message;
+  public String message;
 
-    public DeviceReadyUpdateResponse() {
-        message = "Device(s) not found.";
-    }
+  public DeviceReadyUpdateResponse() {
+    message = "Device(s) not found.";
+  }
 
-    @Override
-    public String toString() {
-        return "DeviceReadyUpdateResponse{" +
-                "errs=" + errs +
-                ", message='" + message + '\'' +
-                '}';
-    }
+  @Override
+  public String toString() {
+    return "DeviceReadyUpdateResponse{" +
+        "errs=" + errs +
+        ", message='" + message + '\'' +
+        '}';
+  }
 }

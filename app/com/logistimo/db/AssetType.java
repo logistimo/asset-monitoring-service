@@ -23,9 +23,14 @@
 
 package com.logistimo.db;
 
-import play.db.jpa.JPA;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Table;
 
-import javax.persistence.*;
+import play.db.jpa.JPA;
 
 /**
  * Created by kaniyarasu on 28/10/15.
@@ -33,46 +38,46 @@ import javax.persistence.*;
 @Entity
 @Table(name = "asset_type")
 public class AssetType {
-    public static Integer TEMPERATURE_LOGGER = 1;
-    public static Integer TEMP_SENSOR = 4;
-    public static Integer ILR = 2;
-    public static Integer DEEP_FREEZER = 2;
+  public static Integer TEMPERATURE_LOGGER = 1;
+  public static Integer TEMP_SENSOR = 4;
+  public static Integer ILR = 2;
+  public static Integer DEEP_FREEZER = 2;
 
-    public static Integer MONITORED_ASSET = 2;
-    public static Integer MONITORING_ASSET = 1;
+  public static Integer MONITORED_ASSET = 2;
+  public static Integer MONITORING_ASSET = 1;
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(name = "id")
-    public Integer id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.AUTO)
+  @Column(name = "id")
+  public Integer id;
 
-    @Column(name = "asset_name")
-    public String assetName;
+  @Column(name = "asset_name")
+  public String assetName;
 
-    @Column(name = "is_temp_sensitive")
-    public Boolean isTempSensitive;
+  @Column(name = "is_temp_sensitive")
+  public Boolean isTempSensitive;
 
-    @Column(name = "is_gsm_enabled")
-    public Boolean isGSMEnabled;
+  @Column(name = "is_gsm_enabled")
+  public Boolean isGSMEnabled;
 
-    @Column(name = "type")
-    public Integer assetType;
+  @Column(name = "type")
+  public Integer assetType;
 
-    public static AssetType getAssetType(Integer id){
-        return JPA.em().createQuery("from AssetType where id = ?1", AssetType.class)
-                .setParameter(1, id)
-                .getSingleResult();
-    }
+  public static AssetType getAssetType(Integer id) {
+    return JPA.em().createQuery("from AssetType where id = ?1", AssetType.class)
+        .setParameter(1, id)
+        .getSingleResult();
+  }
 
-    public void save() {
-        JPA.em().persist(this);
-    }
+  public void save() {
+    JPA.em().persist(this);
+  }
 
-    public void update() {
-        JPA.em().merge(this);
-    }
+  public void update() {
+    JPA.em().merge(this);
+  }
 
-    public void delete() {
-        JPA.em().remove(this);
-    }
+  public void delete() {
+    JPA.em().remove(this);
+  }
 }

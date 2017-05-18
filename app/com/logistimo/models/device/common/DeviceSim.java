@@ -32,7 +32,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class DeviceSim {
-    public String sid;
+  public String sid;
 
-    public String phn;
+  public String phn;
 }

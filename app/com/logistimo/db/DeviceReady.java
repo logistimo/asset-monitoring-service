@@ -23,63 +23,69 @@
 
 package com.logistimo.db;
 
-import play.db.jpa.JPA;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
 
-import javax.persistence.*;
+import play.db.jpa.JPA;
 
 @Entity
 @Table(name = "device_ready")
 public class DeviceReady {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(name = "id")
-    public Long id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.AUTO)
+  @Column(name = "id")
+  public Long id;
 
-    @Column(name = "transmitter_id", nullable = false)
-    public String transmitterId;
+  @Column(name = "transmitter_id", nullable = false)
+  public String transmitterId;
 
-    @Column(name = "device_model")
-    public String deviceModel;
+  @Column(name = "device_model")
+  public String deviceModel;
 
-    @Column(name = "device_sensor_firmware_version")
-    public String deviceSensorFirmwareVersion;
+  @Column(name = "device_sensor_firmware_version")
+  public String deviceSensorFirmwareVersion;
 
-    @Column(name = "device_gsm_firmware_version")
-    public String deviceGsmFirmwareVersion;
+  @Column(name = "device_gsm_firmware_version")
+  public String deviceGsmFirmwareVersion;
 
-    @Column(name = "device_imei")
-    public String deviceImei;
+  @Column(name = "device_imei")
+  public String deviceImei;
 
-    @Column(name = "sim_phone")
-    public String simNumber;
+  @Column(name = "sim_phone")
+  public String simNumber;
 
-    @Column(name = "sim_id")
-    public String simId;
+  @Column(name = "sim_id")
+  public String simId;
 
-    @ManyToOne
-    public Device device;
+  @ManyToOne
+  public Device device;
 
-    public DeviceReady() {
-    }
+  public DeviceReady() {
+  }
 
-    public static DeviceReady getDeviceStatusByDevice(Device device) {
-        return JPA.em()
-                .createQuery("from DeviceReady where device = ?1", DeviceReady.class)
-                .setParameter(1, device)
-                .getSingleResult();
-    }
+  public static DeviceReady getDeviceStatusByDevice(Device device) {
+    return JPA.em()
+        .createQuery("from DeviceReady where device = ?1", DeviceReady.class)
+        .setParameter(1, device)
+        .getSingleResult();
+  }
 
-    public void save() {
-        JPA.em().persist(this);
-    }
+  public void save() {
+    JPA.em().persist(this);
+  }
 
-    public void update() {
-        JPA.em().merge(this);
-    }
+  public void update() {
+    JPA.em().merge(this);
+  }
 
-    public void delete() {
-        JPA.em().remove(this);
-    }
+  public void delete() {
+    JPA.em().remove(this);
+  }
 
 }

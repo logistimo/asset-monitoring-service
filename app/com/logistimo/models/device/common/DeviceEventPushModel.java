@@ -34,90 +34,90 @@ import java.util.Map;
  * Created by kaniyarasu on 01/12/15.
  */
 public class DeviceEventPushModel {
-    public static Integer DEVICE_EVENT_WORKING = 0;
-    public static Integer DEVICE_EVENT_TEMP = 1;
-    public static Integer DEVICE_EVENT_BATTERY = 2;
-    public static Integer DEVICE_EVENT_ACTIVITY = 3;
-    public static Integer DEVICE_EVENT_XSNS = 4;
-    public static Integer DEVICE_EVENT_DCON = 5;
-    public static Integer DEVICE_EVENT_POWER_OUTAGE = 6;
-    public static Integer DEVICE_EVENT_WORKING_STATUS = 7;
-    public static Map<Integer, Integer> DEVICE_EVENT_ALARM_GROUP = new HashMap<Integer, Integer>(){{
-       put(AssetStatusConstants.DEVICE_CONN_ALARM_TYPE, DEVICE_EVENT_DCON);
-        put(AssetStatusConstants.XSNS_ALARM_TYPE, DEVICE_EVENT_XSNS);
-        put(AssetStatusConstants.BATTERY_ALARM_TYPE, DEVICE_EVENT_BATTERY);
-        put(AssetStatusConstants.ACTIVITY_ALARM_TYPE, DEVICE_EVENT_ACTIVITY);
-        put(AssetStatusConstants.POWER_OUTAGE_ALARM_TYPE, DEVICE_EVENT_POWER_OUTAGE);
+  public static Integer DEVICE_EVENT_WORKING = 0;
+  public static Integer DEVICE_EVENT_TEMP = 1;
+  public static Integer DEVICE_EVENT_BATTERY = 2;
+  public static Integer DEVICE_EVENT_ACTIVITY = 3;
+  public static Integer DEVICE_EVENT_XSNS = 4;
+  public static Integer DEVICE_EVENT_DCON = 5;
+  public static Integer DEVICE_EVENT_POWER_OUTAGE = 6;
+  public static Integer DEVICE_EVENT_WORKING_STATUS = 7;
+  public static Map<Integer, Integer> DEVICE_EVENT_ALARM_GROUP = new HashMap<Integer, Integer>() {{
+    put(AssetStatusConstants.DEVICE_CONN_ALARM_TYPE, DEVICE_EVENT_DCON);
+    put(AssetStatusConstants.XSNS_ALARM_TYPE, DEVICE_EVENT_XSNS);
+    put(AssetStatusConstants.BATTERY_ALARM_TYPE, DEVICE_EVENT_BATTERY);
+    put(AssetStatusConstants.ACTIVITY_ALARM_TYPE, DEVICE_EVENT_ACTIVITY);
+    put(AssetStatusConstants.POWER_OUTAGE_ALARM_TYPE, DEVICE_EVENT_POWER_OUTAGE);
+  }};
+
+  public static Map<String, Integer> DEVICE_EVENT_STATUS_GROUP = new HashMap<String, Integer>() {{
+    put(AssetStatusConstants.ACTIVITY_STATUS_KEY, DEVICE_EVENT_ACTIVITY);
+    put(AssetStatusConstants.WORKING_STATUS_KEY, DEVICE_EVENT_WORKING_STATUS);
+    put(AssetStatusConstants.TEMP_STATUS_KEY, DEVICE_EVENT_TEMP);
+    put(AssetStatusConstants.XSNS_ALARM_STATUS_KEY, DEVICE_EVENT_XSNS);
+    put(AssetStatusConstants.BATTERY_ALARM_STATUS_KEY, DEVICE_EVENT_BATTERY);
+    put(AssetStatusConstants.DEVICE_CONN_ALARM_STATUS_KEY, DEVICE_EVENT_DCON);
+    put(AssetStatusConstants.POWER_OUTAGE_STATUS_KEY, DEVICE_EVENT_POWER_OUTAGE);
+
+  }};
+
+  public static String TMP_MIN = "min";
+  public static String TMP_MAX = "max";
+
+  public List<DeviceEvent> data;
+
+  public DeviceEventPushModel() {
+    data = new ArrayList<>(1);
+  }
+
+  public DeviceEventPushModel(final DeviceEvent deviceEvent) {
+    data = new ArrayList<DeviceEvent>() {{
+      add(deviceEvent);
     }};
+  }
 
-    public static Map<String, Integer> DEVICE_EVENT_STATUS_GROUP = new HashMap<String, Integer>(){{
-        put(AssetStatusConstants.ACTIVITY_STATUS_KEY, DEVICE_EVENT_ACTIVITY);
-        put(AssetStatusConstants.WORKING_STATUS_KEY, DEVICE_EVENT_WORKING_STATUS);
-        put(AssetStatusConstants.TEMP_STATUS_KEY, DEVICE_EVENT_TEMP);
-        put(AssetStatusConstants.XSNS_ALARM_STATUS_KEY, DEVICE_EVENT_XSNS);
-        put(AssetStatusConstants.BATTERY_ALARM_STATUS_KEY, DEVICE_EVENT_BATTERY);
-        put(AssetStatusConstants.DEVICE_CONN_ALARM_STATUS_KEY, DEVICE_EVENT_DCON);
-        put(AssetStatusConstants.POWER_OUTAGE_STATUS_KEY, DEVICE_EVENT_POWER_OUTAGE);
+  @Override
+  public String toString() {
+    return "DeviceEventPushModel{" +
+        "data=" + data +
+        '}';
+  }
 
-    }};
+  public static class DeviceEvent {
+    public String vId;
 
-    public static String TMP_MIN = "min";
-    public static String TMP_MAX = "max";
+    public String dId;
 
-    public List<DeviceEvent> data;
+    public Integer st;
 
-    public DeviceEventPushModel() {
-        data = new ArrayList<>(1);
-    }
+    public Integer type;
 
-    public DeviceEventPushModel(final DeviceEvent deviceEvent){
-        data = new ArrayList<DeviceEvent>(){{
-            add(deviceEvent);
-        }};
-    }
+    public Integer time;
 
-    public static class DeviceEvent{
-        public String vId;
+    public Integer aSt;
 
-        public String dId;
+    public double tmp;
 
-        public Integer st;
+    public String sId;
 
-        public Integer type;
+    public Integer mpId;
 
-        public Integer time;
-
-        public Integer aSt;
-
-        public double tmp;
-
-        public String sId;
-
-        public Integer mpId;
-
-        public Map<String, String> attrs = new HashMap<>(1);
-
-        @Override
-        public String toString() {
-            return "DeviceEvent{" +
-                    "vId='" + vId + '\'' +
-                    ", dId='" + dId + '\'' +
-                    ", st=" + st +
-                    ", type=" + type +
-                    ", time=" + time +
-                    ", aSt=" + aSt +
-                    ", tmp=" + tmp +
-                    ", sId='" + sId + '\'' +
-                    ", mpId=" + mpId +
-                    ", attrs=" + attrs +
-                    '}';
-        }
-    }
+    public Map<String, String> attrs = new HashMap<>(1);
 
     @Override
     public String toString() {
-        return "DeviceEventPushModel{" +
-                "data=" + data +
-                '}';
+      return "DeviceEvent{" +
+          "vId='" + vId + '\'' +
+          ", dId='" + dId + '\'' +
+          ", st=" + st +
+          ", type=" + type +
+          ", time=" + time +
+          ", aSt=" + aSt +
+          ", tmp=" + tmp +
+          ", sId='" + sId + '\'' +
+          ", mpId=" + mpId +
+          ", attrs=" + attrs +
+          '}';
     }
+  }
 }

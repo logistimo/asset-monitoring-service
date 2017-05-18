@@ -26,15 +26,15 @@ package com.logistimo.models.stats.response;
 import com.logistimo.models.common.ErrorResponse;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 /**
  * Created by kaniyarasu on 28/10/14.
  */
 public class StatsLoggingResponse {
-    public List<ErrorResponse> errs = new ArrayList<>(1);
+  public List<ErrorResponse> errs = new ArrayList<>(1);
 
-    public StatsLoggingResponse() {}
+  public StatsLoggingResponse() {
+  }
 
 }

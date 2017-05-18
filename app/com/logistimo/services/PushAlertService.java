@@ -23,53 +23,52 @@
 
 package com.logistimo.services;
 
-import com.logistimo.utils.LogistimoUtils;
 import org.apache.commons.codec.binary.Base64;
-import play.Logger;
+
+import java.security.GeneralSecurityException;
+import java.util.Map;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
-import java.security.GeneralSecurityException;
-import java.util.Map;
+
+import play.Logger;
 
 /**
  * Created by kaniyarasu on 12/08/15.
  */
 public class PushAlertService extends ServiceImpl implements Executable {
 
-    private static final Logger.ALogger LOGGER = Logger.of(PushAlertService.class);
-    private final static String HMAC_SHA1_ALGORITHM = "HmacSHA1";
-    private static final String PRODUCER_ID = "ASSET-ALARMS";
+  private static final Logger.ALogger LOGGER = Logger.of(PushAlertService.class);
+  private final static String HMAC_SHA1_ALGORITHM = "HmacSHA1";
+  private static final String PRODUCER_ID = "ASSET-ALARMS";
 
-    private static MessagingService messagingService = ServiceFactory.getService(MessagingService.class);
+  private static MessagingService
+      messagingService =
+      ServiceFactory.getService(MessagingService.class);
 
-    @Override
-    public void process(String content, Map<String, Object> options) throws Exception {
-        messagingService.produceMessage(PRODUCER_ID, content);
+  public static String generatehmac(String data) {
+    return hmac("X0FIbIBUHmTNV0SpYdTfJsISTUMnM59UDSTfrbcTTk8iMRh4wpjHf99fXYDotlt5", data);
+  }
+
+  /**
+   * Creates Hmac string from application secret and post data
+   */
+  private static String hmac(String secret, String data) {
+    try {
+      SecretKeySpec signatureKey = new SecretKeySpec(secret.getBytes(), HMAC_SHA1_ALGORITHM);
+      Mac m = Mac.getInstance(HMAC_SHA1_ALGORITHM);
+      m.init(signatureKey);
+      byte[] rawHmac = m.doFinal(data.getBytes());
+      String result = new String(Base64.encodeBase64(rawHmac));
+      return result;
+    } catch (GeneralSecurityException e) {
+      LOGGER.warn("Unexpected error while creating hmac", e);
+      throw new IllegalArgumentException();
     }
+  }
 
-    public static String generatehmac(String data) {
-        return hmac("X0FIbIBUHmTNV0SpYdTfJsISTUMnM59UDSTfrbcTTk8iMRh4wpjHf99fXYDotlt5", data);
-    }
-
-    /**
-     * Creates Hmac string from application secret and post data
-     *
-     * @param secret
-     * @param data
-     * @return
-     */
-    private static String hmac(String secret, String data) {
-        try {
-            SecretKeySpec signatureKey = new SecretKeySpec(secret.getBytes(), HMAC_SHA1_ALGORITHM);
-            Mac m = Mac.getInstance(HMAC_SHA1_ALGORITHM);
-            m.init(signatureKey);
-            byte[] rawHmac = m.doFinal(data.getBytes());
-            String result = new String(Base64.encodeBase64(rawHmac));
-            return result;
-        } catch (GeneralSecurityException e) {
-            LOGGER.warn("Unexpected error while creating hmac", e);
-            throw new IllegalArgumentException();
-        }
-    }
+  @Override
+  public void process(String content, Map<String, Object> options) throws Exception {
+    messagingService.produceMessage(PRODUCER_ID, content);
+  }
 }
