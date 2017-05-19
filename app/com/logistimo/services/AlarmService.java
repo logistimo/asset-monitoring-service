@@ -52,13 +52,7 @@ import com.logistimo.utils.LogistimoUtils;
 
 import org.apache.commons.lang3.StringUtils;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 import javax.persistence.NoResultException;
 
@@ -97,40 +91,7 @@ public class AlarmService extends ServiceImpl {
 
           //Currently skipping device firmware error
           if (deviceAlarm.type != 3) {
-            DeviceStatus deviceStatus;
-
-            if (deviceAlarm.sensorId != null) {
-              deviceStatus =
-                  deviceService.getOrCreateDeviceStatus(device, null, deviceAlarm.sensorId,
-                      AssetStatusConstants.DEVICE_ALARM_STATUS_KEYS_MAP.get(deviceAlarm.type),
-                      null);
-            } else {
-              deviceStatus =
-                  deviceService.getOrCreateDeviceStatus(deviceAlarm.device, null, null,
-                      AssetStatusConstants.DEVICE_ALARM_STATUS_KEYS_MAP.get(deviceAlarm.type),
-                      null);
-            }
-            if (deviceStatus.status != deviceAlarm.status && (
-                deviceStatus.statusUpdatedTime < deviceAlarm.time
-                    || deviceAlarm.type == AssetStatusConstants.ACTIVITY_ALARM_TYPE)) {
-              deviceStatus.status = deviceAlarm.status;
-              deviceStatus.statusUpdatedTime = deviceAlarm.time;
-              deviceStatus.update();
-
-              //Preparing notification to LS
-              DeviceEventPushModel.DeviceEvent deviceEvent = new DeviceEventPushModel.DeviceEvent();
-              deviceEvent.vId = deviceAlarm.device.vendorId;
-              deviceEvent.dId = deviceAlarm.device.deviceId;
-              deviceEvent.st = deviceStatus.status;
-              deviceEvent.time = deviceStatus.statusUpdatedTime;
-              deviceEvent.sId = deviceAlarm.sensorId;
-              deviceEvent.type =
-                  DeviceEventPushModel.DEVICE_EVENT_ALARM_GROUP.get(deviceAlarm.type);
-              deviceEventPushModel.data.add(deviceEvent);
-            } else if (deviceStatus.statusUpdatedTime < deviceAlarm.time) {
-              deviceStatus.statusUpdatedTime = deviceAlarm.time;
-              deviceStatus.update();
-            }
+            DeviceStatus deviceStatus = updateDeviceStatus(device, deviceAlarm, deviceEventPushModel);
 
             Optional<Device>
                 updatedOptional =
@@ -163,6 +124,51 @@ public class AlarmService extends ServiceImpl {
     updateAndPushEvent(deviceEventPushModel, deviceSet);
 
     return alarmLoggingResponse;
+  }
+
+  /**
+   * Propagates the device alarm to the device status
+   * @param device
+   * @param deviceAlarm
+   * @param deviceEventPushModel
+   * @return
+   */
+  private DeviceStatus updateDeviceStatus(Device device, DeviceAlarm deviceAlarm, DeviceEventPushModel deviceEventPushModel) {
+    DeviceStatus deviceStatus;
+
+    if (deviceAlarm.sensorId != null) {
+      deviceStatus =
+          deviceService.getOrCreateDeviceStatus(device, null, deviceAlarm.sensorId,
+              AssetStatusConstants.DEVICE_ALARM_STATUS_KEYS_MAP.get(deviceAlarm.type),
+              null);
+    } else {
+      deviceStatus =
+          deviceService.getOrCreateDeviceStatus(deviceAlarm.device, null, null,
+              AssetStatusConstants.DEVICE_ALARM_STATUS_KEYS_MAP.get(deviceAlarm.type),
+              null);
+    }
+    if (deviceStatus.status != deviceAlarm.status && (
+        deviceStatus.statusUpdatedTime < deviceAlarm.time
+            || deviceAlarm.type == AssetStatusConstants.ACTIVITY_ALARM_TYPE)) {
+      deviceStatus.status = deviceAlarm.status;
+      deviceStatus.statusUpdatedTime = deviceAlarm.time;
+      deviceStatus.update();
+
+      //Preparing notification to LS
+      DeviceEventPushModel.DeviceEvent deviceEvent = new DeviceEventPushModel.DeviceEvent();
+      deviceEvent.vId = deviceAlarm.device.vendorId;
+      deviceEvent.dId = deviceAlarm.device.deviceId;
+      deviceEvent.st = deviceStatus.status;
+      deviceEvent.time = deviceStatus.statusUpdatedTime;
+      deviceEvent.sId = deviceAlarm.sensorId;
+      deviceEvent.type =
+          DeviceEventPushModel.DEVICE_EVENT_ALARM_GROUP.get(deviceAlarm.type);
+      deviceEventPushModel.data.add(deviceEvent);
+    } else if (deviceStatus.statusUpdatedTime < deviceAlarm.time) {
+      deviceStatus.statusUpdatedTime = deviceAlarm.time;
+      deviceStatus.update();
+    }
+    return deviceStatus;
   }
 
   /**
@@ -230,28 +236,66 @@ public class AlarmService extends ServiceImpl {
                 null);
       }
 
-      if (!Objects.equals(relatedDeviceStatus.status, deviceStatus.status)
-          || !Objects.equals(deviceStatus.statusUpdatedTime,
-          relatedDeviceStatus.statusUpdatedTime)) {
-        relatedDeviceStatus.status = deviceStatus.status;
-        relatedDeviceStatus.statusUpdatedTime = deviceStatus.statusUpdatedTime;
-        relatedDeviceStatus.update();
+      return propagateDeviceStatus(relatedDeviceStatus, deviceStatus, deviceEventPushModel, assetMapping, type);
+    }
+    return Optional.empty();
+  }
 
-        if (type == AssetStatusConstants.ACTIVITY_ALARM_TYPE) {
-          DeviceEventPushModel.DeviceEvent
-              deviceEvent =
-              new DeviceEventPushModel.DeviceEvent();
-          deviceEvent.vId = assetMapping.asset.vendorId;
-          deviceEvent.dId = assetMapping.asset.deviceId;
-          deviceEvent.mpId = assetMapping.monitoringPositionId;
-          deviceEvent.st = relatedDeviceStatus.status;
-          deviceEvent.time = relatedDeviceStatus.statusUpdatedTime;
-          deviceEvent.type =
-              DeviceEventPushModel.DEVICE_EVENT_ALARM_GROUP.get(type);
-          deviceEventPushModel.data.add(deviceEvent);
-        }
-        return Optional.of(assetMapping.asset);
+  /**
+   * Updates the parent assets status for the sensor
+   * @param deviceStatus
+   * @param device
+   * @param type
+   * @param deviceEventPushModel
+   * @return
+   */
+  public Optional<Device> updateParentAssetStatus(DeviceStatus deviceStatus, Device device,
+                                                     int type,
+                                                     DeviceEventPushModel deviceEventPushModel) {
+    //Updating specific device alarm for related assets
+    AssetMapping assetMapping = null;
+    try {
+      assetMapping =
+              AssetMapping.findAssetMappingByRelatedAssetAndType(device,
+                      LogistimoConstant.CONTAINS);
+    } catch (NoResultException e) {
+      //do nothing
+    }
+    if (assetMapping != null) {
+      DeviceStatus relatedDeviceStatus =
+                deviceService.getOrCreateDeviceStatus(assetMapping.asset,
+                        null, LogistimoUtils.extractSensorId(device.deviceId),
+                        AssetStatusConstants.DEVICE_ALARM_STATUS_KEYS_MAP.get(type),
+                        null);
+
+      return propagateDeviceStatus(relatedDeviceStatus, deviceStatus, deviceEventPushModel, assetMapping, type);
+    }
+    return Optional.empty();
+  }
+
+  private Optional<Device> propagateDeviceStatus(DeviceStatus relatedDeviceStatus, DeviceStatus deviceStatus, DeviceEventPushModel deviceEventPushModel, AssetMapping assetMapping, int type) {
+    if (!Objects.equals(relatedDeviceStatus.status, deviceStatus.status)
+            || !Objects.equals(deviceStatus.statusUpdatedTime,
+            relatedDeviceStatus.statusUpdatedTime)) {
+      relatedDeviceStatus.status = deviceStatus.status;
+      relatedDeviceStatus.statusUpdatedTime = deviceStatus.statusUpdatedTime;
+      relatedDeviceStatus.update();
+
+      if (type == AssetStatusConstants.ACTIVITY_ALARM_TYPE) {
+        DeviceEventPushModel.DeviceEvent
+                deviceEvent =
+                new DeviceEventPushModel.DeviceEvent();
+        deviceEvent.vId = assetMapping.asset.vendorId;
+        deviceEvent.dId = assetMapping.asset.deviceId;
+        deviceEvent.mpId = assetMapping.monitoringPositionId;
+        deviceEvent.sId = Objects.equals(assetMapping.asset.assetType.assetType, AssetType.TEMPERATURE_LOGGER) ? LogistimoUtils.extractSensorId(assetMapping.relatedAsset.deviceId) : null;
+        deviceEvent.st = relatedDeviceStatus.status;
+        deviceEvent.time = relatedDeviceStatus.statusUpdatedTime;
+        deviceEvent.type =
+                DeviceEventPushModel.DEVICE_EVENT_ALARM_GROUP.get(type);
+        deviceEventPushModel.data.add(deviceEvent);
       }
+      return Optional.of(assetMapping.asset);
     }
     return Optional.empty();
   }
@@ -673,5 +717,30 @@ public class AlarmService extends ServiceImpl {
 
     //posting
     postDeviceAlarm(alarmLoggingRequest);
+  }
+
+  public void updateRelatedAssetStatus(Device device, DeviceStatus deviceStatus){
+    //Updating parent status activity
+    DeviceEventPushModel deviceEventPushModel = new DeviceEventPushModel();
+    Optional<Device>
+            updatedDevice =
+            updateParentAssetStatus(deviceStatus, device,
+                    AssetStatusConstants.ACTIVITY_ALARM_TYPE, deviceEventPushModel);
+
+    if(updatedDevice.isPresent()){
+      updateAndPushEvent(deviceEventPushModel,
+              Collections.singleton(updatedDevice.get()));
+    }
+
+    //Updating monitored asset status
+    deviceEventPushModel = new DeviceEventPushModel();
+    updatedDevice =
+            updateMonitoredAssetStatus(deviceStatus, device,
+                    AssetStatusConstants.ACTIVITY_ALARM_TYPE, deviceEventPushModel);
+
+    if(updatedDevice.isPresent()){
+      updateAndPushEvent(deviceEventPushModel,
+              Collections.singleton(updatedDevice.get()));
+    }
   }
 }

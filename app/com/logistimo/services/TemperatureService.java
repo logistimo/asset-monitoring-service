@@ -572,15 +572,7 @@ public class TemperatureService extends ServiceImpl implements Executable {
         }
       } else {
         //if status is in correct, then ensure related assets are also correct.
-        DeviceEventPushModel deviceEventPushModel = new DeviceEventPushModel();
-        Optional<Device>
-            updatedDevice =
-            alarmService.updateMonitoredAssetStatus(deviceStatus, device,
-                AssetStatusConstants.ACTIVITY_ALARM_TYPE, deviceEventPushModel);
-        if(updatedDevice.isPresent()){
-          alarmService.updateAndPushEvent(deviceEventPushModel,
-              Collections.singleton(updatedDevice.get()));
-        }
+          alarmService.updateRelatedAssetStatus(device, deviceStatus);
       }
     }
   }
