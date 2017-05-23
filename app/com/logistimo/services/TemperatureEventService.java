@@ -69,13 +69,14 @@ public class TemperatureEventService extends ServiceImpl implements Executable {
         && options.get(STATE_UPDATED_TIME) != null
         && options.get(VENDOR_ID) != null && options.get(DEVICE_ID) != null) {
       LockUtil.LockStatus
-          lockStatus =
-          LockUtil.lock(LogistimoConstant.DEVICE_LOCK + LogistimoUtils
-              .extractDeviceId((String) options.get(DEVICE_ID)));
+          status = null;
       try {
-        if (!LockUtil.isLocked(lockStatus)) {
-          throw new ServiceException("Error while locking the device " + LogistimoUtils
-              .extractDeviceId((String) options.get(DEVICE_ID)));
+        status =
+            LockUtil.lock("LOCK_" + options.get(VENDOR_ID) + "_" + LogistimoUtils.extractDeviceId(
+                (String) options.get(DEVICE_ID)));
+        if (!LockUtil.isLocked(status)) {
+          throw new ServiceException("Failed to lock device "+"LOCK_" + options.get(VENDOR_ID) + "_" + LogistimoUtils.extractDeviceId(
+              (String) options.get(DEVICE_ID)));
         }
         JPA.withTransaction(() -> {
           Device
@@ -157,11 +158,10 @@ public class TemperatureEventService extends ServiceImpl implements Executable {
         LOGGER.warn("{} while scheduling temperature event for task options {}", e.getMessage(),
             options.toString(), e);
       } finally {
-        if (LockUtil.shouldReleaseLock(lockStatus) && !LockUtil.release(String.valueOf(
-            LogistimoConstant.DEVICE_LOCK + LogistimoUtils
-                .extractDeviceId((String) options.get(DEVICE_ID))))) {
-          LOGGER.error("Error while releasing lock for the device {} in temperature event job",
-              LogistimoUtils.extractDeviceId((String) options.get(DEVICE_ID)));
+        if (LockUtil.shouldReleaseLock(status)){
+          LockUtil.release(
+              "LOCK_" + options.get(VENDOR_ID) + "_" + LogistimoUtils.extractDeviceId(
+                  (String) options.get(DEVICE_ID)));
         }
       }
     }
