@@ -105,19 +105,18 @@ public class TaskService extends ServiceImpl {
           //Persisting task options for recovery
           if (task == null) {
             task = new Task(Json.toJson(taskOptions).toString());
-            task.save();
+            final Task persistableFinalTask = task;
+            JPA.withTransaction(persistableFinalTask::save);
           }
           final Task finalTask = task;
           Akka.system().scheduler().scheduleOnce(
               Duration.create(taskOptions.getDelayInMillis(), TimeUnit.MILLISECONDS),
-              new Runnable() {
-                public void run() {
-                  producers.get(taskOptions.getType()).tell(
-                      new CamelMessage(taskOptions, taskOptions.getHeaders()),
-                      null
-                  );
-                  deleteTask(finalTask);
-                }
+              () -> {
+                producers.get(taskOptions.getType()).tell(
+                    new CamelMessage(taskOptions, taskOptions.getHeaders()),
+                    null
+                );
+                deleteTask(finalTask);
               },
               Akka.system().dispatcher()
           );
@@ -140,11 +139,9 @@ public class TaskService extends ServiceImpl {
 
   public void deleteTask(final Task finalTask) {
     try {
-      JPA.withTransaction(new play.libs.F.Function0<Void>() {
-        public Void apply() throws Throwable {
-          Task.findTaskById(finalTask.id).delete();
-          return null;
-        }
+      JPA.withTransaction(() -> {
+        Task.findTaskById(finalTask.id).delete();
+        return null;
       });
     } catch (Throwable throwable) {
       LOGGER.warn("Error while deleting task, {}", finalTask, throwable);
