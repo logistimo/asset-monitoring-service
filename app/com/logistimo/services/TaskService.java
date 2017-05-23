@@ -116,16 +116,7 @@ public class TaskService extends ServiceImpl {
                       new CamelMessage(taskOptions, taskOptions.getHeaders()),
                       null
                   );
-                  try {
-                    JPA.withTransaction(new play.libs.F.Function0<Void>() {
-                      public Void apply() throws Throwable {
-                        Task.findTaskById(finalTask.id).delete();
-                        return null;
-                      }
-                    });
-                  } catch (Throwable throwable) {
-                    LOGGER.warn("Error while deleting task, {}", finalTask, throwable);
-                  }
+                  deleteTask(finalTask);
                 }
               },
               Akka.system().dispatcher()
@@ -135,12 +126,28 @@ public class TaskService extends ServiceImpl {
               new CamelMessage(taskOptions, taskOptions.getHeaders()),
               null
           );
+          if(task != null){
+            deleteTask(task);
+          }
         }
       } else {
         throw new ServiceException("Invalid task type: " + taskOptions.getType());
       }
     } else {
       throw new ServiceException("Invalid task options: " + taskOptions);
+    }
+  }
+
+  public void deleteTask(final Task finalTask) {
+    try {
+      JPA.withTransaction(new play.libs.F.Function0<Void>() {
+        public Void apply() throws Throwable {
+          Task.findTaskById(finalTask.id).delete();
+          return null;
+        }
+      });
+    } catch (Throwable throwable) {
+      LOGGER.warn("Error while deleting task, {}", finalTask, throwable);
     }
   }
 

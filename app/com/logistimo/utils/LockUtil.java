@@ -26,10 +26,14 @@ package com.logistimo.utils;
 import com.logistimo.services.RedisCacheService;
 import com.logistimo.services.ServiceFactory;
 
+import play.Logger;
+
 /**
  * Created by kaniyarasu on 13/04/17.
  */
 public class LockUtil {
+
+  private static final Logger.ALogger LOGGER = Logger.of(LockUtil.class);
 
   private static final int DEFAULT_RETRY_COUNT = 50;
   private static final int DEFAULT_WAIT_TIME_IN_MILLIS = 500;
@@ -63,12 +67,14 @@ public class LockUtil {
       }
 
       if (retryCount > 0) {
+        LOGGER.info("Sleeping: Could not acquire lock for key "+key + ":" + Thread.currentThread().getName());
         try {
           Thread.sleep(retryDelayInMillis);
         } catch (InterruptedException ignored) {
         }
       }
     }
+    LOGGER.info("Failed: Could not acquire lock for key "+key + ":" + Thread.currentThread().getName());
     return LockStatus.FAILED_TO_LOCK;
   }
 

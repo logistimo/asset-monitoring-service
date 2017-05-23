@@ -199,7 +199,9 @@ public class AlarmLog {
                                            Integer deviceAlarmType, Integer startTime) {
     if (null == deviceAlarmType) {
       return JPA.em().createQuery(
-          "from AlarmLog where device = ?1 and alarm_type = ?2 and device_alarm_type is NULL and start_time = ?3 and sensor_id IS NULL and monitoring_position_id IS NULL and end_time is NULL",
+          "from AlarmLog where device = ?1 and alarm_type = ?2 and device_alarm_type is NULL and "
+              + "start_time = ?3 and sensor_id IS NULL and monitoring_position_id IS NULL "
+              + "and end_time is NULL",
           AlarmLog.class)
           .setParameter(1, device)
           .setParameter(2, alarmType)
@@ -207,7 +209,9 @@ public class AlarmLog {
           .getSingleResult();
     }
     return JPA.em().createQuery(
-        "from AlarmLog where device = ?1 and alarm_type = ?2 and device_alarm_type = ?3 and start_time = ?4 and sensor_id IS NULL and monitoring_position_id IS NULL",
+        "from AlarmLog where device = ?1 and alarm_type = ?2 and device_alarm_type = ?3 and "
+            + "start_time = ?4 and sensor_id IS NULL and monitoring_position_id IS NULL and "
+            + "end_time is NULL",
         AlarmLog.class)
         .setParameter(1, device)
         .setParameter(2, alarmType)

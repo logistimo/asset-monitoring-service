@@ -59,10 +59,10 @@ import com.logistimo.models.v1.request.Temperature;
 import com.logistimo.utils.AssetStatusConstants;
 import com.logistimo.utils.DeviceMetaAppendix;
 import com.logistimo.utils.HttpUtil;
+import com.logistimo.utils.LockUtil;
 import com.logistimo.utils.LogistimoConstant;
 import com.logistimo.utils.LogistimoUtils;
 
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.IOException;
@@ -84,6 +84,7 @@ import javax.persistence.NoResultException;
 
 import play.Logger;
 import play.Play;
+import play.db.jpa.JPA;
 import play.i18n.Messages;
 
 @SuppressWarnings("unchecked")
@@ -132,28 +133,43 @@ public class TemperatureService extends ServiceImpl implements Executable {
                                                 Integer chSource) throws ServiceException {
     TemperatureLoggingResponse temperatureLoggingResponse = new TemperatureLoggingResponse();
     for (DeviceReadingRequest deviceReadingRequest : temperatureLoggingRequest.data) {
+      LockUtil.LockStatus
+          status = null;
       try {
-        Device
-            device =
-            deviceService.findDevice(temperatureLoggingRequest.vId, deviceReadingRequest.dId);
-
-        DevicePowerTransition devicePowerTransition = null;
-        if (deviceReadingRequest.pwa != null) {
-          devicePowerTransition =
-              DevicePowerTransitionDAO.logPowerTransition(device, deviceReadingRequest.pwa);
+        status =
+            LockUtil.lock("LOCK_" + temperatureLoggingRequest.vId + "_" + deviceReadingRequest.dId);
+        if (!LockUtil.isLocked(status)) {
+          throw new ServiceException("Failed to lock device");
         }
+        JPA.withTransaction(() -> {
+          Device
+              device =
+              deviceService.findDevice(temperatureLoggingRequest.vId, deviceReadingRequest.dId);
 
-        List<String>
-            errorReadings =
-            logTemperatures(deviceReadingRequest.tmps, device, devicePowerTransition, chSource);
-        if (errorReadings.size() > 0) {
-          for (String errorReading : errorReadings) {
-            temperatureLoggingResponse.errTmps.add(deviceReadingRequest.dId + ": " + errorReading);
+          DevicePowerTransition devicePowerTransition = null;
+          if (deviceReadingRequest.pwa != null) {
+            devicePowerTransition =
+                DevicePowerTransitionDAO.logPowerTransition(device, deviceReadingRequest.pwa);
           }
-        }
+
+          List<String>
+              errorReadings =
+              logTemperatures(deviceReadingRequest.tmps, device, devicePowerTransition, chSource);
+          if (errorReadings.size() > 0) {
+            for (String errorReading : errorReadings) {
+              temperatureLoggingResponse.errTmps
+                  .add(deviceReadingRequest.dId + ": " + errorReading);
+            }
+          }
+        });
       } catch (NoResultException e) {
         LOGGER.warn("Device not found while logging temperature {}", e.getMessage(), e);
         temperatureLoggingResponse.errs.add(deviceReadingRequest.dId);
+      } finally {
+        if (LockUtil.shouldReleaseLock(status)) {
+          LockUtil
+              .release("LOCK_" + temperatureLoggingRequest.vId + "_" + deviceReadingRequest.dId);
+        }
       }
     }
 
@@ -572,7 +588,7 @@ public class TemperatureService extends ServiceImpl implements Executable {
         }
       } else {
         //if status is in correct, then ensure related assets are also correct.
-          alarmService.updateRelatedAssetStatus(device, deviceStatus);
+        alarmService.updateRelatedAssetStatus(device, deviceStatus);
       }
     }
   }

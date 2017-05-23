@@ -55,12 +55,7 @@ public class TaskConsumer extends UntypedConsumerActor {
           ((CamelMessage) message).getBodyAs(TaskOptions.class, getCamelContext());
       if (taskOptions != null) {
         try {
-          JPA.withTransaction(new play.libs.F.Function0<Void>() {
-            public Void apply() throws Throwable {
-              taskService.consumeMessage(taskOptions);
-              return null;
-            }
-          });
+          taskService.consumeMessage(taskOptions);
         } catch (Throwable throwable) {
           LOGGER.warn("Error while executing task {}", taskOptions, throwable);
           try {

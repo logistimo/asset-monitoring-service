@@ -45,6 +45,7 @@ import java.util.Map;
 import javax.persistence.NoResultException;
 
 import play.Logger;
+import play.db.jpa.JPA;
 
 /**
  * Created by kaniyarasu on 11/08/15.
@@ -76,80 +77,82 @@ public class TemperatureEventService extends ServiceImpl implements Executable {
           throw new ServiceException("Error while locking the device " + LogistimoUtils
               .extractDeviceId((String) options.get(DEVICE_ID)));
         }
+        JPA.withTransaction(() -> {
+          Device
+              device =
+              deviceService
+                  .findDevice((String) options.get(VENDOR_ID), (String) options.get(DEVICE_ID));
+          DeviceStatus
+              deviceStatus =
+              deviceService
+                  .getOrCreateDeviceStatus(device, null, null, AssetStatusConstants.TEMP_STATUS_KEY,
+                      null);
+          if (deviceStatus.statusUpdatedTime.equals(options.get(STATE_UPDATED_TIME))) {
+            if (options.get(EVENT_TYPE) == TemperatureEventType.EXCURSION) {
+              Map<String, DeviceMetaData>
+                  deviceMetaDataMap =
+                  deviceService.getDeviceMetaDataMap(device, DeviceMetaAppendix.TEMP_WARN_GROUP);
+              Long warningEventDelay = 0L;
+              if (deviceStatus.temperatureAbnormalStatus == 2) {
+                warningEventDelay = getExecutionDelayTime(deviceStatus.statusUpdatedTime
+                    , LogistimoUtils
+                    .getMetaDataValue(deviceMetaDataMap.get(DeviceMetaAppendix.WARN_HIGH_DUR)));
+              } else if (deviceStatus.temperatureAbnormalStatus == 1) {
+                warningEventDelay = getExecutionDelayTime(deviceStatus.statusUpdatedTime
+                    , LogistimoUtils
+                    .getMetaDataValue(deviceMetaDataMap.get(DeviceMetaAppendix.WARN_LOW_DUR)));
+              }
 
-        Device
-            device =
-            deviceService
-                .findDevice((String) options.get(VENDOR_ID), (String) options.get(DEVICE_ID));
-        DeviceStatus
-            deviceStatus =
-            deviceService
-                .getOrCreateDeviceStatus(device, null, null, AssetStatusConstants.TEMP_STATUS_KEY,
-                    null);
-        if (deviceStatus.statusUpdatedTime.equals(options.get(STATE_UPDATED_TIME))) {
-          if (options.get(EVENT_TYPE) == TemperatureEventType.EXCURSION) {
-            Map<String, DeviceMetaData>
-                deviceMetaDataMap =
-                deviceService.getDeviceMetaDataMap(device, DeviceMetaAppendix.TEMP_WARN_GROUP);
-            Long warningEventDelay = 0L;
-            if (deviceStatus.temperatureAbnormalStatus == 2) {
-              warningEventDelay = getExecutionDelayTime(deviceStatus.statusUpdatedTime
-                  , LogistimoUtils
-                  .getMetaDataValue(deviceMetaDataMap.get(DeviceMetaAppendix.WARN_HIGH_DUR)));
-            } else if (deviceStatus.temperatureAbnormalStatus == 1) {
-              warningEventDelay = getExecutionDelayTime(deviceStatus.statusUpdatedTime
-                  , LogistimoUtils
-                  .getMetaDataValue(deviceMetaDataMap.get(DeviceMetaAppendix.WARN_LOW_DUR)));
+              options.put(TemperatureEventService.EVENT_TYPE, TemperatureEventType.WARNING);
+              taskService.produceMessage(
+                  new TaskOptions(
+                      TaskType.BACKGROUND_TASK.getValue(),
+                      TemperatureEventService.class,
+                      null,
+                      options,
+                      Math.max(warningEventDelay, 30000)
+                  )
+              );
+            } else if (options.get(EVENT_TYPE) == TemperatureEventType.WARNING) {
+              int
+                  deviceExcursionTime =
+                  updateAndPropagateDeviceStatus(device, deviceStatus,
+                      Device.TEMP_WARNING);
+
+              Map<String, DeviceMetaData>
+                  deviceMetaDataMap =
+                  deviceService.getDeviceMetaDataMap(device, DeviceMetaAppendix.TEMP_ALARM_GROUP);
+              Long alarmEventDelay = 0L;
+              if (deviceStatus.temperatureAbnormalStatus == 2) {
+                alarmEventDelay = getExecutionDelayTime(deviceExcursionTime
+                    , LogistimoUtils
+                    .getMetaDataValue(deviceMetaDataMap.get(DeviceMetaAppendix.ALARM_HIGH_DUR)));
+              } else if (deviceStatus.temperatureAbnormalStatus == 1) {
+                alarmEventDelay = getExecutionDelayTime(deviceExcursionTime
+                    , LogistimoUtils
+                    .getMetaDataValue(deviceMetaDataMap.get(DeviceMetaAppendix.ALARM_LOW_DUR)));
+              }
+
+              options.put(TemperatureEventService.EVENT_TYPE, TemperatureEventType.ALARM);
+              options
+                  .put(TemperatureEventService.STATE_UPDATED_TIME, deviceStatus.statusUpdatedTime);
+              taskService.produceMessage(
+                  new TaskOptions(
+                      TaskType.BACKGROUND_TASK.getValue(),
+                      TemperatureEventService.class,
+                      null,
+                      options,
+                      Math.max(alarmEventDelay, 30000)
+                  )
+              );
+            } else if (options.get(EVENT_TYPE) == TemperatureEventType.ALARM) {
+              updateAndPropagateDeviceStatus(device, deviceStatus,
+                  Device.TEMP_ALARM);
             }
-
-            options.put(TemperatureEventService.EVENT_TYPE, TemperatureEventType.WARNING);
-            taskService.produceMessage(
-                new TaskOptions(
-                    TaskType.BACKGROUND_TASK.getValue(),
-                    TemperatureEventService.class,
-                    null,
-                    options,
-                    Math.max(warningEventDelay, 30000)
-                )
-            );
-          } else if (options.get(EVENT_TYPE) == TemperatureEventType.WARNING) {
-            int
-                deviceExcursionTime =
-                updateAndPropagateDeviceStatus(device, deviceStatus,
-                    Device.TEMP_WARNING);
-
-            Map<String, DeviceMetaData>
-                deviceMetaDataMap =
-                deviceService.getDeviceMetaDataMap(device, DeviceMetaAppendix.TEMP_ALARM_GROUP);
-            Long alarmEventDelay = 0L;
-            if (deviceStatus.temperatureAbnormalStatus == 2) {
-              alarmEventDelay = getExecutionDelayTime(deviceExcursionTime
-                  , LogistimoUtils
-                  .getMetaDataValue(deviceMetaDataMap.get(DeviceMetaAppendix.ALARM_HIGH_DUR)));
-            } else if (deviceStatus.temperatureAbnormalStatus == 1) {
-              alarmEventDelay = getExecutionDelayTime(deviceExcursionTime
-                  , LogistimoUtils
-                  .getMetaDataValue(deviceMetaDataMap.get(DeviceMetaAppendix.ALARM_LOW_DUR)));
-            }
-
-            options.put(TemperatureEventService.EVENT_TYPE, TemperatureEventType.ALARM);
-            options.put(TemperatureEventService.STATE_UPDATED_TIME, deviceStatus.statusUpdatedTime);
-            taskService.produceMessage(
-                new TaskOptions(
-                    TaskType.BACKGROUND_TASK.getValue(),
-                    TemperatureEventService.class,
-                    null,
-                    options,
-                    Math.max(alarmEventDelay, 30000)
-                )
-            );
-          } else if (options.get(EVENT_TYPE) == TemperatureEventType.ALARM) {
-            updateAndPropagateDeviceStatus(device, deviceStatus,
-                Device.TEMP_ALARM);
+          } else {
+            LOGGER.info("Device state changed while executing event {}", options.toString());
           }
-        } else {
-          LOGGER.info("Device state changed while executing event {}", options.toString());
-        }
+        });
       } catch (NoResultException e) {
         LOGGER.warn("{} while scheduling temperature event for task options {}", e.getMessage(),
             options.toString(), e);
