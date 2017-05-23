@@ -521,7 +521,7 @@ public class TemperatureService extends ServiceImpl implements Executable {
                     TemperatureEventService.class,
                     null,
                     options,
-                    3000L
+                    10000L
                 )
             );
           } catch (ServiceException e) {
