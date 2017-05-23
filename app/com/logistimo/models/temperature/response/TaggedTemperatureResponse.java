@@ -33,20 +33,20 @@ import java.util.List;
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class TaggedTemperatureResponse {
-    public List<TaggedDeviceReadingResponse> data;
+  public List<TaggedDeviceReadingResponse> data;
 
-    private long nPages;
+  private long nPages;
 
-    public TaggedTemperatureResponse() {
-        data = new ArrayList<TaggedDeviceReadingResponse>();
-        nPages = 0;
-    }
+  public TaggedTemperatureResponse() {
+    data = new ArrayList<TaggedDeviceReadingResponse>();
+    nPages = 0;
+  }
 
-    public long getnPages() {
-        return nPages;
-    }
+  public long getnPages() {
+    return nPages;
+  }
 
-    public void setnPages(long nPages) {
-        this.nPages = nPages;
-    }
+  public void setnPages(long nPages) {
+    this.nPages = nPages;
+  }
 }

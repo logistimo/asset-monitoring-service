@@ -24,28 +24,29 @@
 package com.logistimo.models.user.request;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import org.hibernate.validator.constraints.NotEmpty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AddApiConsumerRequest {
-    @NotEmpty
-    public String userName;
+  @NotEmpty
+  public String userName;
 
-    @NotEmpty
-    public String password;
+  @NotEmpty
+  public String password;
 
-    @NotEmpty
-    public String organizationName;
+  @NotEmpty
+  public String organizationName;
 
-    @NotEmpty
-    public Integer userType;
+  @NotEmpty
+  public Integer userType;
 
-    @Override
-    public String toString() {
-        return "AddApiConsumerRequest{" +
-                "userName='" + userName + '\'' +
-                ", password='" + password + '\'' +
-                ", organizationName='" + organizationName + '\'' +
-                '}';
-    }
+  @Override
+  public String toString() {
+    return "AddApiConsumerRequest{" +
+        "userName='" + userName + '\'' +
+        ", password='" + password + '\'' +
+        ", organizationName='" + organizationName + '\'' +
+        '}';
+  }
 }

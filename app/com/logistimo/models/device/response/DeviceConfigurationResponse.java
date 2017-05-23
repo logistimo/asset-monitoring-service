@@ -28,5 +28,5 @@ import com.logistimo.models.device.request.ConfigurationRequest;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class DeviceConfigurationResponse {
-    public ConfigurationRequest data;
+  public ConfigurationRequest data;
 }

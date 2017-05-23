@@ -27,15 +27,15 @@ package com.logistimo.utils;
  * Created by kaniyarasu on 27/10/14.
  */
 public class LogistimoValidationUtils {
-    public static boolean validateURL(String url) {
-        return (url != null && url.length() <= 500);
-    }
+  public static boolean validateURL(String url) {
+    return (url != null && url.length() <= 500);
+  }
 
-    public static boolean validatePhoneNumber(String phoneNumber) {
-        return (phoneNumber != null && phoneNumber.length() <= 25);
-    }
+  public static boolean validatePhoneNumber(String phoneNumber) {
+    return (phoneNumber != null && phoneNumber.length() <= 25);
+  }
 
-    public static boolean validateDuration(int duration) {
-        return duration >= 0;
-    }
+  public static boolean validateDuration(int duration) {
+    return duration >= 0;
+  }
 }

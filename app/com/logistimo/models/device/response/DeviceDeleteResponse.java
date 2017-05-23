@@ -30,19 +30,19 @@ import java.util.List;
  * Created by kaniyarasu on 21/10/14.
  */
 public class DeviceDeleteResponse {
-    public List<String> errs = new ArrayList<String>();
+  public List<String> errs = new ArrayList<String>();
 
-    public String message;
+  public String message;
 
-    public DeviceDeleteResponse() {
-        message = "List of device not found.";
-    }
+  public DeviceDeleteResponse() {
+    message = "List of device not found.";
+  }
 
-    @Override
-    public String toString() {
-        return "DeviceDeleteResponse{" +
-                "errs=" + errs +
-                ", message='" + message + '\'' +
-                '}';
-    }
+  @Override
+  public String toString() {
+    return "DeviceDeleteResponse{" +
+        "errs=" + errs +
+        ", message='" + message + '\'' +
+        '}';
+  }
 }

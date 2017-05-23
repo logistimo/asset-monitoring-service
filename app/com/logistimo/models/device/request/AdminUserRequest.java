@@ -24,6 +24,7 @@
 package com.logistimo.models.device.request;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import org.hibernate.validator.constraints.NotEmpty;
 
 /**
@@ -31,10 +32,10 @@ import org.hibernate.validator.constraints.NotEmpty;
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AdminUserRequest {
-    @NotEmpty
-    public String phone;
+  @NotEmpty
+  public String phone;
 
-    public String pwd;
+  public String pwd;
 
-    public String senderId;
+  public String senderId;
 }

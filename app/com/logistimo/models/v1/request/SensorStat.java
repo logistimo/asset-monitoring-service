@@ -30,9 +30,9 @@ import javax.validation.constraints.Min;
 @Deprecated
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class SensorStat {
-    public String status;
-    public long triggerTime;
+  public String status;
+  public long triggerTime;
 
-    @Min(0)
-    public int durationFail;
+  @Min(0)
+  public int durationFail;
 }

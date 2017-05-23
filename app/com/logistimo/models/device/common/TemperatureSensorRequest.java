@@ -30,17 +30,15 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class TemperatureSensorRequest {
-    private String sId;
+  public String cd;
+  public Integer isA;
+  private String sId;
 
-    public String cd;
+  public String getsId() {
+    return sId;
+  }
 
-    public Integer isA;
-
-    public String getsId() {
-        return sId;
-    }
-
-    public void setsId(String sId) {
-        this.sId = sId;
-    }
+  public void setsId(String sId) {
+    this.sId = sId;
+  }
 }

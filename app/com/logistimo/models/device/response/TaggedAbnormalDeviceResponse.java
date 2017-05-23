@@ -33,15 +33,15 @@ import java.util.List;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class TaggedAbnormalDeviceResponse {
-    public int numberOfDevices;
+  public int numberOfDevices;
 
-    public List<TaggedAbnormalTemperatureResponse> abnormalTemperatures;
+  public List<TaggedAbnormalTemperatureResponse> abnormalTemperatures;
 
-    public List<AlarmResponse> alarmDevices;
+  public List<AlarmResponse> alarmDevices;
 
-    public TaggedAbnormalDeviceResponse() {
-        abnormalTemperatures = new ArrayList<TaggedAbnormalTemperatureResponse>();
+  public TaggedAbnormalDeviceResponse() {
+    abnormalTemperatures = new ArrayList<TaggedAbnormalTemperatureResponse>();
 
-        alarmDevices = new ArrayList<AlarmResponse>();
-    }
+    alarmDevices = new ArrayList<AlarmResponse>();
+  }
 }

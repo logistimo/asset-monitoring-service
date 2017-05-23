@@ -30,16 +30,16 @@ import javax.validation.constraints.Min;
 @Deprecated
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class HighAlertStat {
-    @Min(0)
-    public int numAlerts;
+  @Min(0)
+  public int numAlerts;
 
-    public Double highestTemperature;
+  public Double highestTemperature;
 
-    @Min(0)
-    public int durationHigh;
+  @Min(0)
+  public int durationHigh;
 
-    @Min(0)
-    public long triggerTime;
+  @Min(0)
+  public long triggerTime;
 
-    public Double ambientTemperature;
+  public Double ambientTemperature;
 }

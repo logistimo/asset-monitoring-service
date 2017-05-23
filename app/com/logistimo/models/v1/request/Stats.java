@@ -35,23 +35,23 @@ import javax.validation.constraints.Min;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Stats {
 
-    @Min(0)
-    public long day;
+  @Min(0)
+  public long day;
 
-    @Min(0)
-    public int numAlerts;
+  @Min(0)
+  public int numAlerts;
 
-    public Double meanTemperature;
+  public Double meanTemperature;
 
-    @Valid
-    public LowAlertStat lowAlert;
+  @Valid
+  public LowAlertStat lowAlert;
 
-    @Valid
-    public HighAlertStat highAlert;
+  @Valid
+  public HighAlertStat highAlert;
 
-    @Valid
-    public SensorStat sensorConnection;
+  @Valid
+  public SensorStat sensorConnection;
 
-    @Valid
-    public CommunicationStat communication;
+  @Valid
+  public CommunicationStat communication;
 }

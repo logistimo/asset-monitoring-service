@@ -30,19 +30,19 @@ import java.util.List;
  * Created by kaniyarasu on 21/10/14.
  */
 public class DeviceCreationResponse {
-    public List<String> errs = new ArrayList<String>();
+  public List<String> errs = new ArrayList<String>();
 
-    public String message;
+  public String message;
 
-    public DeviceCreationResponse() {
-        message = "Invalid request data(vId/dId is null).";
-    }
+  public DeviceCreationResponse() {
+    message = "Invalid request data(vId/dId is null).";
+  }
 
-    @Override
-    public String toString() {
-        return "DeviceCreationResponse{" +
-                "errs=" + errs +
-                ", message='" + message + '\'' +
-                '}';
-    }
+  @Override
+  public String toString() {
+    return "DeviceCreationResponse{" +
+        "errs=" + errs +
+        ", message='" + message + '\'' +
+        '}';
+  }
 }

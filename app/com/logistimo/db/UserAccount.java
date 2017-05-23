@@ -23,53 +23,59 @@
 
 package com.logistimo.db;
 
-import play.db.jpa.JPA;
-
-import javax.persistence.*;
 import java.util.List;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Table;
+
+import play.db.jpa.JPA;
 
 @Entity
 @Table(name = "user_accounts")
 public class UserAccount {
-    public static final Integer USERTYPE_RW = 1;
-    public static final Integer USERTYPE_R = 2;
+  public static final Integer USERTYPE_RW = 1;
+  public static final Integer USERTYPE_R = 2;
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(name = "id")
-    public Long id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.AUTO)
+  @Column(name = "id")
+  public Long id;
 
-    @Column(name = "username", unique = true, nullable = false)
-    public String userName;
+  @Column(name = "username", unique = true, nullable = false)
+  public String userName;
 
-    @Column(name = "password", nullable = false)
-    public String password;
+  @Column(name = "password", nullable = false)
+  public String password;
 
-    @Column(name = "organizationname", nullable = false)
-    public String organizationName;
+  @Column(name = "organizationname", nullable = false)
+  public String organizationName;
 
-    @Column(name = "type", nullable = false)
-    public Integer userType;
+  @Column(name = "type", nullable = false)
+  public Integer userType;
 
-    public static List<UserAccount> findAll() {
-        return JPA.em()
-                .createQuery("from UserAccount", UserAccount.class)
-                .getResultList();
-    }
+  public static List<UserAccount> findAll() {
+    return JPA.em()
+        .createQuery("from UserAccount", UserAccount.class)
+        .getResultList();
+  }
 
-    public static UserAccount getUser(String userName) {
-        return (UserAccount) JPA.em()
-                .createQuery("from UserAccount where username = ?1")
-                .setParameter(1, userName)
-                .setMaxResults(1)
-                .getSingleResult();
-    }
+  public static UserAccount getUser(String userName) {
+    return (UserAccount) JPA.em()
+        .createQuery("from UserAccount where username = ?1")
+        .setParameter(1, userName)
+        .setMaxResults(1)
+        .getSingleResult();
+  }
 
-    public void save() {
-        JPA.em().persist(this);
-    }
+  public void save() {
+    JPA.em().persist(this);
+  }
 
-    public void update() {
-        JPA.em().merge(this);
-    }
+  public void update() {
+    JPA.em().merge(this);
+  }
 }

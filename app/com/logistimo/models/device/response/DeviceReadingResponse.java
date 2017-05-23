@@ -31,13 +31,13 @@ import java.util.List;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class DeviceReadingResponse {
-    public String deviceId;
+  public String deviceId;
 
-    public String vendorId;
+  public String vendorId;
 
-    public List<TemperatureResponse> temperatures;
+  public List<TemperatureResponse> temperatures;
 
-    public DeviceReadingResponse() {
-        temperatures = new ArrayList<TemperatureResponse>();
-    }
+  public DeviceReadingResponse() {
+    temperatures = new ArrayList<TemperatureResponse>();
+  }
 }

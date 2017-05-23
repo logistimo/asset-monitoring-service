@@ -23,38 +23,46 @@
 
 package com.logistimo.db;
 
-import play.db.jpa.JPA;
-
-import javax.persistence.*;
 import java.util.List;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
+
+import play.db.jpa.JPA;
 
 @Entity
 @Table(name = "daily_stats_device_errors")
 public class DailyStatsDeviceError {
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(name = "id")
-    public Long id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.AUTO)
+  @Column(name = "id")
+  public Long id;
 
-    @Column(name = "error_code", nullable = false)
-    public String errorCode;
+  @Column(name = "error_code", nullable = false)
+  public String errorCode;
 
-    @Column(name = "count", nullable = false)
-    public int count;
+  @Column(name = "count", nullable = false)
+  public int count;
 
-    @Column(name = "time", nullable = false)
-    public int time;
+  @Column(name = "time", nullable = false)
+  public int time;
 
-    @ManyToOne
-    public DailyStatsDO daily_stats;
+  @ManyToOne
+  public DailyStatsDO daily_stats;
 
-    public static List<DailyStatsDeviceError> getDailyStatsDeviceErrors(DailyStatsDO dailyStatsDO) {
-        return JPA.em().createQuery("from DailyStatsDeviceError  where daily_stats = ?1", DailyStatsDeviceError.class)
-                .setParameter(1, dailyStatsDO)
-                .getResultList();
-    }
+  public static List<DailyStatsDeviceError> getDailyStatsDeviceErrors(DailyStatsDO dailyStatsDO) {
+    return JPA.em().createQuery("from DailyStatsDeviceError  where daily_stats = ?1",
+        DailyStatsDeviceError.class)
+        .setParameter(1, dailyStatsDO)
+        .getResultList();
+  }
 
-    public void save() {
-        JPA.em().persist(this);
-    }
+  public void save() {
+    JPA.em().persist(this);
+  }
 }

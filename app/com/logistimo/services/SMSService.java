@@ -23,6 +23,8 @@
 
 package com.logistimo.services;
 
+import java.io.IOException;
+
 import play.Logger;
 import play.libs.Json;
 import play.libs.ws.WS;
@@ -30,67 +32,67 @@ import play.libs.ws.WSRequestHolder;
 import play.libs.ws.WSResponse;
 import play.mvc.Http;
 
-import java.io.IOException;
-
 /**
  * Created by kaniyarasu on 06/11/14.
  */
 public class SMSService<T> extends ServiceImpl {
-    private static final Logger.ALogger LOGGER = Logger.of(SMSService.class);
+  private static final Logger.ALogger LOGGER = Logger.of(SMSService.class);
 
-    /**
-     * Call the SMS Service API, return response.
-     *
-     * @return
-     */
-    public String sendSMS(String requestURL) throws IOException {
-        int MAX_TRIALS = 3;
-        for (int index = 0; index < 3; index++) {
-            try {
-                //String hmac = hmac(Play.application().configuration().getString("application.secret"), data);
-                WSRequestHolder req = WS.url(requestURL);
-                WSResponse wsResponse = req.get().get(20000);
-                if (wsResponse.getStatus() != Http.Status.OK) {
-                    throw new IOException(wsResponse.getStatusText());
-                }
-                LOGGER.info("Response: %s", wsResponse.getStatus());
-                return wsResponse.getStatusText();
-            } catch (IOException e) {
-                LOGGER.warn("IOException on trial %s; will be trying %s more times: %s", index, (MAX_TRIALS - index), e.getMessage());
-                if (index == MAX_TRIALS)
-                    throw new IOException("Error when connection to SMS Gateway to send message. Please try again later.");
-            }
+  /**
+   * Call the SMS Service API, return response.
+   */
+  public String sendSMS(String requestURL) throws IOException {
+    int MAX_TRIALS = 3;
+    for (int index = 0; index < 3; index++) {
+      try {
+        //String hmac = hmac(Play.application().configuration().getString("application.secret"), data);
+        WSRequestHolder req = WS.url(requestURL);
+        WSResponse wsResponse = req.get().get(20000);
+        if (wsResponse.getStatus() != Http.Status.OK) {
+          throw new IOException(wsResponse.getStatusText());
         }
-        return "";
-    }
-
-    /**
-     * Call the SMS Service API, return response.
-     *
-     * @return
-     */
-    public String sendSMS(String requestURL, String requestBody) throws IOException {
-        int MAX_TRIALS = 3;
-        for (int index = 0; index < 3; index++) {
-            try {
-                //String hmac = hmac(Play.application().configuration().getString("application.secret"), data);
-                WSRequestHolder req = WS.url(requestURL).setHeader("Content-Type", "application/json");
-                WSResponse wsResponse = req.post(requestBody).get(20000);
-                if (wsResponse.getStatus() != Http.Status.OK) {
-                    throw new IOException(wsResponse.getStatusText());
-                }
-                LOGGER.info("Response: {}", wsResponse.getStatus());
-                return wsResponse.getStatusText();
-            } catch (IOException e) {
-                LOGGER.warn("IOException on url {}, body {}, trial {}; will be trying {} more times: {}", requestURL, requestBody, index, (MAX_TRIALS - index), e.getMessage());
-                if (index == MAX_TRIALS)
-                    throw new IOException("Error when connection to SMS Gateway to send message. Please try again later.");
-            }
+        LOGGER.info("Response: %s", wsResponse.getStatus());
+        return wsResponse.getStatusText();
+      } catch (IOException e) {
+        LOGGER.warn("IOException on trial %s; will be trying %s more times: %s", index,
+            (MAX_TRIALS - index), e.getMessage());
+        if (index == MAX_TRIALS) {
+          throw new IOException(
+              "Error when connection to SMS Gateway to send message. Please try again later.");
         }
-        return "";
+      }
     }
+    return "";
+  }
 
-    public String sendSMS(String requestUrl, T t) throws IOException {
-        return sendSMS(requestUrl, Json.toJson(t).toString());
+  /**
+   * Call the SMS Service API, return response.
+   */
+  public String sendSMS(String requestURL, String requestBody) throws IOException {
+    int MAX_TRIALS = 3;
+    for (int index = 0; index < 3; index++) {
+      try {
+        //String hmac = hmac(Play.application().configuration().getString("application.secret"), data);
+        WSRequestHolder req = WS.url(requestURL).setHeader("Content-Type", "application/json");
+        WSResponse wsResponse = req.post(requestBody).get(20000);
+        if (wsResponse.getStatus() != Http.Status.OK) {
+          throw new IOException(wsResponse.getStatusText());
+        }
+        LOGGER.info("Response: {}", wsResponse.getStatus());
+        return wsResponse.getStatusText();
+      } catch (IOException e) {
+        LOGGER.warn("IOException on url {}, body {}, trial {}; will be trying {} more times: {}",
+            requestURL, requestBody, index, (MAX_TRIALS - index), e.getMessage());
+        if (index == MAX_TRIALS) {
+          throw new IOException(
+              "Error when connection to SMS Gateway to send message. Please try again later.");
+        }
+      }
     }
+    return "";
+  }
+
+  public String sendSMS(String requestUrl, T t) throws IOException {
+    return sendSMS(requestUrl, Json.toJson(t).toString());
+  }
 }

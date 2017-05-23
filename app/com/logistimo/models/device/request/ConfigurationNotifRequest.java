@@ -32,8 +32,8 @@ import javax.validation.constraints.Min;
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ConfigurationNotifRequest {
-    public Integer dur;
+  public Integer dur;
 
-    @Min(0)
-    public Integer num;
+  @Min(0)
+  public Integer num;
 }

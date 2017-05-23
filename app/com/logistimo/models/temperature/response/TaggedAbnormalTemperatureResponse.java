@@ -30,11 +30,11 @@ import com.fasterxml.jackson.annotation.JsonInclude;
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class TaggedAbnormalTemperatureResponse {
-    public String deviceId;
+  public String deviceId;
 
-    public String vendorId;
+  public String vendorId;
 
-    public double temperature;
+  public double temperature;
 
-    public int time;
+  public int time;
 }

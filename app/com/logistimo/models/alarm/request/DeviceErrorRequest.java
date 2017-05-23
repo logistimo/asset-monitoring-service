@@ -29,10 +29,10 @@ import javax.validation.constraints.Min;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DeviceErrorRequest {
-    public String code;
+  public String code;
 
-    @Min(0)
-    public int time;
+  @Min(0)
+  public int time;
 
-    public String msg;
+  public String msg;
 }

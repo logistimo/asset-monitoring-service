@@ -26,14 +26,14 @@ package com.logistimo.models.device.request;
 /**
  * Created by kaniyarasu on 11/02/16.
  */
-public class PowerOutageAlarmConfiguration{
-    private Integer dur;
+public class PowerOutageAlarmConfiguration {
+  private Integer dur;
 
-    public Integer getDur() {
-        return dur;
-    }
+  public Integer getDur() {
+    return dur;
+  }
 
-    public void setDur(Integer dur) {
-        this.dur = dur;
-    }
+  public void setDur(Integer dur) {
+    this.dur = dur;
+  }
 }

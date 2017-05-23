@@ -23,49 +23,55 @@
 
 package com.logistimo.db;
 
-import play.db.jpa.JPA;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
 
-import javax.persistence.*;
+import play.db.jpa.JPA;
 
 @Entity
 @Table(name = "temperature_statistics")
 @Deprecated
 public class TemperatureStatistics {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(name = "id")
-    public Long id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.AUTO)
+  @Column(name = "id")
+  public Long id;
 
-    @Column(nullable = false)
-    public long dayOfComputation;
-    public int numberOfAlerts;
-    public Double meanTemperature;
+  @Column(nullable = false)
+  public long dayOfComputation;
+  public int numberOfAlerts;
+  public Double meanTemperature;
 
-    public int numberOfLowAlerts;
-    public Double lowestTemperature;
-    public int durationLow;
-    public long firstLowAlertTime;
-    public Double lowAlertAmbientTemperatureLow;
+  public int numberOfLowAlerts;
+  public Double lowestTemperature;
+  public int durationLow;
+  public long firstLowAlertTime;
+  public Double lowAlertAmbientTemperatureLow;
 
-    public int numberOfHighAlerts;
-    public Double highestTemperature;
-    public int durationHigh;
-    public long firstHighAlertTime;
-    public Double highAlertAmbientTemperature;
+  public int numberOfHighAlerts;
+  public Double highestTemperature;
+  public int durationHigh;
+  public long firstHighAlertTime;
+  public Double highAlertAmbientTemperature;
 
-    public int numberOfSMSSent;
-    public int numberOfInternetPushes;
-    public int numberInternetPushFailures;
+  public int numberOfSMSSent;
+  public int numberOfInternetPushes;
+  public int numberInternetPushFailures;
 
-    public long firstSensorConnectionFailureTime;
-    public int sensorConnectionFailureDuration;
+  public long firstSensorConnectionFailureTime;
+  public int sensorConnectionFailureDuration;
 
-    @ManyToOne
-    public Device device;
+  @ManyToOne
+  public Device device;
 
-    public void save() {
-        JPA.em().persist(this);
-    }
+  public void save() {
+    JPA.em().persist(this);
+  }
 
 }

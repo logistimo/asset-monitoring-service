@@ -24,11 +24,11 @@
 package com.logistimo.task;
 
 public class BackgroundTaskConsumer extends TaskConsumer {
-    public String getEndpointUri() {
-        return super.getEndpointUri();
-    }
+  public String getEndpointUri() {
+    return super.getEndpointUri();
+  }
 
-    public void onReceive(Object message) {
-        super.onReceive(message);
-    }
+  public void onReceive(Object message) {
+    super.onReceive(message);
+  }
 }

@@ -30,15 +30,15 @@ import java.util.List;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class TemperatureReadingResponse {
-    public List<TemperatureResponse> data = new ArrayList<TemperatureResponse>();
+  public List<TemperatureResponse> data = new ArrayList<TemperatureResponse>();
 
-    private long nPages;
+  private long nPages;
 
-    public long getnPages() {
-        return nPages;
-    }
+  public long getnPages() {
+    return nPages;
+  }
 
-    public void setnPages(long nPages) {
-        this.nPages = nPages;
-    }
+  public void setnPages(long nPages) {
+    this.nPages = nPages;
+  }
 }

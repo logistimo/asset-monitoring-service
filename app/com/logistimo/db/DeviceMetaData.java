@@ -23,9 +23,17 @@
 
 package com.logistimo.db;
 
-import play.db.jpa.JPA;
-import javax.persistence.*;
 import java.util.List;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
+
+import play.db.jpa.JPA;
 
 /**
  * Created by kaniyarasu on 27/10/15.
@@ -33,67 +41,69 @@ import java.util.List;
 @Entity
 @Table(name = "device_meta_data")
 public class DeviceMetaData {
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(name = "id")
-    public Long id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.AUTO)
+  @Column(name = "id")
+  public Long id;
 
-    @Column(name = "ky")
-    public String key;
+  @Column(name = "ky")
+  public String key;
 
-    @Column(name = "value")
-    public String value;
+  @Column(name = "value")
+  public String value;
 
-    @ManyToOne
-    public Device device;
+  @ManyToOne
+  public Device device;
 
-    public DeviceMetaData() {
+  public DeviceMetaData() {
+  }
+
+  public DeviceMetaData(String key, Device device) {
+    this.key = key;
+    this.device = device;
+  }
+
+  public DeviceMetaData(String key, String value, Device device) {
+    this.key = key;
+    this.value = value;
+    this.device = device;
+  }
+
+  public static List<DeviceMetaData> getDeviceMetaDatas(Device device) {
+    return JPA.em().createQuery("from DeviceMetaData where device = ?1", DeviceMetaData.class)
+        .setParameter(1, device)
+        .getResultList();
+  }
+
+  public static DeviceMetaData getDeviceMetaDataByKey(Device device, String key) {
+    return JPA.em()
+        .createQuery("from DeviceMetaData where device = ?1 and key = ?2", DeviceMetaData.class)
+        .setParameter(1, device)
+        .setParameter(2, key)
+        .getSingleResult();
+  }
+
+  public static List<DeviceMetaData> getDeviceMetaDataByKeys(Device device, List<String> keys) {
+    return JPA.em().createQuery("from DeviceMetaData where device = ?1 and key in :inclList",
+        DeviceMetaData.class)
+        .setParameter(1, device)
+        .setParameter("inclList", keys)
+        .getResultList();
+  }
+
+  public void save() {
+    if (this.key != null && this.value != null) {
+      JPA.em().persist(this);
     }
+  }
 
-    public DeviceMetaData(String key, Device device) {
-        this.key = key;
-        this.device = device;
+  public void update() {
+    if (this.key != null && this.value != null) {
+      JPA.em().merge(this);
     }
+  }
 
-    public DeviceMetaData(String key, String value, Device device) {
-        this.key = key;
-        this.value = value;
-        this.device = device;
-    }
-
-    public static List<DeviceMetaData> getDeviceMetaDatas(Device device){
-        return JPA.em().createQuery("from DeviceMetaData where device = ?1", DeviceMetaData.class)
-                .setParameter(1, device)
-                .getResultList();
-    }
-
-    public static DeviceMetaData getDeviceMetaDataByKey(Device device, String key){
-        return JPA.em().createQuery("from DeviceMetaData where device = ?1 and key = ?2", DeviceMetaData.class)
-                .setParameter(1, device)
-                .setParameter(2, key)
-                .getSingleResult();
-    }
-
-    public static List<DeviceMetaData> getDeviceMetaDataByKeys(Device device, List<String> keys){
-        return JPA.em().createQuery("from DeviceMetaData where device = ?1 and key in :inclList", DeviceMetaData.class)
-                .setParameter(1, device)
-                .setParameter("inclList", keys)
-                .getResultList();
-    }
-
-    public void save() {
-        if(this.key != null && this.value != null){
-            JPA.em().persist(this);
-        }
-    }
-
-    public void update() {
-        if(this.key != null && this.value != null) {
-            JPA.em().merge(this);
-        }
-    }
-
-    public void delete() {
-        JPA.em().remove(this);
-    }
+  public void delete() {
+    JPA.em().remove(this);
+  }
 }

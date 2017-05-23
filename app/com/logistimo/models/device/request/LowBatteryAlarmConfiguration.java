@@ -26,14 +26,14 @@ package com.logistimo.models.device.request;
 /**
  * Created by kaniyarasu on 11/02/16.
  */
-public class LowBatteryAlarmConfiguration{
-    private Integer lmt;
+public class LowBatteryAlarmConfiguration {
+  private Integer lmt;
 
-    public Integer getLmt() {
-        return lmt;
-    }
+  public Integer getLmt() {
+    return lmt;
+  }
 
-    public void setLmt(Integer lmt) {
-        this.lmt = lmt;
-    }
+  public void setLmt(Integer lmt) {
+    this.lmt = lmt;
+  }
 }

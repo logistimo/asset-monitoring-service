@@ -27,6 +27,9 @@ import com.logistimo.models.alarm.request.AlarmLoggingRequest;
 import com.logistimo.models.alarm.response.AlarmLoggingResponse;
 import com.logistimo.services.AlarmService;
 import com.logistimo.services.ServiceFactory;
+
+import javax.persistence.NoResultException;
+
 import play.Logger;
 import play.Logger.ALogger;
 import play.db.jpa.Transactional;
@@ -34,52 +37,53 @@ import play.libs.Json;
 import play.mvc.Result;
 import play.mvc.With;
 
-import javax.persistence.NoResultException;
-
 public class AlarmController extends BaseController {
-    private static final ALogger LOGGER = Logger.of(AlarmController.class);
-    private static final AlarmService alarmService = ServiceFactory.getService(AlarmService.class);
+  private static final ALogger LOGGER = Logger.of(AlarmController.class);
+  private static final AlarmService alarmService = ServiceFactory.getService(AlarmService.class);
 
-    @Transactional
-    public static Result createAlarm(String callback) {
+  @Transactional
+  public static Result createAlarm(String callback) {
 
-        AlarmLoggingRequest alarmLoggingRequest;
-        try {
-            alarmLoggingRequest = getValidatedObject(request().body().asJson()
-                    , AlarmLoggingRequest.class);
-        } catch (Exception e) {
-            LOGGER.warn("Validation failed while posting alarm", e);
-            return prepareResult(BAD_REQUEST, callback, "Error while parsing request data - " + e.getMessage());
-        }
-        try {
-            AlarmLoggingResponse alarmLoggingResponse = alarmService.postDeviceAlarm(alarmLoggingRequest);
-
-            if (alarmLoggingResponse.errs.size() == alarmLoggingRequest.data.size()) {
-                LOGGER.warn("No device found - " + alarmLoggingResponse.toString());
-                return prepareResult(NOT_FOUND, callback, Json.toJson(alarmLoggingResponse));
-            } else if (alarmLoggingResponse.errs.size() > 0) {
-                LOGGER.warn("Partial content - " + alarmLoggingResponse.toString());
-                return prepareResult(PARTIAL_CONTENT, callback, Json.toJson(alarmLoggingResponse));
-            }
-            return prepareResult(CREATED, callback, "Alarm posted successfully.");
-        } catch (Exception e) {
-            LOGGER.error("Error while logging alarms", e);
-            return prepareResult(INTERNAL_SERVER_ERROR, callback, e.getMessage());
-        }
+    AlarmLoggingRequest alarmLoggingRequest;
+    try {
+      alarmLoggingRequest = getValidatedObject(request().body().asJson()
+          , AlarmLoggingRequest.class);
+    } catch (Exception e) {
+      LOGGER.warn("Validation failed while posting alarm", e);
+      return prepareResult(BAD_REQUEST, callback,
+          "Error while parsing request data - " + e.getMessage());
     }
+    try {
+      AlarmLoggingResponse alarmLoggingResponse = alarmService.postDeviceAlarm(alarmLoggingRequest);
 
-    @Transactional(readOnly = true)
-    @With(SecuredAction.class)
-    public static Result getAlarm(String vendorId, String deviceId, String sid, int pageNumber, int pageSize, String callback) {
-        try {
-            deviceId = decodeParameter(deviceId);
-            return prepareResult(OK, callback, Json.toJson(alarmService.getAlarm(vendorId, deviceId, sid, pageNumber, pageSize)));
-        } catch (NoResultException e) {
-            LOGGER.warn("Error while reading alarms", e);
-            return prepareResult(NOT_FOUND, callback, e.getMessage());
-        } catch (Exception e) {
-            LOGGER.error("Error while reading alarms", e);
-            return prepareResult(INTERNAL_SERVER_ERROR, callback, e.getMessage());
-        }
+      if (alarmLoggingResponse.errs.size() == alarmLoggingRequest.data.size()) {
+        LOGGER.warn("No device found - " + alarmLoggingResponse.toString());
+        return prepareResult(NOT_FOUND, callback, Json.toJson(alarmLoggingResponse));
+      } else if (alarmLoggingResponse.errs.size() > 0) {
+        LOGGER.warn("Partial content - " + alarmLoggingResponse.toString());
+        return prepareResult(PARTIAL_CONTENT, callback, Json.toJson(alarmLoggingResponse));
+      }
+      return prepareResult(CREATED, callback, "Alarm posted successfully.");
+    } catch (Exception e) {
+      LOGGER.error("Error while logging alarms", e);
+      return prepareResult(INTERNAL_SERVER_ERROR, callback, e.getMessage());
     }
+  }
+
+  @Transactional(readOnly = true)
+  @With(SecuredAction.class)
+  public static Result getAlarm(String vendorId, String deviceId, String sid, int pageNumber,
+                                int pageSize, String callback) {
+    try {
+      deviceId = decodeParameter(deviceId);
+      return prepareResult(OK, callback,
+          Json.toJson(alarmService.getAlarm(vendorId, deviceId, sid, pageNumber, pageSize)));
+    } catch (NoResultException e) {
+      LOGGER.warn("Error while reading alarms", e);
+      return prepareResult(NOT_FOUND, callback, e.getMessage());
+    } catch (Exception e) {
+      LOGGER.error("Error while reading alarms", e);
+      return prepareResult(INTERNAL_SERVER_ERROR, callback, e.getMessage());
+    }
+  }
 }

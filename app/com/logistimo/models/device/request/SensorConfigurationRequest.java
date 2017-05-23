@@ -30,25 +30,19 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class SensorConfigurationRequest {
-    private String sId;
+  public ConfigurationCommRequest comm;
+  public ConfigurationHighAlarmRequest highAlarm;
+  public ConfigurationLowAlarmRequest lowAlarm;
+  public ConfigurationHighWarnRequest highWarn;
+  public ConfigurationLowWarnRequest lowWarn;
+  public ConfigurationNotifRequest notf;
+  private String sId;
 
-    public ConfigurationCommRequest comm;
+  public String getsId() {
+    return sId;
+  }
 
-    public ConfigurationHighAlarmRequest highAlarm;
-
-    public ConfigurationLowAlarmRequest lowAlarm;
-
-    public ConfigurationHighWarnRequest highWarn;
-
-    public ConfigurationLowWarnRequest lowWarn;
-
-    public ConfigurationNotifRequest notf;
-
-    public String getsId() {
-        return sId;
-    }
-
-    public void setsId(String sId) {
-        this.sId = sId;
-    }
+  public void setsId(String sId) {
+    this.sId = sId;
+  }
 }

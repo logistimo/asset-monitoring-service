@@ -23,9 +23,15 @@
 
 package com.logistimo.db;
 
-import play.db.jpa.JPA;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
 
-import javax.persistence.*;
+import play.db.jpa.JPA;
 
 /**
  * Created by kaniyarasu on 20/11/14.
@@ -33,34 +39,35 @@ import javax.persistence.*;
 @Entity
 @Table(name = "device_admin_settings")
 public class DeviceAdminSettings {
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(name = "id")
-    public Long id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.AUTO)
+  @Column(name = "id")
+  public Long id;
 
-    @Column(name = "phone_number")
-    public String phoneNumber;
+  @Column(name = "phone_number")
+  public String phoneNumber;
 
-    @Column(name = "password")
-    public String password;
+  @Column(name = "password")
+  public String password;
 
-    @Column(name = "sender_id")
-    public String senderId;
+  @Column(name = "sender_id")
+  public String senderId;
 
-    @ManyToOne
-    public Device device;
+  @ManyToOne
+  public Device device;
 
-    public static DeviceAdminSettings findByDevice(Device device){
-        return JPA.em().createQuery("from DeviceAdminSettings where device = ?1", DeviceAdminSettings.class)
-                .setParameter(1, device)
-                .getSingleResult();
-    }
+  public static DeviceAdminSettings findByDevice(Device device) {
+    return JPA.em()
+        .createQuery("from DeviceAdminSettings where device = ?1", DeviceAdminSettings.class)
+        .setParameter(1, device)
+        .getSingleResult();
+  }
 
-    public void save() {
-        JPA.em().persist(this);
-    }
+  public void save() {
+    JPA.em().persist(this);
+  }
 
-    public void update() {
-        JPA.em().merge(this);
-    }
+  public void update() {
+    JPA.em().merge(this);
+  }
 }

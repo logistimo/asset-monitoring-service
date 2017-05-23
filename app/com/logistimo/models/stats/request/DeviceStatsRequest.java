@@ -25,6 +25,7 @@ package com.logistimo.models.stats.request;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.logistimo.models.stats.common.DailyStats;
+
 import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.validation.Valid;
@@ -33,23 +34,23 @@ import javax.validation.constraints.NotNull;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DeviceStatsRequest {
 
-    @NotEmpty
-    public String dId;
+  @NotEmpty
+  public String dId;
 
-    public String sId;
+  public String sId;
 
-    public String trId;
+  public String trId;
 
-    @NotNull
-    @Valid
-    public DailyStats stats;
+  @NotNull
+  @Valid
+  public DailyStats stats;
 
-    @Override
-    public String toString() {
-        return "DeviceStatsRequest{" +
-                "dId='" + dId + '\'' +
-                ", sId='" + sId + '\'' +
-                ", stats=" + stats +
-                '}';
-    }
+  @Override
+  public String toString() {
+    return "DeviceStatsRequest{" +
+        "dId='" + dId + '\'' +
+        ", sId='" + sId + '\'' +
+        ", stats=" + stats +
+        '}';
+  }
 }

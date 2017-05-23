@@ -34,199 +34,196 @@ import org.apache.zookeeper.WatchedEvent;
 import org.apache.zookeeper.Watcher;
 import org.apache.zookeeper.ZooKeeper;
 import org.apache.zookeeper.data.Stat;
-import play.Logger;
 
 import java.util.Arrays;
+
+import play.Logger;
 
 // See http://zookeeper.apache.org/doc/current/javaExample.html#ch_Introduction
 public class ZkDataMonitor implements Watcher, StatCallback {
 
-    private final static Logger.ALogger LOGGER = Logger.of(ZkDataMonitor.class);
+  private final static Logger.ALogger LOGGER = Logger.of(ZkDataMonitor.class);
 
 
+  // The ZooKeeper API handle
+  ZooKeeper hZooKeeper = null;
 
-    // The ZooKeeper API handle
-    ZooKeeper hZooKeeper = null;
+  // The ZNode that we're monitoring
+  String zNodePath = null;
 
-    // The ZNode that we're monitoring
-    String zNodePath = null;
+  // True if we're dead, False otherwise
+  boolean isZooKeeperSessionClosed = false;
 
-    // True if we're dead, False otherwise
-    boolean isZooKeeperSessionClosed = false;
+  // The listener object interested in changes to our monitored znode
+  ZkNodeDataListener listener = null;
 
-    // The listener object interested in changes to our monitored znode
-    ZkNodeDataListener listener = null;
+  byte prevData[];
 
-    byte prevData[];
+  /**
+   * Constructor
+   */
+  public ZkDataMonitor(ZooKeeper hZooKeeper, String zNodePath, ZkNodeDataListener listener) {
+    this.hZooKeeper = hZooKeeper;
+    this.zNodePath = zNodePath;
+    this.listener = listener;
+    // Get things started by checking if the node exists. We are going
+    // to be completely event driven
+    checkZNodeExistsAsync();
+  }
 
-    /**
-     * Other classes use the DataMonitor by implementing this method
-     */
-    public interface ZkNodeDataListener {
-        /**
-         * The existence status of the node has changed.
-         */
-        void onZNodeDeleted();
+  /**
+   * @return handle to ZooKeeper API
+   */
+  private ZooKeeper getZooKeeper() {
+    assert null != hZooKeeper;
+    return hZooKeeper;
+  }
 
-        /**
-         * The ZooKeeper session is no longer valid.
-         */
-        void onZooKeeperSessionClosed();
+  /**
+   * @return Path to zNode that we're monitoring for existence
+   */
+  private final String getZNodePath() {
+    return zNodePath;
+  }
 
-        /**
-         * The ZooKeeper connection lost
-         */
-        void onZooKeeperDisconnected();
+  /**
+   * @return True if we're dead, False otherwise
+   */
+  public boolean getIsZooKeeperSessionClosed() {
+    return isZooKeeperSessionClosed;
+  }
 
-        /**
-         * Listener for zookeeper reconnect.
-         */
-        void onZooKeeperReconnected();
+  /**
+   * @return Listener to callback when data changes
+   */
+  private ZkNodeDataListener getListener() {
+    assert null != listener;
+    return listener;
+  }
 
-        /**
-         * The existence status of the node has changed.
-         */
-        void exists(byte[] b);
-    }
+  /**
+   * Utility function to close monitor and inform listener on session close
+   */
+  private void onZooKeeperSessionClosed() {
+    isZooKeeperSessionClosed = true;
+    getListener().onZooKeeperSessionClosed();
+  }
 
-    /**
-     * @return handle to ZooKeeper API
-     */
-    private ZooKeeper getZooKeeper() {
-        assert null != hZooKeeper;
-        return hZooKeeper;
-    }
+  /**
+   * Utility function to close monitor and inform listener on connection loss
+   */
+  private void onZooKeeperDisconnected() {
+    getListener().onZooKeeperDisconnected();
+  }
 
-    /**
-     * @return Path to zNode that we're monitoring for existence
-     */
-    private final String getZNodePath() {
-        return zNodePath;
-    }
+  private void onZooKeeperReconnected() {
+    getListener().onZooKeeperReconnected();
+  }
 
-    /**
-     * @return True if we're dead, False otherwise
-     */
-    public boolean getIsZooKeeperSessionClosed() {
-        return isZooKeeperSessionClosed;
-    }
+  /**
+   * Utility function to check on znode existence
+   */
+  private void checkZNodeExistsAsync() {
+    getZooKeeper().exists(getZNodePath(), true /*bWatch*/, this /*AsyncCallback.StatCallback*/, null /*Object ctx*/);
+  }
 
-    /**
-     * @return Listener to callback when data changes
-     */
-    private ZkNodeDataListener getListener() {
-        assert null != listener;
-        return listener;
-    }
+  /**
+   * Watcher callback
+   */
+  public void process(WatchedEvent event) {
+    String path = event.getPath();
+    if (event.getType() == Event.EventType.None) {
+      // We are are being told that the state of the
+      // connection has changed
+      switch (event.getState()) {
+        case SyncConnected:
+          // In this particular example we don't need to do anything
+          // here - watches are automatically re-registered with
+          // server and any watches triggered while the client was
+          // disconnected will be delivered (in order of course)
+          onZooKeeperReconnected();
+          break;
+        case Expired:
+          // It's all over
+          onZooKeeperSessionClosed();
+          break;
 
-    /**
-     * Constructor
-     */
-    public ZkDataMonitor(ZooKeeper hZooKeeper, String zNodePath, ZkNodeDataListener listener) {
-        this.hZooKeeper = hZooKeeper;
-        this.zNodePath = zNodePath;
-        this.listener = listener;
-        // Get things started by checking if the node exists. We are going
-        // to be completely event driven
+        // It's all over
+        case Disconnected:
+          onZooKeeperDisconnected();
+          break;
+      }
+    } else {
+      if (path != null && path.equals(getZNodePath())) {
+        // Something has changed on the node, let's find out
         checkZNodeExistsAsync();
+      }
     }
+  }
+
+  /**
+   * AsyncCallback.StatCallback
+   */
+  @SuppressWarnings("deprecation")
+  public void processResult(int rc, String path, Object ctx, Stat stat) {
+    LOGGER.info("ZooZNodeDeletionMonitor::processResult:: rc is " + rc);
+    if (rc == Code.NoNode /*Code.NONODE.ordinal()*/) {
+      getListener().onZNodeDeleted();
+    } else if (rc == Code.Ok /*Code.OK.ordinal()*/) {
+      // put logging or handle this case separately (zNode exists)
+      byte b[] = null;
+      try {
+        b = getZooKeeper().getData(getZNodePath(), false, null);
+      } catch (KeeperException e) {
+        // We don't need to worry about recovering now. The watch
+        // callbacks will kick off any exception handling
+        LOGGER.warn("Keeper exception", e);
+      } catch (InterruptedException e) {
+        return;
+      }
+      if ((b == null && b != prevData)
+          || (b != null && !Arrays.equals(prevData, b))) {
+        listener.exists(b);
+        prevData = b;
+      }
+    } else if (
+        (rc == Code.SessionExpired /*Code.SESSIONEXPIRED.ordinal()*/)
+            || (rc == Code.NoAuth /*Code.NOAUTH.ordinal()*/)
+        ) {
+      onZooKeeperSessionClosed();
+    } else {
+      // Retry errors
+      checkZNodeExistsAsync();
+    }
+  }
+
+  /**
+   * Other classes use the DataMonitor by implementing this method
+   */
+  public interface ZkNodeDataListener {
+    /**
+     * The existence status of the node has changed.
+     */
+    void onZNodeDeleted();
 
     /**
-     * Utility function to close monitor and inform listener on session close
+     * The ZooKeeper session is no longer valid.
      */
-    private void onZooKeeperSessionClosed() {
-        isZooKeeperSessionClosed = true;
-        getListener().onZooKeeperSessionClosed();
-    }
+    void onZooKeeperSessionClosed();
 
     /**
-     * Utility function to close monitor and inform listener on connection loss
+     * The ZooKeeper connection lost
      */
-    private void onZooKeeperDisconnected() {
-        getListener().onZooKeeperDisconnected();
-    }
-
-    private void onZooKeeperReconnected(){
-        getListener().onZooKeeperReconnected();
-    }
+    void onZooKeeperDisconnected();
 
     /**
-     * Utility function to check on znode existence
+     * Listener for zookeeper reconnect.
      */
-    private void checkZNodeExistsAsync() {
-        getZooKeeper().exists( getZNodePath(), true /*bWatch*/, this /*AsyncCallback.StatCallback*/, null /*Object ctx*/) ;
-    }
+    void onZooKeeperReconnected();
 
     /**
-     * Watcher callback
+     * The existence status of the node has changed.
      */
-    public void process(WatchedEvent event) {
-        String path = event.getPath();
-        if (event.getType() == Event.EventType.None) {
-            // We are are being told that the state of the
-            // connection has changed
-            switch (event.getState()) {
-                case SyncConnected:
-                    // In this particular example we don't need to do anything
-                    // here - watches are automatically re-registered with
-                    // server and any watches triggered while the client was
-                    // disconnected will be delivered (in order of course)
-                    onZooKeeperReconnected();
-                    break;
-                case Expired:
-                    // It's all over
-                    onZooKeeperSessionClosed();
-                    break;
-
-                // It's all over
-                case Disconnected:
-                    onZooKeeperDisconnected();
-                    break;
-            }
-        } else {
-            if (path != null && path.equals(getZNodePath())) {
-                // Something has changed on the node, let's find out
-                checkZNodeExistsAsync();
-            }
-        }
-    }
-
-    /**
-     * AsyncCallback.StatCallback
-     */
-    @SuppressWarnings("deprecation")
-    public void processResult(int rc, String path, Object ctx, Stat stat) {
-        LOGGER.info("ZooZNodeDeletionMonitor::processResult:: rc is " + rc);
-        if ( rc == Code.NoNode /*Code.NONODE.ordinal()*/ ) {
-            getListener().onZNodeDeleted();
-        }
-        else if ( rc == Code.Ok /*Code.OK.ordinal()*/ ) {
-            // put logging or handle this case separately (zNode exists)
-            byte b[] = null;
-                try {
-                    b = getZooKeeper().getData(getZNodePath(), false, null);
-                } catch (KeeperException e) {
-                    // We don't need to worry about recovering now. The watch
-                    // callbacks will kick off any exception handling
-                    LOGGER.warn("Keeper exception",e);
-                } catch (InterruptedException e) {
-                    return;
-                }
-            if ((b == null && b != prevData)
-                    || (b != null && !Arrays.equals(prevData, b))) {
-                listener.exists(b);
-                prevData = b;
-            }
-        }
-        else if (
-                ( rc == Code.SessionExpired /*Code.SESSIONEXPIRED.ordinal()*/ )
-                        || ( rc == Code.NoAuth /*Code.NOAUTH.ordinal()*/ )
-                ) {
-            onZooKeeperSessionClosed();
-        }
-        else {
-            // Retry errors
-            checkZNodeExistsAsync();
-        }
-    }
+    void exists(byte[] b);
+  }
 }

@@ -26,12 +26,12 @@ package com.logistimo.task;
 import akka.camel.javaapi.UntypedProducerActor;
 
 public class BackgroundTaskProducer extends UntypedProducerActor {
-        public String getEndpointUri() {
-            return "activemq:queue:tms-task";
-        }
+  public String getEndpointUri() {
+    return "activemq:queue:tms-task";
+  }
 
-        @Override
-        public boolean isOneway() {
-            return  true;
-        }
-    }
+  @Override
+  public boolean isOneway() {
+    return true;
+  }
+}

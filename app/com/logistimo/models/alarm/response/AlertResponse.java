@@ -25,28 +25,28 @@ package com.logistimo.models.alarm.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.logistimo.models.temperature.response.AssetTemperatureResponse;
-import com.logistimo.models.temperature.response.TemperatureResponse;
 
 /**
  * Created by kaniyarasu on 12/01/15.
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class AlertResponse implements Comparable<AlertResponse>{
-    public int typ;
+public class AlertResponse implements Comparable<AlertResponse> {
+  public int typ;
 
-    public long time;
+  public long time;
 
-    public AssetTemperatureResponse tmpalm;
+  public AssetTemperatureResponse tmpalm;
 
-    public AlarmResponse devalm;
+  public AlarmResponse devalm;
 
-    @Override
-    public int compareTo(AlertResponse o) {
-        if ( this.time > o.time )
-            return -1;
-        else if ( this.time == o.time )
-            return 0;
-        else
-            return 1;
+  @Override
+  public int compareTo(AlertResponse o) {
+    if (this.time > o.time) {
+      return -1;
+    } else if (this.time == o.time) {
+      return 0;
+    } else {
+      return 1;
     }
+  }
 }

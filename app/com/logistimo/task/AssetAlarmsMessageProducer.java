@@ -29,15 +29,17 @@ import play.Play;
 
 public class AssetAlarmsMessageProducer extends UntypedProducerActor {
 
-    private static final String QUEUE_NAME = Play.application().configuration().getString("asset-alarms");
+  private static final String
+      QUEUE_NAME =
+      Play.application().configuration().getString("asset-alarms");
 
-    @Override
-    public String getEndpointUri() {
-        return QUEUE_NAME;
-    }
+  @Override
+  public String getEndpointUri() {
+    return QUEUE_NAME;
+  }
 
-    @Override
-    public boolean isOneway() {
-        return true;
-    }
+  @Override
+  public boolean isOneway() {
+    return true;
+  }
 }

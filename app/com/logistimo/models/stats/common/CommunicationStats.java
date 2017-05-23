@@ -30,48 +30,48 @@ import javax.validation.constraints.NotNull;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class CommunicationStats {
-    @NotNull
-    @Min(0)
-    private Integer nSMS;
+  @NotNull
+  @Min(0)
+  private Integer nSMS;
 
-    @NotNull
-    @Min(0)
-    private Integer nPsh;
+  @NotNull
+  @Min(0)
+  private Integer nPsh;
 
-    @NotNull
-    @Min(0)
-    private Integer nErr;
+  @NotNull
+  @Min(0)
+  private Integer nErr;
 
-    public int getnSMS() {
-        return nSMS;
-    }
+  public int getnSMS() {
+    return nSMS;
+  }
 
-    public void setnSMS(int nSMS) {
-        this.nSMS = nSMS;
-    }
+  public void setnSMS(int nSMS) {
+    this.nSMS = nSMS;
+  }
 
-    public int getnPsh() {
-        return nPsh;
-    }
+  public int getnPsh() {
+    return nPsh;
+  }
 
-    public void setnPsh(int nPsh) {
-        this.nPsh = nPsh;
-    }
+  public void setnPsh(int nPsh) {
+    this.nPsh = nPsh;
+  }
 
-    public int getnErr() {
-        return nErr;
-    }
+  public int getnErr() {
+    return nErr;
+  }
 
-    public void setnErr(int nErr) {
-        this.nErr = nErr;
-    }
+  public void setnErr(int nErr) {
+    this.nErr = nErr;
+  }
 
-    @Override
-    public String toString() {
-        return "CommunicationStatsRequest{" +
-                "nSMS=" + nSMS +
-                ", nPsh=" + nPsh +
-                ", nErr=" + nErr +
-                '}';
-    }
+  @Override
+  public String toString() {
+    return "CommunicationStatsRequest{" +
+        "nSMS=" + nSMS +
+        ", nPsh=" + nPsh +
+        ", nErr=" + nErr +
+        '}';
+  }
 }

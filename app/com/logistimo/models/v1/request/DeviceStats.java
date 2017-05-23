@@ -26,6 +26,7 @@ package com.logistimo.models.v1.request;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.logistimo.db.Device;
 import com.logistimo.db.TemperatureStatistics;
+
 import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.validation.constraints.NotNull;
@@ -33,43 +34,43 @@ import javax.validation.constraints.NotNull;
 @Deprecated
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DeviceStats {
-    @NotEmpty
-    public String deviceId;
+  @NotEmpty
+  public String deviceId;
 
-    @NotNull
-    public Stats stats;
+  @NotNull
+  public Stats stats;
 
-    public TemperatureStatistics toDeviceStatistics(Device d) {
-        TemperatureStatistics ds = new TemperatureStatistics();
-        ds.device = d;
-        ds.dayOfComputation = stats.day;
-        ds.numberOfAlerts = stats.numAlerts;
-        ds.meanTemperature = stats.meanTemperature;
-        if (stats.lowAlert != null) {
-            ds.firstLowAlertTime = stats.lowAlert.triggerTime;
-            ds.lowestTemperature = stats.lowAlert.lowestTemperature;
-            ds.durationLow = stats.lowAlert.durationLow;
-            ds.lowAlertAmbientTemperatureLow = stats.lowAlert.ambientTemperature;
-            ds.numberOfLowAlerts = stats.lowAlert.numAlerts;
-        }
-        if (stats.highAlert != null) {
-            ds.firstHighAlertTime = stats.highAlert.triggerTime;
-            ds.highestTemperature = stats.highAlert.highestTemperature;
-            ds.durationHigh = stats.highAlert.durationHigh;
-            ds.highAlertAmbientTemperature = stats.highAlert.ambientTemperature;
-            ds.numberOfHighAlerts = stats.highAlert.numAlerts;
-        }
-
-        if (stats.sensorConnection != null) {
-            ds.firstSensorConnectionFailureTime = stats.sensorConnection.triggerTime;
-            ds.sensorConnectionFailureDuration = stats.sensorConnection.durationFail;
-        }
-
-        if (stats.communication != null) {
-            ds.numberOfSMSSent = stats.communication.numSMSSent;
-            ds.numberOfInternetPushes = stats.communication.numInternetPushes;
-            ds.numberInternetPushFailures = stats.communication.numInternetFailures;
-        }
-        return ds;
+  public TemperatureStatistics toDeviceStatistics(Device d) {
+    TemperatureStatistics ds = new TemperatureStatistics();
+    ds.device = d;
+    ds.dayOfComputation = stats.day;
+    ds.numberOfAlerts = stats.numAlerts;
+    ds.meanTemperature = stats.meanTemperature;
+    if (stats.lowAlert != null) {
+      ds.firstLowAlertTime = stats.lowAlert.triggerTime;
+      ds.lowestTemperature = stats.lowAlert.lowestTemperature;
+      ds.durationLow = stats.lowAlert.durationLow;
+      ds.lowAlertAmbientTemperatureLow = stats.lowAlert.ambientTemperature;
+      ds.numberOfLowAlerts = stats.lowAlert.numAlerts;
     }
+    if (stats.highAlert != null) {
+      ds.firstHighAlertTime = stats.highAlert.triggerTime;
+      ds.highestTemperature = stats.highAlert.highestTemperature;
+      ds.durationHigh = stats.highAlert.durationHigh;
+      ds.highAlertAmbientTemperature = stats.highAlert.ambientTemperature;
+      ds.numberOfHighAlerts = stats.highAlert.numAlerts;
+    }
+
+    if (stats.sensorConnection != null) {
+      ds.firstSensorConnectionFailureTime = stats.sensorConnection.triggerTime;
+      ds.sensorConnectionFailureDuration = stats.sensorConnection.durationFail;
+    }
+
+    if (stats.communication != null) {
+      ds.numberOfSMSSent = stats.communication.numSMSSent;
+      ds.numberOfInternetPushes = stats.communication.numInternetPushes;
+      ds.numberInternetPushFailures = stats.communication.numInternetFailures;
+    }
+    return ds;
+  }
 }

@@ -24,6 +24,7 @@
 package com.logistimo.models.device.request;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import org.hibernate.validator.constraints.NotEmpty;
 
 import java.util.ArrayList;
@@ -34,29 +35,29 @@ import java.util.List;
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DeviceDeleteRequest {
-    @NotEmpty
-    private String vId;
+  @NotEmpty
+  private String vId;
 
-    @NotEmpty
-    private List<String> dIds;
+  @NotEmpty
+  private List<String> dIds;
 
-    public DeviceDeleteRequest() {
-        this.dIds = new ArrayList<String>(1);
-    }
+  public DeviceDeleteRequest() {
+    this.dIds = new ArrayList<String>(1);
+  }
 
-    public String getvId() {
-        return vId;
-    }
+  public String getvId() {
+    return vId;
+  }
 
-    public void setvId(String vId) {
-        this.vId = vId;
-    }
+  public void setvId(String vId) {
+    this.vId = vId;
+  }
 
-    public List<String> getdIds() {
-        return dIds;
-    }
+  public List<String> getdIds() {
+    return dIds;
+  }
 
-    public void setdIds(List<String> dIds) {
-        this.dIds = dIds;
-    }
+  public void setdIds(List<String> dIds) {
+    this.dIds = dIds;
+  }
 }

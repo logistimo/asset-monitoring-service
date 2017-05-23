@@ -24,9 +24,9 @@
 package com.logistimo.models.v1.response;
 
 public class TemperatureResponse {
-    public int timeOfReading;
+  public int timeOfReading;
 
-    public String type;
+  public String type;
 
-    public double temperature;
+  public double temperature;
 }

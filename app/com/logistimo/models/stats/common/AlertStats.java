@@ -31,47 +31,41 @@ import javax.validation.constraints.Min;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_DEFAULT)
 public class AlertStats {
-    public int stat = -1;
+  public int stat = -1;
+  @Min(0)
+  public Integer dur = 0;
+  @Min(0)
+  public Integer time = 0;
+  public boolean cnf;
+  public String cnfms;
+  private int nAlrms = 0;
+  private double aTmp;
 
-    private int nAlrms = 0;
+  public double getaTmp() {
+    return aTmp;
+  }
 
-    @Min(0)
-    public Integer dur = 0;
+  public void setaTmp(double aTmp) {
+    this.aTmp = aTmp;
+  }
 
-    @Min(0)
-    public Integer time = 0;
+  public int getnAlrms() {
+    return nAlrms;
+  }
 
-    private double aTmp;
+  public void setnAlrms(int nAlrms) {
+    this.nAlrms = nAlrms;
+  }
 
-    public boolean cnf;
-
-    public String cnfms;
-
-    public double getaTmp() {
-        return aTmp;
-    }
-
-    public void setaTmp(double aTmp) {
-        this.aTmp = aTmp;
-    }
-
-    public int getnAlrms() {
-        return nAlrms;
-    }
-
-    public void setnAlrms(int nAlrms) {
-        this.nAlrms = nAlrms;
-    }
-
-    @Override
-    public String toString() {
-        return "AlertStats{" +
-                "stat=" + stat +
-                ", nAlrms=" + nAlrms +
-                ", dur=" + dur +
-                ", time=" + time +
-                ", aTmp=" + aTmp +
-                ", cnfms='" + cnfms + '\'' +
-                '}';
-    }
+  @Override
+  public String toString() {
+    return "AlertStats{" +
+        "stat=" + stat +
+        ", nAlrms=" + nAlrms +
+        ", dur=" + dur +
+        ", time=" + time +
+        ", aTmp=" + aTmp +
+        ", cnfms='" + cnfms + '\'' +
+        '}';
+  }
 }

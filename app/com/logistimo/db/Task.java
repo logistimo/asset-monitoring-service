@@ -23,10 +23,16 @@
 
 package com.logistimo.db;
 
-import play.db.jpa.JPA;
-
-import javax.persistence.*;
 import java.util.List;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Table;
+
+import play.db.jpa.JPA;
 
 /**
  * Created by kaniyarasu on 20/08/15.
@@ -34,40 +40,40 @@ import java.util.List;
 @Entity
 @Table(name = "task")
 public class Task {
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(name = "id")
-    public Long id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.AUTO)
+  @Column(name = "id")
+  public Long id;
 
-    @Column(name = "task_options", nullable = false)
-    public String taskOptions;
+  @Column(name = "task_options", nullable = false)
+  public String taskOptions;
 
-    public Task(String taskOptions) {
-        this.taskOptions = taskOptions;
-    }
+  public Task(String taskOptions) {
+    this.taskOptions = taskOptions;
+  }
 
-    public Task() {
-    }
+  public Task() {
+  }
 
-    public static List<Task> getUnprocessedTasks(){
-        return JPA.em().createQuery("from Task", Task.class).getResultList();
-    }
+  public static List<Task> getUnprocessedTasks() {
+    return JPA.em().createQuery("from Task", Task.class).getResultList();
+  }
 
-    public static Task findTaskById(long id){
-        return JPA.em().createQuery("from Task where id = ?1", Task.class)
-                .setParameter(1, id)
-                .getSingleResult();
-    }
+  public static Task findTaskById(long id) {
+    return JPA.em().createQuery("from Task where id = ?1", Task.class)
+        .setParameter(1, id)
+        .getSingleResult();
+  }
 
-    public void save() {
-        JPA.em().persist(this);
-    }
+  public void save() {
+    JPA.em().persist(this);
+  }
 
-    public void update() {
-        JPA.em().merge(this);
-    }
+  public void update() {
+    JPA.em().merge(this);
+  }
 
-    public void delete() {
-        JPA.em().remove(this);
-    }
+  public void delete() {
+    JPA.em().remove(this);
+  }
 }

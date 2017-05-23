@@ -27,17 +27,19 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.logistimo.exception.LogistimoException;
 import com.logistimo.models.common.BaseResponse;
 import com.logistimo.utils.LogistimoUtils;
+
 import org.apache.commons.lang3.StringUtils;
-import play.libs.Json;
-import play.mvc.Controller;
-import play.mvc.Result;
+
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 
 import javax.validation.Validation;
 import javax.validation.Validator;
 import javax.validation.ValidatorFactory;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
+import play.libs.Json;
+import play.mvc.Controller;
+import play.mvc.Result;
 
 import static play.libs.Jsonp.jsonp;
 
@@ -46,40 +48,41 @@ import static play.libs.Jsonp.jsonp;
  */
 public class BaseController extends Controller {
 
-    private static ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
-    private static Validator validator = factory.getValidator();
+  private static ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
+  private static Validator validator = factory.getValidator();
 
-    public static Result prepareResult(int statusCode, String callback, JsonNode jsonNode) {
-        if (callback != null) {
-            return status(statusCode, jsonp(callback, jsonNode));
-        }
-        return status(statusCode, jsonNode);
+  public static Result prepareResult(int statusCode, String callback, JsonNode jsonNode) {
+    if (callback != null) {
+      return status(statusCode, jsonp(callback, jsonNode));
+    }
+    return status(statusCode, jsonNode);
+  }
+
+  public static Result prepareResult(int statusCode, String callback, String message) {
+    return prepareResult(statusCode, callback, Json.toJson(new BaseResponse(message)));
+  }
+
+  //Maps input json to given class instance, and validates the fields. Return the mapped object if no error.
+  public static <T> T getValidatedObject(JsonNode jsonNode, Class<T> klass)
+      throws LogistimoException {
+    if (jsonNode == null) {
+      throw new LogistimoException("JSON data is required.");
     }
 
-    public static Result prepareResult(int statusCode, String callback, String message) {
-        return prepareResult(statusCode, callback, Json.toJson(new BaseResponse(message)));
+    T obj = Json.fromJson(jsonNode, klass);
+    LogistimoUtils.validateObject(obj);
+    return obj;
+  }
+
+  public static String decodeParameter(String paramValue) {
+    if (StringUtils.isNotEmpty(paramValue)) {
+      try {
+        paramValue = URLDecoder.decode(paramValue, "UTF-8");
+      } catch (UnsupportedEncodingException e) {
+        //do nothing
+      }
     }
 
-    //Maps input json to given class instance, and validates the fields. Return the mapped object if no error.
-    public static <T> T getValidatedObject(JsonNode jsonNode, Class<T> klass) throws LogistimoException {
-        if(jsonNode == null){
-            throw new LogistimoException("JSON data is required.");
-        }
-
-        T obj = Json.fromJson(jsonNode, klass);
-        LogistimoUtils.validateObject(obj);
-        return obj;
-    }
-
-    public static String decodeParameter(String paramValue){
-        if(StringUtils.isNotEmpty(paramValue)){
-            try {
-                paramValue = URLDecoder.decode(paramValue, "UTF-8");
-            } catch (UnsupportedEncodingException e) {
-                //do nothing
-            }
-        }
-
-        return paramValue;
-    }
+    return paramValue;
+  }
 }

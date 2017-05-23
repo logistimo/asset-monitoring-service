@@ -24,10 +24,20 @@
 package com.logistimo.db;
 
 import com.logistimo.models.device.common.DeviceRequestStatus;
-import play.db.jpa.JPA;
 
-import javax.persistence.*;
 import java.util.Date;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
+
+import play.db.jpa.JPA;
 
 /**
  * Created by kaniyarasu on 20/11/14.
@@ -35,43 +45,45 @@ import java.util.Date;
 @Entity
 @Table(name = "device_admin_settings_push_status")
 public class DeviceAdminSettingsPushStatus {
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(name = "id")
-    public Long id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.AUTO)
+  @Column(name = "id")
+  public Long id;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "status")
-    public DeviceRequestStatus status;
+  @Enumerated(EnumType.STRING)
+  @Column(name = "status")
+  public DeviceRequestStatus status;
 
-    @Column(name = "sent_time")
-    public Date sent_time;
+  @Column(name = "sent_time")
+  public Date sent_time;
 
-    @Column(name = "acknowledged_time")
-    public Date acknowledged_time;
+  @Column(name = "acknowledged_time")
+  public Date acknowledged_time;
 
-    @Column(name = "error_code")
-    public String errorCode;
+  @Column(name = "error_code")
+  public String errorCode;
 
-    @Column(name = "error_message")
-    public String errorMessage;
+  @Column(name = "error_message")
+  public String errorMessage;
 
-    @ManyToOne
-    public Device device;
+  @ManyToOne
+  public Device device;
 
-    public static DeviceAdminSettingsPushStatus findSentByDevice(Device device){
-        return JPA.em().createQuery("from DeviceAdminSettingsPushStatus where device = ?1 and status = ?2 order by sent_time desc", DeviceAdminSettingsPushStatus.class)
-                .setParameter(1, device)
-                .setParameter(2, DeviceRequestStatus.SMS_SENT)
-                .setMaxResults(1)
-                .getSingleResult();
-    }
+  public static DeviceAdminSettingsPushStatus findSentByDevice(Device device) {
+    return JPA.em().createQuery(
+        "from DeviceAdminSettingsPushStatus where device = ?1 and status = ?2 order by sent_time desc",
+        DeviceAdminSettingsPushStatus.class)
+        .setParameter(1, device)
+        .setParameter(2, DeviceRequestStatus.SMS_SENT)
+        .setMaxResults(1)
+        .getSingleResult();
+  }
 
-    public void save() {
-        JPA.em().persist(this);
-    }
+  public void save() {
+    JPA.em().persist(this);
+  }
 
-    public void update() {
-        JPA.em().merge(this);
-    }
+  public void update() {
+    JPA.em().merge(this);
+  }
 }

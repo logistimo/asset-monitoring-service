@@ -34,19 +34,19 @@ import java.util.List;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class StatsResponse {
-    public List<DeviceStatsResponse> data;
+  public List<DeviceStatsResponse> data;
 
-    private long nPages;
+  private long nPages;
 
-    public StatsResponse() {
-        this.data = new ArrayList<DeviceStatsResponse>();
-    }
+  public StatsResponse() {
+    this.data = new ArrayList<DeviceStatsResponse>();
+  }
 
-    public long getnPages() {
-        return nPages;
-    }
+  public long getnPages() {
+    return nPages;
+  }
 
-    public void setnPages(long nPages) {
-        this.nPages = nPages;
-    }
+  public void setnPages(long nPages) {
+    this.nPages = nPages;
+  }
 }

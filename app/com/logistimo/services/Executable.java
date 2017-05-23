@@ -29,5 +29,5 @@ import java.util.Map;
  * Created by kaniyarasu on 11/08/15.
  */
 public interface Executable {
-    public void process(String content, Map<String, Object> options)  throws Exception;
+  public void process(String content, Map<String, Object> options) throws Exception;
 }

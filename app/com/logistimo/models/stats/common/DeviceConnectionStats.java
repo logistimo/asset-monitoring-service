@@ -31,31 +31,28 @@ import javax.validation.constraints.Min;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_DEFAULT)
 public class DeviceConnectionStats {
-    public int stat = -1;
+  public int stat = -1;
+  @Min(0)
+  public int dur = 0;
+  @Min(0)
+  public int time = 0;
+  private int nAlrms = 0;
 
-    private int nAlrms = 0;
+  public int getnAlrms() {
+    return nAlrms;
+  }
 
-    @Min(0)
-    public int dur = 0;
+  public void setnAlrms(int nAlrms) {
+    this.nAlrms = nAlrms;
+  }
 
-    @Min(0)
-    public int time = 0;
-
-    public int getnAlrms() {
-        return nAlrms;
-    }
-
-    public void setnAlrms(int nAlrms) {
-        this.nAlrms = nAlrms;
-    }
-
-    @Override
-    public String toString() {
-        return "DeviceConnectionStats{" +
-                "stat=" + stat +
-                ", nAlrms=" + nAlrms +
-                ", dur=" + dur +
-                ", time=" + time +
-                '}';
-    }
+  @Override
+  public String toString() {
+    return "DeviceConnectionStats{" +
+        "stat=" + stat +
+        ", nAlrms=" + nAlrms +
+        ", dur=" + dur +
+        ", time=" + time +
+        '}';
+  }
 }

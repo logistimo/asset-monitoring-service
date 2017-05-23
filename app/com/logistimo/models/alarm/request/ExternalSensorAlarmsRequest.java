@@ -32,26 +32,26 @@ import javax.validation.constraints.Min;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_DEFAULT)
 public class ExternalSensorAlarmsRequest {
-    @Min(0)
-    @Max(4)
-    public Integer stat = 0;
+  @Min(0)
+  @Max(4)
+  public Integer stat = 0;
 
-    @Min(0)
-    public Integer time = 0;
+  @Min(0)
+  public Integer time = 0;
 
-    @Override
-    public String toString() {
-        return "ExternalSensorStatsRequest{" +
-                "stat=" + stat +
-                ", time=" + time +
-                '}';
-    }
+  public ExternalSensorAlarmsRequest() {
+  }
 
-    public ExternalSensorAlarmsRequest() {
-    }
+  public ExternalSensorAlarmsRequest(Integer stat, Integer time) {
+    this.stat = stat;
+    this.time = time;
+  }
 
-    public ExternalSensorAlarmsRequest(Integer stat, Integer time) {
-        this.stat = stat;
-        this.time = time;
-    }
+  @Override
+  public String toString() {
+    return "ExternalSensorStatsRequest{" +
+        "stat=" + stat +
+        ", time=" + time +
+        '}';
+  }
 }

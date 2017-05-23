@@ -23,10 +23,17 @@
 
 package com.logistimo.db;
 
-import play.db.jpa.JPA;
-
-import javax.persistence.*;
 import java.util.List;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
+
+import play.db.jpa.JPA;
 
 /**
  * Created by kaniyarasu on 05/10/15.
@@ -34,53 +41,53 @@ import java.util.List;
 @Entity
 @Table(name = "temperature_sensors")
 public class TemperatureSensor {
-    public static final Integer STATUS_ACTIVE = 1;
-    public static final Integer STATUS_INACTIVE = 0;
+  public static final Integer STATUS_ACTIVE = 1;
+  public static final Integer STATUS_INACTIVE = 0;
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(name = "id")
-    public Long id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.AUTO)
+  @Column(name = "id")
+  public Long id;
 
-    @Column(name = "sensor_id")
-    public String sensorId;
+  @Column(name = "sensor_id")
+  public String sensorId;
 
-    @Column(name = "code")
-    public String code;
+  @Column(name = "code")
+  public String code;
 
-    @Column(name = "status")
-    public Integer sensorStatus = STATUS_INACTIVE;
+  @Column(name = "status")
+  public Integer sensorStatus = STATUS_INACTIVE;
 
-    @ManyToOne
-    public Device device;
+  @ManyToOne
+  public Device device;
 
-    public static List<TemperatureSensor> getTemperatureSensor(Device device) {
-        String query = "from TemperatureSensor where device = ?1";
-        return JPA.em()
-                .createQuery(query, TemperatureSensor.class)
-                .setParameter(1, device)
-                .getResultList();
-    }
+  public static List<TemperatureSensor> getTemperatureSensor(Device device) {
+    String query = "from TemperatureSensor where device = ?1";
+    return JPA.em()
+        .createQuery(query, TemperatureSensor.class)
+        .setParameter(1, device)
+        .getResultList();
+  }
 
-    public static TemperatureSensor getTemperatureSensor(Device device, String sensorId) {
-        String query = "from TemperatureSensor where device = ?1 and sensorId = ?2";
-        return JPA.em()
-                .createQuery(query, TemperatureSensor.class)
-                .setParameter(1, device)
-                .setParameter(2, sensorId)
-                .setMaxResults(1)
-                .getSingleResult();
-    }
+  public static TemperatureSensor getTemperatureSensor(Device device, String sensorId) {
+    String query = "from TemperatureSensor where device = ?1 and sensorId = ?2";
+    return JPA.em()
+        .createQuery(query, TemperatureSensor.class)
+        .setParameter(1, device)
+        .setParameter(2, sensorId)
+        .setMaxResults(1)
+        .getSingleResult();
+  }
 
-    public void save() {
-        JPA.em().persist(this);
-    }
+  public void save() {
+    JPA.em().persist(this);
+  }
 
-    public void update() {
-        JPA.em().merge(this);
-    }
+  public void update() {
+    JPA.em().merge(this);
+  }
 
-    public void delete() {
-        JPA.em().remove(this);
-    }
+  public void delete() {
+    JPA.em().remove(this);
+  }
 }

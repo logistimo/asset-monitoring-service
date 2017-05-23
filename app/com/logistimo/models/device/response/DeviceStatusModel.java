@@ -32,27 +32,27 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DeviceStatusModel {
-    public Integer st;
+  public Integer st;
 
-    public Integer stut;
+  public Integer stut;
 
-    private String mpId = null;
+  private String mpId = null;
 
-    private String sId = null;
+  private String sId = null;
 
-    public String getMpId() {
-        return mpId;
-    }
+  public String getMpId() {
+    return mpId;
+  }
 
-    public void setMpId(String mpId) {
-        this.mpId = mpId;
-    }
+  public void setMpId(String mpId) {
+    this.mpId = mpId;
+  }
 
-    public String getsId() {
-        return sId;
-    }
+  public String getsId() {
+    return sId;
+  }
 
-    public void setsId(String sId) {
-        this.sId = sId;
-    }
+  public void setsId(String sId) {
+    this.sId = sId;
+  }
 }

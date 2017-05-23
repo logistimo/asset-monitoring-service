@@ -25,6 +25,7 @@ package com.logistimo.models.device.common;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+
 import org.hibernate.validator.constraints.NotEmpty;
 
 /**
@@ -33,29 +34,29 @@ import org.hibernate.validator.constraints.NotEmpty;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class DeviceReadyModel {
-    public String mdl;
+  public String mdl;
 
-    @NotEmpty
-    public String imei;
+  @NotEmpty
+  public String imei;
 
-    @NotEmpty
-    private String dVr;
+  @NotEmpty
+  private String dVr;
 
-    private String mVr;
+  private String mVr;
 
-    public String getdVr() {
-        return dVr;
-    }
+  public String getdVr() {
+    return dVr;
+  }
 
-    public void setdVr(String dVr) {
-        this.dVr = dVr;
-    }
+  public void setdVr(String dVr) {
+    this.dVr = dVr;
+  }
 
-    public String getmVr() {
-        return mVr;
-    }
+  public String getmVr() {
+    return mVr;
+  }
 
-    public void setmVr(String mVr) {
-        this.mVr = mVr;
-    }
+  public void setmVr(String mVr) {
+    this.mVr = mVr;
+  }
 }

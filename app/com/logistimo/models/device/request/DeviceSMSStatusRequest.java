@@ -30,33 +30,28 @@ import org.hibernate.validator.constraints.NotEmpty;
  */
 public class DeviceSMSStatusRequest {
 
-    @NotEmpty
-    private String vId;
+  public boolean isAcknowledged = true;
+  public String errCode;
+  public String errKeycode;
+  public String receivedOn;
+  @NotEmpty
+  private String vId;
+  @NotEmpty
+  private String dId;
 
-    @NotEmpty
-    private String dId;
+  public String getvId() {
+    return vId;
+  }
 
-    public boolean isAcknowledged = true;
+  public void setvId(String vId) {
+    this.vId = vId;
+  }
 
-    public String errCode;
+  public String getdId() {
+    return dId;
+  }
 
-    public String errKeycode;
-
-    public String receivedOn;
-
-    public String getvId() {
-        return vId;
-    }
-
-    public void setvId(String vId) {
-        this.vId = vId;
-    }
-
-    public String getdId() {
-        return dId;
-    }
-
-    public void setdId(String dId) {
-        this.dId = dId;
-    }
+  public void setdId(String dId) {
+    this.dId = dId;
+  }
 }

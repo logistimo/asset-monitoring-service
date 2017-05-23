@@ -27,10 +27,12 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.logistimo.models.device.common.DeviceReadyModel;
 import com.logistimo.models.device.common.DeviceReadySim;
+
 import org.hibernate.validator.constraints.NotEmpty;
 
-import javax.validation.Valid;
 import java.util.List;
+
+import javax.validation.Valid;
 
 /**
  * Created by kaniyarasu on 31/10/14.
@@ -38,36 +40,34 @@ import java.util.List;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class DeviceReadyRequest {
-    public String trId;
+  public String trId;
 
-    @Valid
-    public DeviceReadyModel dev;
+  @Valid
+  public DeviceReadyModel dev;
 
-    public DeviceReadySim sim;
+  public DeviceReadySim sim;
 
-    public DeviceReadySim altSim;
+  public DeviceReadySim altSim;
+  public List<String> actSns;
+  @NotEmpty
+  private String dId;
 
-    @NotEmpty
-    private String dId;
+  public String getdId() {
+    return dId;
+  }
 
-    public List<String> actSns;
+  public void setdId(String dId) {
+    this.dId = dId;
+  }
 
-    public String getdId() {
-        return dId;
-    }
-
-    public void setdId(String dId) {
-        this.dId = dId;
-    }
-
-    @Override
-    public String toString() {
-        return "DeviceReadyRequest{" +
-                "trId='" + trId + '\'' +
-                ", dev=" + dev +
-                ", sim=" + sim +
-                ", altSim=" + altSim +
-                ", dId='" + dId + '\'' +
-                '}';
-    }
+  @Override
+  public String toString() {
+    return "DeviceReadyRequest{" +
+        "trId='" + trId + '\'' +
+        ", dev=" + dev +
+        ", sim=" + sim +
+        ", altSim=" + altSim +
+        ", dId='" + dId + '\'' +
+        '}';
+  }
 }

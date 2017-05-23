@@ -27,11 +27,11 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class UserAccountResponse {
-    public String userName;
+  public String userName;
 
-    public String password;
+  public String password;
 
-    public String organizationName;
+  public String organizationName;
 
-    public Integer userType;
+  public Integer userType;
 }

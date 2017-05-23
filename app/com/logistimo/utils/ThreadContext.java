@@ -31,5 +31,5 @@ import java.util.Set;
  */
 public class ThreadContext {
 
-    public Set<String> locks = new HashSet<>(1);
+  public Set<String> locks = new HashSet<>(1);
 }

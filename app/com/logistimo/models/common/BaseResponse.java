@@ -31,16 +31,16 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class BaseResponse {
 
-    public String message;
+  public String message;
 
-    public BaseResponse(String message) {
-        this.message = message;
-    }
+  public BaseResponse(String message) {
+    this.message = message;
+  }
 
-    @Override
-    public String toString() {
-        return "BaseResponse{" +
-                ", message='" + message + '\'' +
-                '}';
-    }
+  @Override
+  public String toString() {
+    return "BaseResponse{" +
+        ", message='" + message + '\'' +
+        '}';
+  }
 }

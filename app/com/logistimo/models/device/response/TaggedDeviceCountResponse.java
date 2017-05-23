@@ -31,35 +31,35 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class TaggedDeviceCountResponse {
-    public String tag;
+  public String tag;
 
-    private int nDevices;
+  private int nDevices;
 
-    private int nAbnormalDevices;
+  private int nAbnormalDevices;
 
-    private int nIActDevices;
+  private int nIActDevices;
 
-    public int getnIActDevices() {
-        return nIActDevices;
-    }
+  public int getnIActDevices() {
+    return nIActDevices;
+  }
 
-    public void setnIActDevices(int nIActDevices) {
-        this.nIActDevices = nIActDevices;
-    }
+  public void setnIActDevices(int nIActDevices) {
+    this.nIActDevices = nIActDevices;
+  }
 
-    public int getnDevices() {
-        return nDevices;
-    }
+  public int getnDevices() {
+    return nDevices;
+  }
 
-    public void setnDevices(int nDevices) {
-        this.nDevices = nDevices;
-    }
+  public void setnDevices(int nDevices) {
+    this.nDevices = nDevices;
+  }
 
-    public int getnAbnormalDevices() {
-        return nAbnormalDevices;
-    }
+  public int getnAbnormalDevices() {
+    return nAbnormalDevices;
+  }
 
-    public void setnAbnormalDevices(int nAbnormalDevices) {
-        this.nAbnormalDevices = nAbnormalDevices;
-    }
+  public void setnAbnormalDevices(int nAbnormalDevices) {
+    this.nAbnormalDevices = nAbnormalDevices;
+  }
 }

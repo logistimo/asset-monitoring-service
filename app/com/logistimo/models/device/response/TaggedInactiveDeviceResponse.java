@@ -30,18 +30,18 @@ import java.util.List;
  * Created by kaniyarasu on 11/06/15.
  */
 public class TaggedInactiveDeviceResponse {
-    public List<DeviceResponse> data;
-    private long nPages;
+  public List<DeviceResponse> data;
+  private long nPages;
 
-    public TaggedInactiveDeviceResponse() {
-        data = new ArrayList<>(1);
-    }
+  public TaggedInactiveDeviceResponse() {
+    data = new ArrayList<>(1);
+  }
 
-    public long getnPages() {
-        return nPages;
-    }
+  public long getnPages() {
+    return nPages;
+  }
 
-    public void setnPages(long nPages) {
-        this.nPages = nPages;
-    }
+  public void setnPages(long nPages) {
+    this.nPages = nPages;
+  }
 }

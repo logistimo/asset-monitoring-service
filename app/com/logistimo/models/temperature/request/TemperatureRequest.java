@@ -28,42 +28,43 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import javax.validation.constraints.Min;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class TemperatureRequest implements Comparable<TemperatureRequest>{
+public class TemperatureRequest implements Comparable<TemperatureRequest> {
 
-    @Min(0)
-    public Integer time = 0;
+  @Min(0)
+  public Integer time = 0;
 
-    @Min(0)
-    public Integer typ = 0;
+  @Min(0)
+  public Integer typ = 0;
 
-    public Double tmp;
+  public Double tmp;
 
-    public String sId;
+  public String sId;
 
-    public TemperatureRequest() {
+  public TemperatureRequest() {
+  }
+
+  public TemperatureRequest(Integer time, Integer typ, Double tmp) {
+    this.time = time;
+    this.typ = typ;
+    this.tmp = tmp;
+  }
+
+  @Override
+  public String toString() {
+    return "TemperatureRequest{" +
+        "time=" + time +
+        ", typ=" + typ +
+        ", tmp=" + tmp +
+        ", sId='" + sId + '\'' +
+        '}';
+  }
+
+  @Override
+  public int compareTo(TemperatureRequest o) {
+    if (o == null || o.tmp == null) {
+      return 1;
     }
 
-    public TemperatureRequest(Integer time, Integer typ, Double tmp) {
-        this.time = time;
-        this.typ = typ;
-        this.tmp = tmp;
-    }
-
-    @Override
-    public String toString() {
-        return "TemperatureRequest{" +
-                "time=" + time +
-                ", typ=" + typ +
-                ", tmp=" + tmp +
-                ", sId='" + sId + '\'' +
-                '}';
-    }
-
-    @Override
-    public int compareTo(TemperatureRequest o) {
-        if(o == null || o.tmp == null)
-            return 1;
-
-        return this.time - o.time;
-    }
+    return this.time - o.time;
+  }
 }

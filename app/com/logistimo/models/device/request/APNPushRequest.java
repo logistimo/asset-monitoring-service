@@ -25,6 +25,7 @@ package com.logistimo.models.device.request;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+
 import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.validation.Valid;
@@ -36,59 +37,53 @@ import javax.validation.constraints.NotNull;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class APNPushRequest {
-    @NotEmpty
-    private String vId;
+  public APNRequest altApn;
+  public String cn;
+  public String phone;
+  @NotEmpty
+  private String vId;
+  @NotEmpty
+  private String dId;
+  @NotNull
+  @Valid
+  private APNRequest apn;
+  private APNUserRequest usr;
 
-    @NotEmpty
-    private String dId;
+  public APNPushRequest() {
+    apn = new APNRequest();
+    altApn = new APNRequest();
+    usr = new APNUserRequest();
+  }
 
-    @NotNull
-    @Valid
-    private APNRequest apn;
+  public String getvId() {
+    return vId;
+  }
 
-    public APNRequest altApn;
+  public void setvId(String vId) {
+    this.vId = vId;
+  }
 
-    private APNUserRequest usr;
+  public String getdId() {
+    return dId;
+  }
 
-    public String cn;
+  public void setdId(String dId) {
+    this.dId = dId;
+  }
 
-    public String phone;
+  public APNRequest getApn() {
+    return apn;
+  }
 
-    public APNPushRequest() {
-        apn = new APNRequest();
-        altApn = new APNRequest();
-        usr = new APNUserRequest();
-    }
+  public void setApn(APNRequest apn) {
+    this.apn = apn;
+  }
 
-    public String getvId() {
-        return vId;
-    }
+  public APNUserRequest getUsr() {
+    return usr;
+  }
 
-    public void setvId(String vId) {
-        this.vId = vId;
-    }
-
-    public String getdId() {
-        return dId;
-    }
-
-    public void setdId(String dId) {
-        this.dId = dId;
-    }
-
-    public APNRequest getApn() {
-        return apn;
-    }
-
-    public void setApn(APNRequest apn) {
-        this.apn = apn;
-    }
-
-    public APNUserRequest getUsr() {
-        return usr;
-    }
-
-    public void setUsr(APNUserRequest usr) {
-        this.usr = usr;
-    }
+  public void setUsr(APNUserRequest usr) {
+    this.usr = usr;
+  }
 }

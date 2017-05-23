@@ -35,18 +35,18 @@ import javax.validation.constraints.Min;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_DEFAULT)
 public class GenericAlarmRequest {
-    @Min(0)
-    @Max(2)
-    public Integer stat = 0;
+  @Min(0)
+  @Max(2)
+  public Integer stat = 0;
 
-    @Min(0)
-    public Integer time = 0;
+  @Min(0)
+  public Integer time = 0;
 
-    public GenericAlarmRequest() {
-    }
+  public GenericAlarmRequest() {
+  }
 
-    public GenericAlarmRequest(Integer stat, Integer time) {
-        this.stat = stat;
-        this.time = time;
-    }
+  public GenericAlarmRequest(Integer stat, Integer time) {
+    this.stat = stat;
+    this.time = time;
+  }
 }

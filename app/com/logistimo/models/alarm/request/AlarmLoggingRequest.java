@@ -24,6 +24,7 @@
 package com.logistimo.models.alarm.request;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import org.hibernate.validator.constraints.NotEmpty;
 
 import java.util.ArrayList;
@@ -31,18 +32,18 @@ import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AlarmLoggingRequest {
-    @NotEmpty
-    public String vId;
+  @NotEmpty
+  public String vId;
 
-    @NotEmpty
-    public List<AlarmRequest> data;
+  @NotEmpty
+  public List<AlarmRequest> data;
 
-    public AlarmLoggingRequest() {
-        data = new ArrayList<>(1);
-    }
+  public AlarmLoggingRequest() {
+    data = new ArrayList<>(1);
+  }
 
-    public AlarmLoggingRequest(String vendorId) {
-        data = new ArrayList<>(1);
-        this.vId = vendorId;
-    }
+  public AlarmLoggingRequest(String vendorId) {
+    data = new ArrayList<>(1);
+    this.vId = vendorId;
+  }
 }

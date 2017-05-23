@@ -31,15 +31,15 @@ import javax.validation.constraints.NotNull;
 @Deprecated
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class CommunicationStat {
-    @NotNull
-    @Min(0)
-    public Integer numSMSSent;
+  @NotNull
+  @Min(0)
+  public Integer numSMSSent;
 
-    @NotNull
-    @Min(0)
-    public Integer numInternetPushes;
+  @NotNull
+  @Min(0)
+  public Integer numInternetPushes;
 
-    @NotNull
-    @Min(0)
-    public Integer numInternetFailures;
+  @NotNull
+  @Min(0)
+  public Integer numInternetFailures;
 }

@@ -23,13 +23,16 @@
 
 package com.logistimo.controllers;
 
-import com.logistimo.db.UserAccount;
 import com.logistimo.models.common.BaseResponse;
 import com.logistimo.models.user.response.UserAccountResponse;
 import com.logistimo.services.ServiceFactory;
 import com.logistimo.services.UserService;
 import com.logistimo.utils.LogistimoUtils;
+
 import org.apache.commons.codec.digest.DigestUtils;
+
+import javax.persistence.NoResultException;
+
 import play.Logger;
 import play.Logger.ALogger;
 import play.libs.F;
@@ -39,44 +42,42 @@ import play.mvc.Http;
 import play.mvc.Result;
 import play.mvc.Results;
 
-import javax.persistence.NoResultException;
-
 public class ReadSecuredAction extends Action.Simple {
-    public final static String AUTH_TOKEN_HEADER = "Authorization";
-    private static final ALogger LOGGER = Logger.of(SecuredAction.class);
+  public final static String AUTH_TOKEN_HEADER = "Authorization";
+  private static final ALogger LOGGER = Logger.of(SecuredAction.class);
 
-    private static boolean isValidPassword(String actual, String supplied) {
-        String saltedSuppliedPassword = DigestUtils.md5Hex(supplied);
-        return actual.equals(saltedSuppliedPassword);
+  private static boolean isValidPassword(String actual, String supplied) {
+    String saltedSuppliedPassword = DigestUtils.md5Hex(supplied);
+    return actual.equals(saltedSuppliedPassword);
+  }
+
+  public F.Promise<Result> call(Http.Context ctx) throws Throwable {
+    String[] authTokenHeaderValues = ctx.request().headers().get(AUTH_TOKEN_HEADER);
+    if (!ctx.request().headers().containsKey(AUTH_TOKEN_HEADER)) {
+      authTokenHeaderValues = ctx.request().headers().get(AUTH_TOKEN_HEADER.toUpperCase());
+    }
+    Result unauthorized = Results.unauthorized(Json.toJson(new BaseResponse("Access denied.")));
+
+    if (authTokenHeaderValues == null) {
+      ctx.response().setHeader("WWW-Authenticate", "Basic realm='Secured'");
+      return F.Promise.pure(unauthorized);
     }
 
-    public F.Promise<Result> call(Http.Context ctx) throws Throwable {
-        String[] authTokenHeaderValues = ctx.request().headers().get(AUTH_TOKEN_HEADER);
-        if(!ctx.request().headers().containsKey(AUTH_TOKEN_HEADER)){
-            authTokenHeaderValues = ctx.request().headers().get(AUTH_TOKEN_HEADER.toUpperCase());
+    String[] credentials = LogistimoUtils.decodeHeader(authTokenHeaderValues[0]);
+    if ((credentials != null) && (credentials.length == 2) && (credentials[0] != null)) {
+      try {
+        UserAccountResponse userAccountResponse = ServiceFactory.getService(UserService.class)
+            .getUserAccount(credentials[0]);
+        if (isValidPassword(userAccountResponse.password, credentials[1])) {
+          return delegate.call(ctx);
         }
-        Result unauthorized = Results.unauthorized(Json.toJson(new BaseResponse("Access denied.")));
+      } catch (NoResultException e) {
+        LOGGER.warn("Error while authenticating user", e.getMessage());
+      }
 
-        if (authTokenHeaderValues == null) {
-            ctx.response().setHeader("WWW-Authenticate", "Basic realm='Secured'");
-            return F.Promise.pure(unauthorized);
-        }
-
-        String[] credentials = LogistimoUtils.decodeHeader(authTokenHeaderValues[0]);
-        if ((credentials != null) && (credentials.length == 2) && (credentials[0] != null)) {
-            try {
-                UserAccountResponse userAccountResponse = ServiceFactory.getService(UserService.class)
-                        .getUserAccount(credentials[0]);
-                if (isValidPassword(userAccountResponse.password, credentials[1])) {
-                    return delegate.call(ctx);
-                }
-            } catch (NoResultException e) {
-                LOGGER.warn("Error while authenticating user", e.getMessage());
-            }
-
-        }
-        ctx.response().setHeader("WWW-Authenticate", "Basic realm='Secured'");
-        return F.Promise.pure(unauthorized);
     }
+    ctx.response().setHeader("WWW-Authenticate", "Basic realm='Secured'");
+    return F.Promise.pure(unauthorized);
+  }
 
 }

@@ -30,22 +30,22 @@ import java.util.List;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class TemperatureLoggingResponse {
-    public List<String> errs = new ArrayList<String>(1);
+  public List<String> errs = new ArrayList<String>(1);
 
-    public List<String> errTmps = new ArrayList<String>(1);
+  public List<String> errTmps = new ArrayList<String>(1);
 
-    public String message;
+  public String message;
 
-    public TemperatureLoggingResponse() {
-        message = "Device/Temperature details not valid.";
-    }
+  public TemperatureLoggingResponse() {
+    message = "Device/Temperature details not valid.";
+  }
 
-    @Override
-    public String toString() {
-        return "TemperatureLoggingResponse{" +
-                "errs=" + errs +
-                ", errTmps=" + errTmps +
-                ", message='" + message + '\'' +
-                '}';
-    }
+  @Override
+  public String toString() {
+    return "TemperatureLoggingResponse{" +
+        "errs=" + errs +
+        ", errTmps=" + errTmps +
+        ", message='" + message + '\'' +
+        '}';
+  }
 }

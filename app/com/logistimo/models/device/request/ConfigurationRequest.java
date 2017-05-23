@@ -27,9 +27,10 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.logistimo.models.device.common.Locale;
 
+import java.util.List;
+
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
-import java.util.List;
 
 /**
  * Created by kaniyarasu on 01/10/14.
@@ -37,31 +38,31 @@ import java.util.List;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_DEFAULT)
 public class ConfigurationRequest {
-    @NotNull
-    @Valid
-    public ConfigurationCommRequest comm;
+  @NotNull
+  @Valid
+  public ConfigurationCommRequest comm;
 
-    @Valid
-    public ConfigurationHighAlarmRequest highAlarm;
+  @Valid
+  public ConfigurationHighAlarmRequest highAlarm;
 
-    @Valid
-    public ConfigurationLowAlarmRequest lowAlarm;
+  @Valid
+  public ConfigurationLowAlarmRequest lowAlarm;
 
-    @Valid
-    public ConfigurationHighWarnRequest highWarn;
+  @Valid
+  public ConfigurationHighWarnRequest highWarn;
 
-    @Valid
-    public ConfigurationLowWarnRequest lowWarn;
+  @Valid
+  public ConfigurationLowWarnRequest lowWarn;
 
-    @Valid
-    public ConfigurationNotifRequest notf;
+  @Valid
+  public ConfigurationNotifRequest notf;
 
-    public List<SensorConfigurationRequest> sensors;
+  public List<SensorConfigurationRequest> sensors;
 
-    public PowerOutageAlarmConfiguration poa;
+  public PowerOutageAlarmConfiguration poa;
 
-    public LowBatteryAlarmConfiguration lba;
+  public LowBatteryAlarmConfiguration lba;
 
-    @Valid
-    public Locale locale;
+  @Valid
+  public Locale locale;
 }

@@ -34,8 +34,8 @@ import javax.validation.constraints.Min;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ConfigurationHighAlarmRequest {
-    public Double temp;
+  public Double temp;
 
-    @Min(0)
-    public Integer dur;
+  @Min(0)
+  public Integer dur;
 }

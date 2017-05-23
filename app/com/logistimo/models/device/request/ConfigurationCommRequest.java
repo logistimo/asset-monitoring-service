@@ -25,6 +25,7 @@ package com.logistimo.models.device.request;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+
 import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.validation.constraints.NotNull;
@@ -35,41 +36,41 @@ import javax.validation.constraints.NotNull;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ConfigurationCommRequest {
-    @NotNull
-    public Integer chnl;
+  @NotNull
+  public Integer chnl;
 
-    @NotEmpty
-    public String tmpUrl;
+  @NotEmpty
+  public String tmpUrl;
 
-    public String cfgUrl;
+  public String cfgUrl;
 
-    public String alrmUrl;
+  public String alrmUrl;
 
-    public String statsUrl;
+  public String statsUrl;
 
-    public String devRyUrl;
+  public String devRyUrl;
 
-    public String smsGyPh;
+  public String smsGyPh;
 
-    public String senderId;
+  public String senderId;
 
-    public String smsGyKey;
+  public String smsGyKey;
 
-    public boolean tmpNotify = false;
+  public boolean tmpNotify = false;
 
-    public boolean incExcNotify = true;
+  public boolean incExcNotify = true;
 
-    public boolean statsNotify = false;
+  public boolean statsNotify = false;
 
-    public boolean devAlrmsNotify = true;
+  public boolean devAlrmsNotify = true;
 
-    public boolean tmpAlrmsNotify = false;
+  public boolean tmpAlrmsNotify = false;
 
-    @NotNull
-    public Integer samplingInt = -1;
+  @NotNull
+  public Integer samplingInt = -1;
 
-    @NotNull
-    public Integer pushInt = -1;
+  @NotNull
+  public Integer pushInt = -1;
 
-    public String[] usrPhones;
+  public String[] usrPhones;
 }

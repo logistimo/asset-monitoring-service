@@ -30,50 +30,50 @@ import java.util.List;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class TaggedDeviceResponse {
-    public List<DeviceResponse> data = new ArrayList<DeviceResponse>();
-    private Integer nDevices = 0;
-    private Integer nAbnormalTemp = 0;
-    private Integer nAbnormalDevices = 0;
-    private Integer nIActDevices = 0;
-    private long nPages;
+  public List<DeviceResponse> data = new ArrayList<DeviceResponse>();
+  private Integer nDevices = 0;
+  private Integer nAbnormalTemp = 0;
+  private Integer nAbnormalDevices = 0;
+  private Integer nIActDevices = 0;
+  private long nPages;
 
-    public Integer getnDevices() {
-        return nDevices;
-    }
+  public Integer getnDevices() {
+    return nDevices;
+  }
 
-    public void setnDevices(Integer nDevices) {
-        this.nDevices = nDevices;
-    }
+  public void setnDevices(Integer nDevices) {
+    this.nDevices = nDevices;
+  }
 
-    public Integer getnAbnormalTemp() {
-        return nAbnormalTemp;
-    }
+  public Integer getnAbnormalTemp() {
+    return nAbnormalTemp;
+  }
 
-    public void setnAbnormalTemp(Integer nAbnormalTemp) {
-        this.nAbnormalTemp = nAbnormalTemp;
-    }
+  public void setnAbnormalTemp(Integer nAbnormalTemp) {
+    this.nAbnormalTemp = nAbnormalTemp;
+  }
 
-    public Integer getnAbnormalDevices() {
-        return nAbnormalDevices;
-    }
+  public Integer getnAbnormalDevices() {
+    return nAbnormalDevices;
+  }
 
-    public void setnAbnormalDevices(Integer nAbnormalDevices) {
-        this.nAbnormalDevices = nAbnormalDevices;
-    }
+  public void setnAbnormalDevices(Integer nAbnormalDevices) {
+    this.nAbnormalDevices = nAbnormalDevices;
+  }
 
-    public long getnPages() {
-        return nPages;
-    }
+  public long getnPages() {
+    return nPages;
+  }
 
-    public void setnPages(long nPages) {
-        this.nPages = nPages;
-    }
+  public void setnPages(long nPages) {
+    this.nPages = nPages;
+  }
 
-    public Integer getnIActDevices() {
-        return nIActDevices;
-    }
+  public Integer getnIActDevices() {
+    return nIActDevices;
+  }
 
-    public void setnIActDevices(Integer nIActDevices) {
-        this.nIActDevices = nIActDevices;
-    }
+  public void setnIActDevices(Integer nIActDevices) {
+    this.nIActDevices = nIActDevices;
+  }
 }

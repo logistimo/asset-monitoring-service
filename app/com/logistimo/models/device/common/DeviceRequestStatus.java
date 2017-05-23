@@ -27,5 +27,5 @@ package com.logistimo.models.device.common;
  * Created by kaniyarasu on 20/11/14.
  */
 public enum DeviceRequestStatus {
-    SMS_SENT, SMS_ACK, SMS_F_ERROR, SMS_NOT_SENT
+  SMS_SENT, SMS_ACK, SMS_F_ERROR, SMS_NOT_SENT
 }

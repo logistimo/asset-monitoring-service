@@ -30,31 +30,29 @@ import com.fasterxml.jackson.annotation.JsonInclude;
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ErrorResponse {
-    private String dId;
+  public String message;
+  private String dId;
+  private String sId;
 
-    private String sId;
+  public ErrorResponse(String dId, String sId, String message) {
+    this.dId = dId;
+    this.sId = sId;
+    this.message = message;
+  }
 
-    public String message;
+  public String getdId() {
+    return dId;
+  }
 
-    public ErrorResponse(String dId, String sId, String message) {
-        this.dId = dId;
-        this.sId = sId;
-        this.message = message;
-    }
+  public void setdId(String dId) {
+    this.dId = dId;
+  }
 
-    public String getdId() {
-        return dId;
-    }
+  public String getsId() {
+    return sId;
+  }
 
-    public void setdId(String dId) {
-        this.dId = dId;
-    }
-
-    public String getsId() {
-        return sId;
-    }
-
-    public void setsId(String sId) {
-        this.sId = sId;
-    }
+  public void setsId(String sId) {
+    this.sId = sId;
+  }
 }

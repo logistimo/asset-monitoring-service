@@ -29,7 +29,12 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.util.Date;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Table;
 
 import play.db.jpa.JPA;
 
@@ -74,15 +79,22 @@ public class DeviceStatusLog {
   @Column(name = "updated_on")
   public Date updatedOn;
 
-  public DeviceStatusLog(){};
-  public DeviceStatusLog(Long deviceId){
+  public DeviceStatusLog() {
+  }
+
+  ;
+
+  public DeviceStatusLog(Long deviceId) {
     this.deviceId = deviceId;
     this.statusKey = AssetStatusConstants.WORKING_STATUS_KEY;
   }
 
-  public static DeviceStatusLog getDeviceStatusForGivenStartTime(Long deviceId, String statusKey, Integer eventStartTime) {
-    if(deviceId != null && StringUtils.isNotEmpty(statusKey) && eventStartTime != null) {
-      return JPA.em().createQuery("from DeviceStatusLog where device_id = ?1 and status_key = ?2 and start_time = ?3", DeviceStatusLog.class)
+  public static DeviceStatusLog getDeviceStatusForGivenStartTime(Long deviceId, String statusKey,
+                                                                 Integer eventStartTime) {
+    if (deviceId != null && StringUtils.isNotEmpty(statusKey) && eventStartTime != null) {
+      return JPA.em().createQuery(
+          "from DeviceStatusLog where device_id = ?1 and status_key = ?2 and start_time = ?3",
+          DeviceStatusLog.class)
           .setParameter(1, deviceId)
           .setParameter(2, statusKey)
           .setParameter(3, eventStartTime)

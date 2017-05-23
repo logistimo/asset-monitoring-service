@@ -23,59 +23,67 @@
 
 package com.logistimo.db;
 
-import play.db.jpa.JPA;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToOne;
+import javax.persistence.Table;
 
-import javax.persistence.*;
+import play.db.jpa.JPA;
 
 @Entity
 @Table(name = "device_configurations")
 public class DeviceConfiguration {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(name = "id")
-    public Long id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.AUTO)
+  @Column(name = "id")
+  public Long id;
 
-    @OneToOne
-    public Tag tag;
+  @OneToOne
+  public Tag tag;
 
-    @Column(name = "configuration", nullable = false)
-    public String configuration;
+  @Column(name = "configuration", nullable = false)
+  public String configuration;
 
-    @ManyToOne
-    public Device device;
+  @ManyToOne
+  public Device device;
 
-    public static DeviceConfiguration getDeviceConfiguration(Device device) {
-        String query = "from DeviceConfiguration where device = ?1";
-        return (DeviceConfiguration) JPA.em()
-                .createQuery(query)
-                .setParameter(1, device)
-                .setMaxResults(1)
-                .getSingleResult();
-    }
+  public static DeviceConfiguration getDeviceConfiguration(Device device) {
+    String query = "from DeviceConfiguration where device = ?1";
+    return (DeviceConfiguration) JPA.em()
+        .createQuery(query)
+        .setParameter(1, device)
+        .setMaxResults(1)
+        .getSingleResult();
+  }
 
-    public static DeviceConfiguration getDeviceConfigByTag(Tag tag) {
-        return JPA.em()
-                .createQuery("from DeviceConfiguration where tag = ?1", DeviceConfiguration.class)
-                .setParameter(1, tag)
-                .setMaxResults(1)
-                .getSingleResult();
-    }
+  public static DeviceConfiguration getDeviceConfigByTag(Tag tag) {
+    return JPA.em()
+        .createQuery("from DeviceConfiguration where tag = ?1", DeviceConfiguration.class)
+        .setParameter(1, tag)
+        .setMaxResults(1)
+        .getSingleResult();
+  }
 
-    public static DeviceConfiguration getDeviceConfigByDeviceTag(Device device, Tag tag) {
-        return JPA.em()
-                .createQuery("from DeviceConfiguration where device =?1 and tag = ?2", DeviceConfiguration.class)
-                .setParameter(1, device)
-                .setParameter(2, tag)
-                .setMaxResults(1)
-                .getSingleResult();
-    }
+  public static DeviceConfiguration getDeviceConfigByDeviceTag(Device device, Tag tag) {
+    return JPA.em()
+        .createQuery("from DeviceConfiguration where device =?1 and tag = ?2",
+            DeviceConfiguration.class)
+        .setParameter(1, device)
+        .setParameter(2, tag)
+        .setMaxResults(1)
+        .getSingleResult();
+  }
 
-    public void save() {
-        JPA.em().persist(this);
-    }
+  public void save() {
+    JPA.em().persist(this);
+  }
 
-    public void update() {
-        JPA.em().merge(this);
-    }
+  public void update() {
+    JPA.em().merge(this);
+  }
 }

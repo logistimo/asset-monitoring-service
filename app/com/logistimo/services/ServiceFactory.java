@@ -27,32 +27,33 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class ServiceFactory {
-    private static final Map<Class<? extends Service>, Service> SERVICES = new LinkedHashMap<>();
+  private static final Map<Class<? extends Service>, Service> SERVICES = new LinkedHashMap<>();
 
-    private ServiceFactory() throws RuntimeException {
-    }
+  private ServiceFactory() throws RuntimeException {
+  }
 
-    @SuppressWarnings("unchecked")
-    public static <T extends Service> T getService(Class<T> klass) {
-        // Get the cached service object
-        Service service = SERVICES.get(klass);
+  @SuppressWarnings("unchecked")
+  public static <T extends Service> T getService(Class<T> klass) {
+    // Get the cached service object
+    Service service = SERVICES.get(klass);
+    if (service == null) {
+      synchronized (ServiceFactory.class) {
         if (service == null) {
-            synchronized (ServiceFactory.class) {
-                if (service == null) {
-                    service = createInstance(klass);
-                    SERVICES.put(klass, service);
-                }
-            }
+          service = createInstance(klass);
+          SERVICES.put(klass, service);
         }
-        return (T) service;
+      }
     }
+    return (T) service;
+  }
 
-    @SuppressWarnings("rawtypes")
-    private static Service createInstance(Class<? extends Service> klass) {
-        try {
-            return klass.newInstance();
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to create an instance of the class: " + klass.getCanonicalName(), e);
-        }
+  @SuppressWarnings("rawtypes")
+  private static Service createInstance(Class<? extends Service> klass) {
+    try {
+      return klass.newInstance();
+    } catch (Exception e) {
+      throw new RuntimeException(
+          "Failed to create an instance of the class: " + klass.getCanonicalName(), e);
     }
+  }
 }

@@ -24,21 +24,23 @@
 package com.logistimo.models.device.request;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import org.hibernate.validator.constraints.NotEmpty;
 
-import javax.validation.Valid;
 import java.util.Set;
+
+import javax.validation.Valid;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DeviceConfigurationRequest {
 
-    @NotEmpty
-    public String vId;
+  @NotEmpty
+  public String vId;
 
-    public String dId;
+  public String dId;
 
-    public Set<String> tags;
+  public Set<String> tags;
 
-    @Valid
-    public ConfigurationRequest configuration;
+  @Valid
+  public ConfigurationRequest configuration;
 }

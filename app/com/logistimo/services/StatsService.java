@@ -28,7 +28,14 @@ import com.logistimo.db.Device;
 import com.logistimo.db.TemperatureStatistics;
 import com.logistimo.exception.LogistimoException;
 import com.logistimo.models.common.ErrorResponse;
-import com.logistimo.models.stats.common.*;
+import com.logistimo.models.stats.common.AlertStats;
+import com.logistimo.models.stats.common.BatteryStats;
+import com.logistimo.models.stats.common.CommunicationStats;
+import com.logistimo.models.stats.common.DailyStats;
+import com.logistimo.models.stats.common.DailyStatsDeviceError;
+import com.logistimo.models.stats.common.DeviceConnectionStats;
+import com.logistimo.models.stats.common.ExternalSensorStats;
+import com.logistimo.models.stats.common.StorageStats;
 import com.logistimo.models.stats.request.DailyStatsLoggingRequest;
 import com.logistimo.models.stats.request.DeviceStatsRequest;
 import com.logistimo.models.stats.response.DeviceStatsResponse;
@@ -38,83 +45,91 @@ import com.logistimo.models.v1.request.DeviceStats;
 import com.logistimo.models.v1.request.StatsRequest;
 import com.logistimo.utils.LogistimoConstant;
 import com.logistimo.utils.LogistimoUtils;
-import play.Logger;
-import play.i18n.Messages;
 
-import javax.persistence.NoResultException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class StatsService extends ServiceImpl{
-    private static final Logger.ALogger LOGGER = Logger.of(StatsService.class);
-    private static final DeviceService deviceService = ServiceFactory.getService(DeviceService.class);
+import javax.persistence.NoResultException;
 
-    public StatsLoggingResponse postDailyStats(DailyStatsLoggingRequest dailyStatsLoggingRequest) {
-        StatsLoggingResponse statsLoggingResponse = new StatsLoggingResponse();
-        for (DeviceStatsRequest deviceStatsRequest : dailyStatsLoggingRequest.data) {
-            try {
-                LogistimoUtils.validateObject(deviceStatsRequest);
-                Device device = deviceService.findDevice(dailyStatsLoggingRequest.vId, deviceStatsRequest.dId);
-                if (device != null) {
-                    DailyStatsDO dailyStatsDO = toDailyStats(deviceStatsRequest.stats);
-                    dailyStatsDO.device = device;
+import play.Logger;
+import play.i18n.Messages;
 
-                    //If sId exist, then received stats is for specific sensor
-                    if(deviceStatsRequest.sId != null && !deviceStatsRequest.sId.isEmpty()){
-                        dailyStatsDO.device = deviceService.findDevice(
-                                device.vendorId,
-                                LogistimoUtils.generateVirtualDeviceId(
-                                        device.deviceId,
-                                        deviceStatsRequest.sId
-                                )
-                        );
-                    }
-                    dailyStatsDO.save();
+public class StatsService extends ServiceImpl {
+  private static final Logger.ALogger LOGGER = Logger.of(StatsService.class);
+  private static final DeviceService deviceService = ServiceFactory.getService(DeviceService.class);
 
-                    //Saving Daily Stats - Device errors
-                    if (deviceStatsRequest.stats.errs != null) {
-                        for (DailyStatsDeviceError dailyStatsDeviceErrorRequest : deviceStatsRequest.stats.errs) {
-                            com.logistimo.db.DailyStatsDeviceError dailyStatsDeviceError = toDailyStatsDeviceError(dailyStatsDeviceErrorRequest);
-                            dailyStatsDeviceError.daily_stats = dailyStatsDO;
-                            dailyStatsDeviceError.save();
-                        }
-                    }
-                }
-            } catch (NoResultException e) {
-                LOGGER.warn("{} while logging daily stats for device: {}, {}", e.getMessage(), dailyStatsLoggingRequest.vId, deviceStatsRequest.dId, e);
-                statsLoggingResponse.errs.add(
-                        new ErrorResponse(
-                                deviceStatsRequest.dId,
-                                deviceStatsRequest.sId,
-                                Messages.get(LogistimoConstant.DEVICES_NOT_FOUND)));
-            } catch (LogistimoException e) {
-                LOGGER.warn("{} while logging daily stats for device: {}, {}", e.getMessage(), dailyStatsLoggingRequest.vId, deviceStatsRequest.dId, e);
-                statsLoggingResponse.errs.add(
-                        new ErrorResponse(
-                                deviceStatsRequest.dId,
-                                deviceStatsRequest.sId,
-                                e.getMessage()));
+  public StatsLoggingResponse postDailyStats(DailyStatsLoggingRequest dailyStatsLoggingRequest) {
+    StatsLoggingResponse statsLoggingResponse = new StatsLoggingResponse();
+    for (DeviceStatsRequest deviceStatsRequest : dailyStatsLoggingRequest.data) {
+      try {
+        LogistimoUtils.validateObject(deviceStatsRequest);
+        Device
+            device =
+            deviceService.findDevice(dailyStatsLoggingRequest.vId, deviceStatsRequest.dId);
+        if (device != null) {
+          DailyStatsDO dailyStatsDO = toDailyStats(deviceStatsRequest.stats);
+          dailyStatsDO.device = device;
+
+          //If sId exist, then received stats is for specific sensor
+          if (deviceStatsRequest.sId != null && !deviceStatsRequest.sId.isEmpty()) {
+            dailyStatsDO.device = deviceService.findDevice(
+                device.vendorId,
+                LogistimoUtils.generateVirtualDeviceId(
+                    device.deviceId,
+                    deviceStatsRequest.sId
+                )
+            );
+          }
+          dailyStatsDO.save();
+
+          //Saving Daily Stats - Device errors
+          if (deviceStatsRequest.stats.errs != null) {
+            for (DailyStatsDeviceError dailyStatsDeviceErrorRequest : deviceStatsRequest.stats.errs) {
+              com.logistimo.db.DailyStatsDeviceError
+                  dailyStatsDeviceError =
+                  toDailyStatsDeviceError(dailyStatsDeviceErrorRequest);
+              dailyStatsDeviceError.daily_stats = dailyStatsDO;
+              dailyStatsDeviceError.save();
             }
+          }
         }
-
-        return statsLoggingResponse;
+      } catch (NoResultException e) {
+        LOGGER.warn("{} while logging daily stats for device: {}, {}", e.getMessage(),
+            dailyStatsLoggingRequest.vId, deviceStatsRequest.dId, e);
+        statsLoggingResponse.errs.add(
+            new ErrorResponse(
+                deviceStatsRequest.dId,
+                deviceStatsRequest.sId,
+                Messages.get(LogistimoConstant.DEVICES_NOT_FOUND)));
+      } catch (LogistimoException e) {
+        LOGGER.warn("{} while logging daily stats for device: {}, {}", e.getMessage(),
+            dailyStatsLoggingRequest.vId, deviceStatsRequest.dId, e);
+        statsLoggingResponse.errs.add(
+            new ErrorResponse(
+                deviceStatsRequest.dId,
+                deviceStatsRequest.sId,
+                e.getMessage()));
+      }
     }
 
-    @Deprecated
-    public int postDailyStatsV1(StatsRequest statsRequest) {
-        int count = 0;
-        for (DeviceStats stats : statsRequest.data) {
-            Device device = deviceService.findDevice(statsRequest.vendorId, stats.deviceId);
+    return statsLoggingResponse;
+  }
 
-            if (device != null) {
-                TemperatureStatistics temperatureStatistics = stats.toDeviceStatistics(device);
-                temperatureStatistics.save();
-                count++;
-            }
-        }
+  @Deprecated
+  public int postDailyStatsV1(StatsRequest statsRequest) {
+    int count = 0;
+    for (DeviceStats stats : statsRequest.data) {
+      Device device = deviceService.findDevice(statsRequest.vendorId, stats.deviceId);
 
-        return count;
+      if (device != null) {
+        TemperatureStatistics temperatureStatistics = stats.toDeviceStatistics(device);
+        temperatureStatistics.save();
+        count++;
+      }
     }
+
+    return count;
+  }
 /*
     public TaggedStatsResponse getStatsByTags(String tagName){
         DeviceService deviceService = ServiceFactory.getDeviceService();
@@ -137,220 +152,236 @@ public class StatsService extends ServiceImpl{
         return taggedStatsResponse;
     }*/
 
-    public StatsResponse getStatsByDevice(String vendorId, String deviceId, String sid, int pageNumber, int pageSize) {
-        Device device = deviceService.findDevice(vendorId, deviceId, sid);
+  public StatsResponse getStatsByDevice(String vendorId, String deviceId, String sid,
+                                        int pageNumber, int pageSize) {
+    Device device = deviceService.findDevice(vendorId, deviceId, sid);
 
-        pageSize = LogistimoUtils.transformPageSize(pageSize);
+    pageSize = LogistimoUtils.transformPageSize(pageSize);
 
-        List<DailyStatsDO> dailyStatsDOList = DailyStatsDO.getDailyStats(device, LogistimoUtils.transformPageNumberToPosition(pageNumber, pageSize), pageSize, -1, -1);
-        StatsResponse statsResponse = new StatsResponse();
+    List<DailyStatsDO>
+        dailyStatsDOList =
+        DailyStatsDO.getDailyStats(device,
+            LogistimoUtils.transformPageNumberToPosition(pageNumber, pageSize), pageSize, -1, -1);
+    StatsResponse statsResponse = new StatsResponse();
 
-        for (DailyStatsDO dailyStatsDO : dailyStatsDOList) {
-            statsResponse.data.add(toDeviceStatsResponse(dailyStatsDO, com.logistimo.db.DailyStatsDeviceError.getDailyStatsDeviceErrors(dailyStatsDO)));
-        }
-
-        statsResponse.setnPages(LogistimoUtils.availableNumberOfPages(pageSize, DailyStatsDO.getDailyStatsCount(device, -1, -1)));
-        return statsResponse;
+    for (DailyStatsDO dailyStatsDO : dailyStatsDOList) {
+      statsResponse.data.add(toDeviceStatsResponse(dailyStatsDO,
+          com.logistimo.db.DailyStatsDeviceError.getDailyStatsDeviceErrors(dailyStatsDO)));
     }
 
-    public StatsResponse getStatsByDeviceAndRange(String vendorId, String deviceId, String sid, int from, int to, int pageNumber, int pageSize) {
-        Device device = deviceService.findDevice(vendorId, deviceId, sid);
+    statsResponse.setnPages(LogistimoUtils
+        .availableNumberOfPages(pageSize, DailyStatsDO.getDailyStatsCount(device, -1, -1)));
+    return statsResponse;
+  }
 
-        pageSize = LogistimoUtils.transformPageSize(pageSize);
+  public StatsResponse getStatsByDeviceAndRange(String vendorId, String deviceId, String sid,
+                                                int from, int to, int pageNumber, int pageSize) {
+    Device device = deviceService.findDevice(vendorId, deviceId, sid);
 
-        List<DailyStatsDO> dailyStatsDOList = DailyStatsDO.getDailyStats(device, LogistimoUtils.transformPageNumberToPosition(pageNumber, pageSize), pageSize, from, to);
-        StatsResponse statsResponse = new StatsResponse();
+    pageSize = LogistimoUtils.transformPageSize(pageSize);
 
-        for (DailyStatsDO dailyStatsDO : dailyStatsDOList) {
-            statsResponse.data.add(toDeviceStatsResponse(dailyStatsDO, com.logistimo.db.DailyStatsDeviceError.getDailyStatsDeviceErrors(dailyStatsDO)));
-        }
+    List<DailyStatsDO>
+        dailyStatsDOList =
+        DailyStatsDO.getDailyStats(device,
+            LogistimoUtils.transformPageNumberToPosition(pageNumber, pageSize), pageSize, from, to);
+    StatsResponse statsResponse = new StatsResponse();
 
-        statsResponse.setnPages(LogistimoUtils.availableNumberOfPages(pageSize, DailyStatsDO.getDailyStatsCount(device, from, to)));
-        return statsResponse;
+    for (DailyStatsDO dailyStatsDO : dailyStatsDOList) {
+      statsResponse.data.add(toDeviceStatsResponse(dailyStatsDO,
+          com.logistimo.db.DailyStatsDeviceError.getDailyStatsDeviceErrors(dailyStatsDO)));
     }
 
-    private DailyStatsDO toDailyStats(DailyStats dailyStatsRequest) throws LogistimoException {
-        DailyStatsDO dailyStatsDO = new DailyStatsDO();
+    statsResponse.setnPages(LogistimoUtils
+        .availableNumberOfPages(pageSize, DailyStatsDO.getDailyStatsCount(device, from, to)));
+    return statsResponse;
+  }
 
-        if (dailyStatsRequest.day > 0) {
-            dailyStatsDO.day = dailyStatsRequest.day;
-        } else {
-            throw new LogistimoException("Day(day) is required.");
-        }
+  private DailyStatsDO toDailyStats(DailyStats dailyStatsRequest) throws LogistimoException {
+    DailyStatsDO dailyStatsDO = new DailyStatsDO();
 
-        if (dailyStatsRequest.batt != null) {
-            dailyStatsDO.batteryStatus = dailyStatsRequest.batt.stat;
-            dailyStatsDO.batteryAlarms = dailyStatsRequest.batt.getnAlrms();
-            dailyStatsDO.batteryTime = dailyStatsRequest.batt.time;
-            dailyStatsDO.batteryActualVolt = dailyStatsRequest.batt.actv;
-            dailyStatsDO.batteryLowVolt = dailyStatsRequest.batt.lowv;
-            dailyStatsDO.batteryHighVolt = dailyStatsRequest.batt.highv;
-            dailyStatsDO.batteryChargingTime = dailyStatsRequest.batt.chgt;
-            dailyStatsDO.batteryWarningDuration = dailyStatsRequest.batt.wdur;
-            dailyStatsDO.batteryAlarmDuration = dailyStatsRequest.batt.adur;
-            dailyStatsDO.powerAvailableTime = dailyStatsRequest.batt.pwrt;
-        } else {
-            throw new LogistimoException("Battery stats(batt) is required");
-        }
-
-        if (dailyStatsRequest.getdCon() != null) {
-            dailyStatsDO.deviceConnectionStatus = dailyStatsRequest.getdCon().stat;
-            dailyStatsDO.deviceConnectionAlarms = dailyStatsRequest.getdCon().getnAlrms();
-            dailyStatsDO.deviceConnectionTime = dailyStatsRequest.getdCon().time;
-            dailyStatsDO.deviceConnectionDuration = dailyStatsRequest.getdCon().dur;
-        }
-
-        if (dailyStatsRequest.getxSns() != null) {
-            dailyStatsDO.externalSensorStatus = dailyStatsRequest.getxSns().stat;
-            dailyStatsDO.externalSensorAlarms = dailyStatsRequest.getxSns().getnAlrms();
-            dailyStatsDO.externalSensorTime = dailyStatsRequest.getxSns().time;
-            dailyStatsDO.externalSensorDuration = dailyStatsRequest.getxSns().dur;
-        }
-
-        if (dailyStatsRequest.mean != null) {
-            dailyStatsDO.meanTemperature = dailyStatsRequest.mean;
-        } else {
-            throw new LogistimoException("Mean temperature(mean) is required.");
-        }
-
-        if (dailyStatsRequest.min != null) {
-            dailyStatsDO.minTemperature = dailyStatsRequest.min;
-        } else {
-            throw new LogistimoException("Min temperature(min) is required.");
-        }
-
-        if (dailyStatsRequest.max != null) {
-            dailyStatsDO.maxTemperature = dailyStatsRequest.max;
-        } else {
-            throw new LogistimoException("Max temperature(max) is required.");
-        }
-
-        dailyStatsDO.numberOfExcursions = dailyStatsRequest.getnExc();
-        if(dailyStatsRequest.tz != null)
-            dailyStatsDO.timezoneOffset = dailyStatsRequest.tz;
-
-        if (dailyStatsRequest.high != null) {
-            dailyStatsDO.highAlertStatus = dailyStatsRequest.high.stat;
-            dailyStatsDO.highAlertAlarms = dailyStatsRequest.high.getnAlrms();
-            dailyStatsDO.highAlertTime = dailyStatsRequest.high.time;
-            dailyStatsDO.highAlertDuration = dailyStatsRequest.high.dur;
-            dailyStatsDO.highAlertAmbientTemperature = dailyStatsRequest.high.getaTmp();
-            dailyStatsDO.highAlertCnfms = dailyStatsRequest.high.cnfms;
-            dailyStatsDO.highAlertCnf = dailyStatsRequest.high.cnf;
-        }
-
-        if (dailyStatsRequest.low != null) {
-            dailyStatsDO.lowAlertStatus = dailyStatsRequest.low.stat;
-            dailyStatsDO.lowAlertAlarms = dailyStatsRequest.low.getnAlrms();
-            dailyStatsDO.lowAlertTime = dailyStatsRequest.low.time;
-            dailyStatsDO.lowAlertDuration = dailyStatsRequest.low.dur;
-            dailyStatsDO.lowAlertAmbientTemperature = dailyStatsRequest.low.getaTmp();
-            dailyStatsDO.lowAlertCnfms = dailyStatsRequest.low.cnfms;
-            dailyStatsDO.lowAlertCnf = dailyStatsRequest.low.cnf;
-        }
-
-        if (dailyStatsRequest.comm != null) {
-            dailyStatsDO.numberOfSmsSent = dailyStatsRequest.comm.getnSMS();
-            dailyStatsDO.numberOfInternetPushes = dailyStatsRequest.comm.getnPsh();
-            dailyStatsDO.numberOfInternetFailures = dailyStatsRequest.comm.getnErr();
-        } else {
-            throw new LogistimoException("Communication stats(comm) is required");
-        }
-
-        if(dailyStatsRequest.str != null){
-            dailyStatsDO.availableDiskSpace = dailyStatsRequest.str.dsk;
-            dailyStatsDO.numberOfTempCached = dailyStatsRequest.str.ntmp;
-            dailyStatsDO.numberOfDVCCached = dailyStatsRequest.str.ndvc;
-        }
-
-        return dailyStatsDO;
+    if (dailyStatsRequest.day > 0) {
+      dailyStatsDO.day = dailyStatsRequest.day;
+    } else {
+      throw new LogistimoException("Day(day) is required.");
     }
 
-    private DeviceStatsResponse toDeviceStatsResponse(DailyStatsDO dailyStatsDO, List<com.logistimo.db.DailyStatsDeviceError> dailyStatsDeviceErrorList) {
-
-        DeviceStatsResponse deviceStatsResponse = new DeviceStatsResponse();
-
-        deviceStatsResponse.trId = dailyStatsDO.device.transmitterId;
-        deviceStatsResponse.stats.day = dailyStatsDO.day;
-        deviceStatsResponse.stats.tz = dailyStatsDO.timezoneOffset;
-        deviceStatsResponse.stats.setnExc(dailyStatsDO.numberOfExcursions);
-        deviceStatsResponse.stats.mean = dailyStatsDO.meanTemperature;
-        deviceStatsResponse.stats.min = dailyStatsDO.minTemperature;
-        deviceStatsResponse.stats.max = dailyStatsDO.maxTemperature;
-
-        deviceStatsResponse.stats.low = new AlertStats();
-        deviceStatsResponse.stats.low.stat = dailyStatsDO.lowAlertStatus;
-        deviceStatsResponse.stats.low.setnAlrms(dailyStatsDO.lowAlertAlarms);
-        deviceStatsResponse.stats.low.dur = dailyStatsDO.lowAlertDuration;
-        deviceStatsResponse.stats.low.time = dailyStatsDO.lowAlertTime;
-        deviceStatsResponse.stats.low.setaTmp(dailyStatsDO.lowAlertAmbientTemperature);
-        deviceStatsResponse.stats.low.cnfms = dailyStatsDO.lowAlertCnfms;
-        deviceStatsResponse.stats.low.cnf = dailyStatsDO.lowAlertCnf;
-
-        deviceStatsResponse.stats.high = new AlertStats();
-        deviceStatsResponse.stats.high.stat = dailyStatsDO.highAlertStatus;
-        deviceStatsResponse.stats.high.setnAlrms(dailyStatsDO.highAlertAlarms);
-        deviceStatsResponse.stats.high.dur = dailyStatsDO.highAlertDuration;
-        deviceStatsResponse.stats.high.time = dailyStatsDO.highAlertTime;
-        deviceStatsResponse.stats.high.setaTmp(dailyStatsDO.highAlertAmbientTemperature);
-        deviceStatsResponse.stats.high.cnfms = dailyStatsDO.highAlertCnfms;
-        deviceStatsResponse.stats.high.cnf = dailyStatsDO.highAlertCnf;
-
-        deviceStatsResponse.stats.setxSns(new ExternalSensorStats());
-        deviceStatsResponse.stats.getxSns().dur = dailyStatsDO.externalSensorDuration;
-        deviceStatsResponse.stats.getxSns().stat = dailyStatsDO.externalSensorStatus;
-        deviceStatsResponse.stats.getxSns().setnAlrms(dailyStatsDO.externalSensorAlarms);
-        deviceStatsResponse.stats.getxSns().time = dailyStatsDO.externalSensorTime;
-
-        deviceStatsResponse.stats.setdCon(new DeviceConnectionStats());
-        deviceStatsResponse.stats.getdCon().dur = dailyStatsDO.deviceConnectionDuration;
-        deviceStatsResponse.stats.getdCon().stat = dailyStatsDO.deviceConnectionStatus;
-        deviceStatsResponse.stats.getdCon().setnAlrms(dailyStatsDO.deviceConnectionAlarms);
-        deviceStatsResponse.stats.getdCon().time = dailyStatsDO.deviceConnectionTime;
-
-        deviceStatsResponse.stats.batt = new BatteryStats();
-        deviceStatsResponse.stats.batt.stat = dailyStatsDO.batteryStatus;
-        deviceStatsResponse.stats.batt.setnAlrms(dailyStatsDO.batteryAlarms);
-        deviceStatsResponse.stats.batt.time = dailyStatsDO.batteryTime;
-        deviceStatsResponse.stats.batt.actv = dailyStatsDO.batteryActualVolt;
-        deviceStatsResponse.stats.batt.lowv = dailyStatsDO.batteryLowVolt;
-        deviceStatsResponse.stats.batt.highv = dailyStatsDO.batteryHighVolt;
-        deviceStatsResponse.stats.batt.chgt = dailyStatsDO.batteryChargingTime;
-        deviceStatsResponse.stats.batt.wdur = dailyStatsDO.batteryWarningDuration;
-        deviceStatsResponse.stats.batt.adur = dailyStatsDO.batteryAlarmDuration;
-        deviceStatsResponse.stats.batt.pwrt = dailyStatsDO.powerAvailableTime;
-
-        deviceStatsResponse.stats.comm = new CommunicationStats();
-        deviceStatsResponse.stats.comm.setnSMS(dailyStatsDO.numberOfSmsSent);
-        deviceStatsResponse.stats.comm.setnPsh(dailyStatsDO.numberOfInternetPushes);
-        deviceStatsResponse.stats.comm.setnErr(dailyStatsDO.numberOfInternetFailures);
-
-        deviceStatsResponse.stats.str = new StorageStats();
-        deviceStatsResponse.stats.str.dsk = dailyStatsDO.availableDiskSpace;
-        deviceStatsResponse.stats.str.ntmp = dailyStatsDO.numberOfTempCached;
-        deviceStatsResponse.stats.str.ndvc = dailyStatsDO.numberOfDVCCached;
-
-        deviceStatsResponse.stats.errs = new ArrayList<>();
-        for (com.logistimo.db.DailyStatsDeviceError dailyStatsDeviceError : dailyStatsDeviceErrorList) {
-            DailyStatsDeviceError dailyStatsDeviceErrorRequest = new DailyStatsDeviceError();
-            dailyStatsDeviceErrorRequest.cnt = dailyStatsDeviceError.count;
-            dailyStatsDeviceErrorRequest.code = dailyStatsDeviceError.errorCode;
-            dailyStatsDeviceErrorRequest.time = dailyStatsDeviceError.time;
-
-            deviceStatsResponse.stats.errs.add(dailyStatsDeviceErrorRequest);
-        }
-
-
-        return deviceStatsResponse;
+    if (dailyStatsRequest.batt != null) {
+      dailyStatsDO.batteryStatus = dailyStatsRequest.batt.stat;
+      dailyStatsDO.batteryAlarms = dailyStatsRequest.batt.getnAlrms();
+      dailyStatsDO.batteryTime = dailyStatsRequest.batt.time;
+      dailyStatsDO.batteryActualVolt = dailyStatsRequest.batt.actv;
+      dailyStatsDO.batteryLowVolt = dailyStatsRequest.batt.lowv;
+      dailyStatsDO.batteryHighVolt = dailyStatsRequest.batt.highv;
+      dailyStatsDO.batteryChargingTime = dailyStatsRequest.batt.chgt;
+      dailyStatsDO.batteryWarningDuration = dailyStatsRequest.batt.wdur;
+      dailyStatsDO.batteryAlarmDuration = dailyStatsRequest.batt.adur;
+      dailyStatsDO.powerAvailableTime = dailyStatsRequest.batt.pwrt;
+    } else {
+      throw new LogistimoException("Battery stats(batt) is required");
     }
 
-    private com.logistimo.db.DailyStatsDeviceError toDailyStatsDeviceError(DailyStatsDeviceError dailyStatsDeviceErrorRequest) {
-        com.logistimo.db.DailyStatsDeviceError dailyStatsDeviceError = new com.logistimo.db.DailyStatsDeviceError();
-
-        dailyStatsDeviceError.errorCode = dailyStatsDeviceErrorRequest.code;
-        dailyStatsDeviceError.time = dailyStatsDeviceErrorRequest.time;
-        dailyStatsDeviceError.count = dailyStatsDeviceErrorRequest.cnt;
-
-        return dailyStatsDeviceError;
+    if (dailyStatsRequest.getdCon() != null) {
+      dailyStatsDO.deviceConnectionStatus = dailyStatsRequest.getdCon().stat;
+      dailyStatsDO.deviceConnectionAlarms = dailyStatsRequest.getdCon().getnAlrms();
+      dailyStatsDO.deviceConnectionTime = dailyStatsRequest.getdCon().time;
+      dailyStatsDO.deviceConnectionDuration = dailyStatsRequest.getdCon().dur;
     }
+
+    if (dailyStatsRequest.getxSns() != null) {
+      dailyStatsDO.externalSensorStatus = dailyStatsRequest.getxSns().stat;
+      dailyStatsDO.externalSensorAlarms = dailyStatsRequest.getxSns().getnAlrms();
+      dailyStatsDO.externalSensorTime = dailyStatsRequest.getxSns().time;
+      dailyStatsDO.externalSensorDuration = dailyStatsRequest.getxSns().dur;
+    }
+
+    if (dailyStatsRequest.mean != null) {
+      dailyStatsDO.meanTemperature = dailyStatsRequest.mean;
+    } else {
+      throw new LogistimoException("Mean temperature(mean) is required.");
+    }
+
+    if (dailyStatsRequest.min != null) {
+      dailyStatsDO.minTemperature = dailyStatsRequest.min;
+    } else {
+      throw new LogistimoException("Min temperature(min) is required.");
+    }
+
+    if (dailyStatsRequest.max != null) {
+      dailyStatsDO.maxTemperature = dailyStatsRequest.max;
+    } else {
+      throw new LogistimoException("Max temperature(max) is required.");
+    }
+
+    dailyStatsDO.numberOfExcursions = dailyStatsRequest.getnExc();
+    if (dailyStatsRequest.tz != null) {
+      dailyStatsDO.timezoneOffset = dailyStatsRequest.tz;
+    }
+
+    if (dailyStatsRequest.high != null) {
+      dailyStatsDO.highAlertStatus = dailyStatsRequest.high.stat;
+      dailyStatsDO.highAlertAlarms = dailyStatsRequest.high.getnAlrms();
+      dailyStatsDO.highAlertTime = dailyStatsRequest.high.time;
+      dailyStatsDO.highAlertDuration = dailyStatsRequest.high.dur;
+      dailyStatsDO.highAlertAmbientTemperature = dailyStatsRequest.high.getaTmp();
+      dailyStatsDO.highAlertCnfms = dailyStatsRequest.high.cnfms;
+      dailyStatsDO.highAlertCnf = dailyStatsRequest.high.cnf;
+    }
+
+    if (dailyStatsRequest.low != null) {
+      dailyStatsDO.lowAlertStatus = dailyStatsRequest.low.stat;
+      dailyStatsDO.lowAlertAlarms = dailyStatsRequest.low.getnAlrms();
+      dailyStatsDO.lowAlertTime = dailyStatsRequest.low.time;
+      dailyStatsDO.lowAlertDuration = dailyStatsRequest.low.dur;
+      dailyStatsDO.lowAlertAmbientTemperature = dailyStatsRequest.low.getaTmp();
+      dailyStatsDO.lowAlertCnfms = dailyStatsRequest.low.cnfms;
+      dailyStatsDO.lowAlertCnf = dailyStatsRequest.low.cnf;
+    }
+
+    if (dailyStatsRequest.comm != null) {
+      dailyStatsDO.numberOfSmsSent = dailyStatsRequest.comm.getnSMS();
+      dailyStatsDO.numberOfInternetPushes = dailyStatsRequest.comm.getnPsh();
+      dailyStatsDO.numberOfInternetFailures = dailyStatsRequest.comm.getnErr();
+    } else {
+      throw new LogistimoException("Communication stats(comm) is required");
+    }
+
+    if (dailyStatsRequest.str != null) {
+      dailyStatsDO.availableDiskSpace = dailyStatsRequest.str.dsk;
+      dailyStatsDO.numberOfTempCached = dailyStatsRequest.str.ntmp;
+      dailyStatsDO.numberOfDVCCached = dailyStatsRequest.str.ndvc;
+    }
+
+    return dailyStatsDO;
+  }
+
+  private DeviceStatsResponse toDeviceStatsResponse(DailyStatsDO dailyStatsDO,
+                                                    List<com.logistimo.db.DailyStatsDeviceError> dailyStatsDeviceErrorList) {
+
+    DeviceStatsResponse deviceStatsResponse = new DeviceStatsResponse();
+
+    deviceStatsResponse.trId = dailyStatsDO.device.transmitterId;
+    deviceStatsResponse.stats.day = dailyStatsDO.day;
+    deviceStatsResponse.stats.tz = dailyStatsDO.timezoneOffset;
+    deviceStatsResponse.stats.setnExc(dailyStatsDO.numberOfExcursions);
+    deviceStatsResponse.stats.mean = dailyStatsDO.meanTemperature;
+    deviceStatsResponse.stats.min = dailyStatsDO.minTemperature;
+    deviceStatsResponse.stats.max = dailyStatsDO.maxTemperature;
+
+    deviceStatsResponse.stats.low = new AlertStats();
+    deviceStatsResponse.stats.low.stat = dailyStatsDO.lowAlertStatus;
+    deviceStatsResponse.stats.low.setnAlrms(dailyStatsDO.lowAlertAlarms);
+    deviceStatsResponse.stats.low.dur = dailyStatsDO.lowAlertDuration;
+    deviceStatsResponse.stats.low.time = dailyStatsDO.lowAlertTime;
+    deviceStatsResponse.stats.low.setaTmp(dailyStatsDO.lowAlertAmbientTemperature);
+    deviceStatsResponse.stats.low.cnfms = dailyStatsDO.lowAlertCnfms;
+    deviceStatsResponse.stats.low.cnf = dailyStatsDO.lowAlertCnf;
+
+    deviceStatsResponse.stats.high = new AlertStats();
+    deviceStatsResponse.stats.high.stat = dailyStatsDO.highAlertStatus;
+    deviceStatsResponse.stats.high.setnAlrms(dailyStatsDO.highAlertAlarms);
+    deviceStatsResponse.stats.high.dur = dailyStatsDO.highAlertDuration;
+    deviceStatsResponse.stats.high.time = dailyStatsDO.highAlertTime;
+    deviceStatsResponse.stats.high.setaTmp(dailyStatsDO.highAlertAmbientTemperature);
+    deviceStatsResponse.stats.high.cnfms = dailyStatsDO.highAlertCnfms;
+    deviceStatsResponse.stats.high.cnf = dailyStatsDO.highAlertCnf;
+
+    deviceStatsResponse.stats.setxSns(new ExternalSensorStats());
+    deviceStatsResponse.stats.getxSns().dur = dailyStatsDO.externalSensorDuration;
+    deviceStatsResponse.stats.getxSns().stat = dailyStatsDO.externalSensorStatus;
+    deviceStatsResponse.stats.getxSns().setnAlrms(dailyStatsDO.externalSensorAlarms);
+    deviceStatsResponse.stats.getxSns().time = dailyStatsDO.externalSensorTime;
+
+    deviceStatsResponse.stats.setdCon(new DeviceConnectionStats());
+    deviceStatsResponse.stats.getdCon().dur = dailyStatsDO.deviceConnectionDuration;
+    deviceStatsResponse.stats.getdCon().stat = dailyStatsDO.deviceConnectionStatus;
+    deviceStatsResponse.stats.getdCon().setnAlrms(dailyStatsDO.deviceConnectionAlarms);
+    deviceStatsResponse.stats.getdCon().time = dailyStatsDO.deviceConnectionTime;
+
+    deviceStatsResponse.stats.batt = new BatteryStats();
+    deviceStatsResponse.stats.batt.stat = dailyStatsDO.batteryStatus;
+    deviceStatsResponse.stats.batt.setnAlrms(dailyStatsDO.batteryAlarms);
+    deviceStatsResponse.stats.batt.time = dailyStatsDO.batteryTime;
+    deviceStatsResponse.stats.batt.actv = dailyStatsDO.batteryActualVolt;
+    deviceStatsResponse.stats.batt.lowv = dailyStatsDO.batteryLowVolt;
+    deviceStatsResponse.stats.batt.highv = dailyStatsDO.batteryHighVolt;
+    deviceStatsResponse.stats.batt.chgt = dailyStatsDO.batteryChargingTime;
+    deviceStatsResponse.stats.batt.wdur = dailyStatsDO.batteryWarningDuration;
+    deviceStatsResponse.stats.batt.adur = dailyStatsDO.batteryAlarmDuration;
+    deviceStatsResponse.stats.batt.pwrt = dailyStatsDO.powerAvailableTime;
+
+    deviceStatsResponse.stats.comm = new CommunicationStats();
+    deviceStatsResponse.stats.comm.setnSMS(dailyStatsDO.numberOfSmsSent);
+    deviceStatsResponse.stats.comm.setnPsh(dailyStatsDO.numberOfInternetPushes);
+    deviceStatsResponse.stats.comm.setnErr(dailyStatsDO.numberOfInternetFailures);
+
+    deviceStatsResponse.stats.str = new StorageStats();
+    deviceStatsResponse.stats.str.dsk = dailyStatsDO.availableDiskSpace;
+    deviceStatsResponse.stats.str.ntmp = dailyStatsDO.numberOfTempCached;
+    deviceStatsResponse.stats.str.ndvc = dailyStatsDO.numberOfDVCCached;
+
+    deviceStatsResponse.stats.errs = new ArrayList<>();
+    for (com.logistimo.db.DailyStatsDeviceError dailyStatsDeviceError : dailyStatsDeviceErrorList) {
+      DailyStatsDeviceError dailyStatsDeviceErrorRequest = new DailyStatsDeviceError();
+      dailyStatsDeviceErrorRequest.cnt = dailyStatsDeviceError.count;
+      dailyStatsDeviceErrorRequest.code = dailyStatsDeviceError.errorCode;
+      dailyStatsDeviceErrorRequest.time = dailyStatsDeviceError.time;
+
+      deviceStatsResponse.stats.errs.add(dailyStatsDeviceErrorRequest);
+    }
+
+    return deviceStatsResponse;
+  }
+
+  private com.logistimo.db.DailyStatsDeviceError toDailyStatsDeviceError(
+      DailyStatsDeviceError dailyStatsDeviceErrorRequest) {
+    com.logistimo.db.DailyStatsDeviceError
+        dailyStatsDeviceError =
+        new com.logistimo.db.DailyStatsDeviceError();
+
+    dailyStatsDeviceError.errorCode = dailyStatsDeviceErrorRequest.code;
+    dailyStatsDeviceError.time = dailyStatsDeviceErrorRequest.time;
+    dailyStatsDeviceError.count = dailyStatsDeviceErrorRequest.cnt;
+
+    return dailyStatsDeviceError;
+  }
 }

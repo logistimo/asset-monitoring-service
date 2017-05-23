@@ -26,51 +26,54 @@ package com.logistimo.services;
 import com.logistimo.db.UserAccount;
 import com.logistimo.models.user.request.AddApiConsumerRequest;
 import com.logistimo.models.user.response.UserAccountResponse;
+
 import org.apache.commons.codec.digest.DigestUtils;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class UserService extends ServiceImpl{
-    public UserAccountResponse getUserAccount(String userName) {
-        return toUserAccountResponse(UserAccount.getUser(userName));
+public class UserService extends ServiceImpl {
+  public UserAccountResponse getUserAccount(String userName) {
+    return toUserAccountResponse(UserAccount.getUser(userName));
+  }
+
+  public List<UserAccountResponse> getAllUsers() {
+    return toUserAccountResponseList(UserAccount.findAll());
+  }
+
+  private List<UserAccountResponse> toUserAccountResponseList(List<UserAccount> userAccountList) {
+    List<UserAccountResponse>
+        userResponseList =
+        new ArrayList<UserAccountResponse>(userAccountList.size());
+    for (UserAccount userAccount : userAccountList) {
+      userResponseList.add(toUserAccountResponse(userAccount));
     }
 
-    public List<UserAccountResponse> getAllUsers() {
-        return toUserAccountResponseList(UserAccount.findAll());
-    }
+    return userResponseList;
+  }
 
-    private List<UserAccountResponse> toUserAccountResponseList(List<UserAccount> userAccountList) {
-        List<UserAccountResponse> userResponseList = new ArrayList<UserAccountResponse>(userAccountList.size());
-        for (UserAccount userAccount : userAccountList) {
-            userResponseList.add(toUserAccountResponse(userAccount));
-        }
+  private UserAccountResponse toUserAccountResponse(UserAccount userAccount) {
+    UserAccountResponse userAccountResponse = new UserAccountResponse();
+    userAccountResponse.userName = userAccount.userName;
+    userAccountResponse.password = userAccount.password;
+    userAccountResponse.organizationName = userAccount.organizationName;
+    userAccountResponse.userType = userAccount.userType;
 
-        return userResponseList;
-    }
+    return userAccountResponse;
+  }
 
-    private UserAccountResponse toUserAccountResponse(UserAccount userAccount) {
-        UserAccountResponse userAccountResponse = new UserAccountResponse();
-        userAccountResponse.userName = userAccount.userName;
-        userAccountResponse.password = userAccount.password;
-        userAccountResponse.organizationName = userAccount.organizationName;
-        userAccountResponse.userType = userAccount.userType;
+  public void addUser(AddApiConsumerRequest addApiConsumerRequest) {
+    toUserAccount(addApiConsumerRequest).save();
+  }
 
-        return userAccountResponse;
-    }
+  private UserAccount toUserAccount(AddApiConsumerRequest addApiConsumerRequest) {
+    UserAccount userAccount = new UserAccount();
 
-    public void addUser(AddApiConsumerRequest addApiConsumerRequest) {
-        toUserAccount(addApiConsumerRequest).save();
-    }
+    userAccount.organizationName = addApiConsumerRequest.organizationName;
+    userAccount.userName = addApiConsumerRequest.userName;
+    userAccount.password = DigestUtils.md5Hex(addApiConsumerRequest.password);
+    userAccount.userType = addApiConsumerRequest.userType;
 
-    private UserAccount toUserAccount(AddApiConsumerRequest addApiConsumerRequest) {
-        UserAccount userAccount = new UserAccount();
-
-        userAccount.organizationName = addApiConsumerRequest.organizationName;
-        userAccount.userName = addApiConsumerRequest.userName;
-        userAccount.password = DigestUtils.md5Hex(addApiConsumerRequest.password);
-        userAccount.userType = addApiConsumerRequest.userType;
-
-        return userAccount;
-    }
+    return userAccount;
+  }
 }

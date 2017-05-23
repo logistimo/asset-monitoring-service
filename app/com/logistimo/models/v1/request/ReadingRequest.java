@@ -24,6 +24,7 @@
 package com.logistimo.models.v1.request;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import org.hibernate.validator.constraints.NotEmpty;
 
 import java.util.List;
@@ -31,9 +32,9 @@ import java.util.List;
 @Deprecated
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ReadingRequest {
-    @NotEmpty
-    public String vendorId;
+  @NotEmpty
+  public String vendorId;
 
-    @NotEmpty
-    public List<Reading> data;
+  @NotEmpty
+  public List<Reading> data;
 }

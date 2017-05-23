@@ -27,23 +27,21 @@ package com.logistimo.models.device.common;
  * Created by kaniyarasu on 05/10/15.
  */
 public class DeviceDetails {
-    private String dId;
+  public String phn;
+  public String cn;
+  private String dId;
 
-    public String phn;
+  public DeviceDetails(String dId, String phn, String cn) {
+    this.dId = dId;
+    this.phn = phn;
+    this.cn = cn;
+  }
 
-    public String cn;
+  public String getdId() {
+    return dId;
+  }
 
-    public DeviceDetails(String dId, String phn, String cn) {
-        this.dId = dId;
-        this.phn = phn;
-        this.cn = cn;
-    }
-
-    public String getdId() {
-        return dId;
-    }
-
-    public void setdId(String dId) {
-        this.dId = dId;
-    }
+  public void setdId(String dId) {
+    this.dId = dId;
+  }
 }

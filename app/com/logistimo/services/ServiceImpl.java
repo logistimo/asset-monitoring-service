@@ -28,18 +28,18 @@ package com.logistimo.services;
  */
 public class ServiceImpl implements Service {
 
-    @Override
-    public void init(ServiceFactory serviceFactory) {
+  @Override
+  public void init(ServiceFactory serviceFactory) {
 
-    }
+  }
 
-    @Override
-    public void destroy() {
+  @Override
+  public void destroy() {
 
-    }
+  }
 
-    @Override
-    public Class<? extends Service> getInterface() {
-        return null;
-    }
+  @Override
+  public Class<? extends Service> getInterface() {
+    return null;
+  }
 }

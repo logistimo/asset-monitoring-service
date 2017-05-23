@@ -23,41 +23,44 @@
 
 package com.logistimo.services;
 
+import com.logistimo.task.AssetAlarmsMessageProducer;
+
+import org.apache.activemq.camel.component.ActiveMQComponent;
+
+import java.util.HashMap;
+import java.util.Map;
+
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
 import akka.camel.Camel;
 import akka.camel.CamelExtension;
 import akka.camel.CamelMessage;
-import com.logistimo.task.AssetAlarmsMessageProducer;
-import org.apache.activemq.camel.component.ActiveMQComponent;
 import play.Play;
-
-import java.util.HashMap;
-import java.util.Map;
 
 public class MessagingService extends ServiceImpl {
 
-    private static final String ACTOR_NAME = "messaging-service-actor";
-    private static final String COMPONENT_NAME = "activemq";
-    private static final String ACTIVEMQ_URL = "activemq.url";
-    private static final String ASSET_ALARMS = "ASSET-ALARMS";
+  private static final String ACTOR_NAME = "messaging-service-actor";
+  private static final String COMPONENT_NAME = "activemq";
+  private static final String ACTIVEMQ_URL = "activemq.url";
+  private static final String ASSET_ALARMS = "ASSET-ALARMS";
 
-    private Map<String, ActorRef> producers;
-    private ActorSystem system;
+  private Map<String, ActorRef> producers;
+  private ActorSystem system;
 
-    public MessagingService() {
+  public MessagingService() {
 
-        system = ActorSystem.create(ACTOR_NAME);
-        Camel camel = CamelExtension.get(system);
-        camel.context().addComponent(COMPONENT_NAME, ActiveMQComponent.activeMQComponent(Play.application().configuration().getString(ACTIVEMQ_URL)));
+    system = ActorSystem.create(ACTOR_NAME);
+    Camel camel = CamelExtension.get(system);
+    camel.context().addComponent(COMPONENT_NAME, ActiveMQComponent
+        .activeMQComponent(Play.application().configuration().getString(ACTIVEMQ_URL)));
 
-        producers = new HashMap<>();
-        producers.put(ASSET_ALARMS, system.actorOf(Props.create(AssetAlarmsMessageProducer.class)));
-    }
+    producers = new HashMap<>();
+    producers.put(ASSET_ALARMS, system.actorOf(Props.create(AssetAlarmsMessageProducer.class)));
+  }
 
-    public void produceMessage(final String producerId, final String jsonString) {
-        producers.get(producerId).tell(new CamelMessage(jsonString, new HashMap()), null);
-    }
+  public void produceMessage(final String producerId, final String jsonString) {
+    producers.get(producerId).tell(new CamelMessage(jsonString, new HashMap()), null);
+  }
 }
 

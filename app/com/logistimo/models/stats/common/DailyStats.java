@@ -26,96 +26,93 @@ package com.logistimo.models.stats.common;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
+import java.util.List;
+
 import javax.validation.Valid;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
-import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class DailyStats {
-    @NotNull
-    @Min(0)
-    public Integer day;
+  @NotNull
+  @Min(0)
+  public Integer day;
 
-    public Double tz;
+  public Double tz;
 
-    @NotNull
-    public Double mean;
+  @NotNull
+  public Double mean;
 
-    @NotNull
-    public Double min;
+  @NotNull
+  public Double min;
 
-    @NotNull
-    public Double max;
+  @NotNull
+  public Double max;
 
-    @Valid
-    public AlertStats high;
+  @Valid
+  public AlertStats high;
 
-    @Valid
-    public AlertStats low;
+  @Valid
+  public AlertStats low;
 
-    @NotNull
-    @Valid
-    public CommunicationStats comm;
+  @NotNull
+  @Valid
+  public CommunicationStats comm;
 
-    @NotNull
-    @Valid
-    public BatteryStats batt;
+  @NotNull
+  @Valid
+  public BatteryStats batt;
 
-    @Valid
-    public List<DailyStatsDeviceError> errs;
+  @Valid
+  public List<DailyStatsDeviceError> errs;
+  public StorageStats str;
+  @Valid
+  private int nExc;
+  @Valid
+  private ExternalSensorStats xSns;
+  @Valid
+  private DeviceConnectionStats dCon;
 
-    @Valid
-    private int nExc;
+  public int getnExc() {
+    return nExc;
+  }
 
-    @Valid
-    private ExternalSensorStats xSns;
+  public void setnExc(int nExc) {
+    this.nExc = nExc;
+  }
 
-    @Valid
-    private DeviceConnectionStats dCon;
+  public ExternalSensorStats getxSns() {
+    return xSns;
+  }
 
-    public StorageStats str;
+  public void setxSns(ExternalSensorStats xSns) {
+    this.xSns = xSns;
+  }
 
-    public int getnExc() {
-        return nExc;
-    }
+  public DeviceConnectionStats getdCon() {
+    return dCon;
+  }
 
-    public void setnExc(int nExc) {
-        this.nExc = nExc;
-    }
+  public void setdCon(DeviceConnectionStats dCon) {
+    this.dCon = dCon;
+  }
 
-    public ExternalSensorStats getxSns() {
-        return xSns;
-    }
-
-    public void setxSns(ExternalSensorStats xSns) {
-        this.xSns = xSns;
-    }
-
-    public DeviceConnectionStats getdCon() {
-        return dCon;
-    }
-
-    public void setdCon(DeviceConnectionStats dCon) {
-        this.dCon = dCon;
-    }
-
-    @Override
-    public String toString() {
-        return "DailyStats{" +
-                "day=" + day +
-                ", mean=" + mean +
-                ", min=" + min +
-                ", max=" + max +
-                ", high=" + high +
-                ", low=" + low +
-                ", batt=" + batt +
-                ", comm=" + comm +
-                ", errs=" + errs +
-                ", nExc=" + nExc +
-                ", xSns=" + xSns +
-                ", dCon=" + dCon +
-                '}';
-    }
+  @Override
+  public String toString() {
+    return "DailyStats{" +
+        "day=" + day +
+        ", mean=" + mean +
+        ", min=" + min +
+        ", max=" + max +
+        ", high=" + high +
+        ", low=" + low +
+        ", batt=" + batt +
+        ", comm=" + comm +
+        ", errs=" + errs +
+        ", nExc=" + nExc +
+        ", xSns=" + xSns +
+        ", dCon=" + dCon +
+        '}';
+  }
 }

@@ -30,7 +30,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DevicePowerAvailabilityRequest {
-    public Integer stat;
+  public Integer stat;
 
-    public Integer time;
+  public Integer time;
 }
