@@ -106,7 +106,19 @@ public class TaskService extends ServiceImpl {
           if (task == null) {
             task = new Task(Json.toJson(taskOptions).toString());
             final Task persistableFinalTask = task;
-            JPA.withTransaction(persistableFinalTask::save);
+            boolean isEMOpen = false;
+            try{
+              if(JPA.em().isOpen()){
+                task.save();
+              }else{
+                isEMOpen = true;
+                JPA.withTransaction(persistableFinalTask::save);
+              }
+            }catch(Throwable e){
+              if(!isEMOpen) {
+                JPA.withTransaction(persistableFinalTask::save);
+              }
+            }
           }
           final Task finalTask = task;
           Akka.system().scheduler().scheduleOnce(
@@ -186,32 +198,6 @@ public class TaskService extends ServiceImpl {
             LOGGER.warn("{} while rescheduling task {}", e.getMessage(),
                 taskOptions != null ? taskOptions.toString() : null, e);
           }
-        }
-      }
-
-      //One time for existing device for migrating temperature state
-      List<Device> deviceList = Device.getExcursionDevices();
-      if (deviceList != null && !deviceList.isEmpty()) {
-        for (Device device : deviceList) {
-          DeviceStatus
-              deviceStatus =
-              deviceService
-                  .getOrCreateDeviceStatus(device, null, null, AssetStatusConstants.TEMP_STATUS_KEY,
-                      null);
-          //Creating the event to generate temperature warning and alarm
-          Map<String, Object> options = new HashMap<>(1);
-          options.put(TemperatureEventService.DEVICE_ID, device.deviceId);
-          options.put(TemperatureEventService.VENDOR_ID, device.vendorId);
-          options.put(TemperatureEventService.EVENT_TYPE, TemperatureEventType.EXCURSION);
-          options.put(TemperatureEventService.STATE_UPDATED_TIME, deviceStatus.statusUpdatedTime);
-          produceMessage(
-              new TaskOptions(
-                  TaskType.BACKGROUND_TASK.getValue(),
-                  TemperatureEventService.class,
-                  null,
-                  options
-              ), null
-          );
         }
       }
     } catch (Exception e) {
