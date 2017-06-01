@@ -76,6 +76,7 @@ public class AlarmService extends ServiceImpl {
   public static final Integer POWER_OUTAGE_ALARM = 5;
   private static final Logger.ALogger LOGGER = Logger.of(AlarmService.class);
   private static final DeviceService deviceService = ServiceFactory.getService(DeviceService.class);
+  private static final AlarmLogService alarmLogService = ServiceFactory.getService(AlarmLogService.class);
   TaskService taskService = ServiceFactory.getService(TaskService.class);
 
   /**
@@ -305,6 +306,12 @@ public class AlarmService extends ServiceImpl {
         deviceEventPushModel.data.add(deviceEvent);
       }
       return Optional.of(assetMapping.asset);
+    }else {
+      try {
+        deviceService.updateOverallActivityStatus(Collections.singleton(assetMapping.asset));
+      } catch (Exception e) {
+        LOGGER.warn("Error while updating activity status for over all device", e);
+      }
     }
     return Optional.empty();
   }
@@ -667,10 +674,10 @@ public class AlarmService extends ServiceImpl {
       AlarmLog alarmLog;
       try {
         if (StringUtils.isNotEmpty(sensorId)) {
-          alarmLog = AlarmLog.getOpenAlarmLogs(device, alarmType,
+          alarmLog = alarmLogService.getOpenAlarmLogForAlarmTypeBySensorId(device, alarmType,
               deviceAlarmType, sensorId);
         } else {
-          alarmLog = AlarmLog.getOpenAlarmLogsForAlarmType(device, alarmType,
+          alarmLog = alarmLogService.getOpenAlarmLogForAlarmType(device, alarmType,
               deviceAlarmType);
         }
         alarmLog.endTime = endTime;

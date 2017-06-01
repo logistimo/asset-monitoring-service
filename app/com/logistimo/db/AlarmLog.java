@@ -129,95 +129,112 @@ public class AlarmLog {
         .getResultList();
   }
 
-  public static AlarmLog getAlarmLogForDeviceAndSensorId(Device device, Integer startTime,
-                                                         String sensorId, Integer alarmType,
-                                                         Integer deviceAlarmType) {
+  public static List<AlarmLog> getAlarmLogForDeviceAndSensorId(Device device,
+                                                               String sensorId, Integer alarmType,
+                                                               Integer deviceAlarmType) {
     if (null == deviceAlarmType) {
       return JPA.em().createQuery(
-          "from AlarmLog where device = ?1 and start_time = ?2 and sensor_id = ?3 and end_time is NULL and alarm_type = ?4 and device_alarm_type is NULL",
+          "from AlarmLog where device = ?1 and sensor_id = ?2 and end_time is NULL and "
+              + "alarm_type = ?3 and device_alarm_type is NULL order by start_time",
           AlarmLog.class)
           .setParameter(1, device)
-          .setParameter(2, startTime)
-          .setParameter(3, sensorId)
-          .setParameter(4, alarmType)
-          .getSingleResult();
+          .setParameter(2, sensorId)
+          .setParameter(3, alarmType)
+          .getResultList();
     }
 
     return JPA.em().createQuery(
-        "from AlarmLog where device = ?1 and start_time = ?2 and sensor_id = ?3 and end_time is NULL and alarm_type = ?4 and device_alarm_type = ?5",
+        "from AlarmLog where device = ?1 and sensor_id = ?2 and end_time is NULL and "
+            + "alarm_type = ?3 and device_alarm_type = ?4 order by start_time",
         AlarmLog.class)
         .setParameter(1, device)
-        .setParameter(2, startTime)
-        .setParameter(3, sensorId)
-        .setParameter(4, alarmType)
-        .setParameter(5, deviceAlarmType)
-        .getSingleResult();
+        .setParameter(2, sensorId)
+        .setParameter(3, alarmType)
+        .setParameter(4, deviceAlarmType)
+        .getResultList();
   }
 
-  public static AlarmLog getOpenAlarmLogsForAlarmType(Device device, Integer alarmType,
-                                                      Integer deviceAlarmType) {
+  public static List<AlarmLog> getAlarmLogForDeviceAndMPId(Device device,
+                                                           Integer mpId, Integer alarmType,
+                                                               Integer deviceAlarmType) {
+    if (null == deviceAlarmType) {
+      return JPA.em().createQuery(
+          "from AlarmLog where device = ?1 and monitoring_position_id = ?2 and end_time is NULL and "
+              + "alarm_type = ?3 and device_alarm_type is NULL order by start_time",
+          AlarmLog.class)
+          .setParameter(1, device)
+          .setParameter(2, mpId)
+          .setParameter(3, alarmType)
+          .getResultList();
+    }
+
     return JPA.em().createQuery(
-        "from AlarmLog where device = ?1 and alarm_type = ?2 and device_alarm_type = ?3 and end_time IS NULL and sensor_id is NULL and monitoring_position_id is NULL",
+        "from AlarmLog where device = ?1 and monitoring_position_id = ?2 and end_time is NULL and "
+            + "alarm_type = ?3 and device_alarm_type = ?4 order by start_time",
+        AlarmLog.class)
+        .setParameter(1, device)
+        .setParameter(2, mpId)
+        .setParameter(3, alarmType)
+        .setParameter(4, deviceAlarmType)
+        .getResultList();
+  }
+
+  public static List<AlarmLog> getOpenAlarmLogsForAlarmType(Device device, Integer alarmType,
+                                                            Integer deviceAlarmType) {
+    return JPA.em().createQuery(
+        "from AlarmLog where device = ?1 and alarm_type = ?2 and device_alarm_type = ?3 and "
+            + "end_time IS NULL and sensor_id is NULL and monitoring_position_id is NULL "
+            + "order by start_time",
         AlarmLog.class)
         .setParameter(1, device)
         .setParameter(2, alarmType)
         .setParameter(3, deviceAlarmType)
-        .getSingleResult();
+        .getResultList();
   }
 
   public static List<AlarmLog> getOpenAlarmLogs(Device device) {
     return JPA.em()
-        .createQuery("from AlarmLog where device = ?1 and end_time IS NULL", AlarmLog.class)
+        .createQuery("from AlarmLog where device = ?1 and end_time IS NULL",
+            AlarmLog.class)
         .setParameter(1, device)
         .getResultList();
   }
 
-  public static AlarmLog getOpenAlarmLogs(Device device, Integer alarmType, Integer deviceAlarmType,
-                                          String sendorId) {
+  public static List<AlarmLog> getOpenAlarmLogs(Device device, Integer alarmType,
+                                                Integer deviceAlarmType,
+                                                String sensorId) {
     return JPA.em().createQuery(
-        "from AlarmLog where device = ?1 and alarm_type = ?2 and device_alarm_type = ?3 and sensor_id = ?4 and end_time IS NULL",
+        "from AlarmLog where device = ?1 and alarm_type = ?2 and device_alarm_type = ?3 "
+            + "and sensor_id = ?4 and end_time IS NULL order by start_time",
         AlarmLog.class)
         .setParameter(1, device)
         .setParameter(2, alarmType)
         .setParameter(3, deviceAlarmType)
-        .setParameter(4, sendorId)
-        .getSingleResult();
+        .setParameter(4, sensorId)
+        .getResultList();
   }
 
-  public static AlarmLog getOpenAlarmLogs(Device device, Integer startTime,
-                                          Integer monitoringPositionId) {
-    return JPA.em().createQuery(
-        "from AlarmLog where device = ?1 and start_time = ?2 and monitoring_position_id = ?3 and end_time IS NULL",
-        AlarmLog.class)
-        .setParameter(1, device)
-        .setParameter(2, startTime)
-        .setParameter(3, monitoringPositionId)
-        .getSingleResult();
-  }
-
-  public static AlarmLog getParentAlarmLog(Device device, Integer alarmType,
-                                           Integer deviceAlarmType, Integer startTime) {
+  public static List<AlarmLog> getParentAlarmLog(Device device, Integer alarmType,
+                                                 Integer deviceAlarmType) {
     if (null == deviceAlarmType) {
       return JPA.em().createQuery(
           "from AlarmLog where device = ?1 and alarm_type = ?2 and device_alarm_type is NULL and "
-              + "start_time = ?3 and sensor_id IS NULL and monitoring_position_id IS NULL "
-              + "and end_time is NULL",
+              + " sensor_id IS NULL and monitoring_position_id IS NULL "
+              + "and end_time is NULL order by start_time",
           AlarmLog.class)
           .setParameter(1, device)
           .setParameter(2, alarmType)
-          .setParameter(3, startTime)
-          .getSingleResult();
+          .getResultList();
     }
     return JPA.em().createQuery(
         "from AlarmLog where device = ?1 and alarm_type = ?2 and device_alarm_type = ?3 and "
-            + "start_time = ?4 and sensor_id IS NULL and monitoring_position_id IS NULL and "
-            + "end_time is NULL",
+            + " sensor_id IS NULL and monitoring_position_id IS NULL and "
+            + "end_time is NULL order by start_time",
         AlarmLog.class)
         .setParameter(1, device)
         .setParameter(2, alarmType)
         .setParameter(3, deviceAlarmType)
-        .setParameter(4, startTime)
-        .getSingleResult();
+        .getResultList();
   }
 
   public static int getAlarmCountForDevice(Device device, int alarmType) {
@@ -245,14 +262,49 @@ public class AlarmLog {
   }
 
   public void save() {
+    this.updatedOn = new Date();
     JPA.em().persist(this);
   }
 
   public void update() {
+    this.updatedOn = new Date();
     JPA.em().merge(this);
   }
 
   public void delete() {
     JPA.em().remove(this);
+  }
+
+  public static AlarmLog getNextAlarmLog(AlarmLog alarmLog) {
+    StringBuilder query = new StringBuilder("select * from alarm_log where device_id = ")
+        .append(alarmLog.device.id);
+
+    if(alarmLog.sensorId != null){
+      query.append(" and sensor_id = '").append(alarmLog.sensorId).append("'");
+    }else{
+      query.append(" and sensor_id is NULL");
+    }
+
+    if(alarmLog.monitoringPositionId != null){
+      query.append(" and monitoring_position_id = ").append(alarmLog.monitoringPositionId);
+    }else {
+      query.append(" and monitoring_position_id is NULL");
+    }
+
+    if(alarmLog.deviceAlarmType != null){
+      query.append(" and device_alarm_type = ").append(alarmLog.deviceAlarmType);
+    }else {
+      query.append(" and device_alarm_type is NULL");
+    }
+
+    query.append(" and alarm_type = ").append(alarmLog.alarmType)
+        .append(" and start_time >= ").append(alarmLog.startTime)
+        .append(" and id <> ").append(alarmLog.id)
+        .append(" order by start_time limit 1");
+
+    return (AlarmLog) JPA.em()
+        .createNativeQuery(query.toString(), AlarmLog.class)
+        .getSingleResult();
+
   }
 }

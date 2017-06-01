@@ -94,6 +94,8 @@ public class TemperatureService extends ServiceImpl implements Executable {
   private static final AlarmService alarmService = ServiceFactory.getService(AlarmService.class);
   private static final SMSService smsService = ServiceFactory.getService(SMSService.class);
   private static final TaskService taskService = ServiceFactory.getService(TaskService.class);
+  private static final AlarmLogService alarmLogService = ServiceFactory.getService(AlarmLogService.class);
+
 
   private static final String INVALID_DEVICE_PHONE_NUMBER = "invalid_device_phone_number";
   private static final String SMS_STATUS_REQUEST_URL = "logistimo.sent_status_request.url";
@@ -730,7 +732,7 @@ public class TemperatureService extends ServiceImpl implements Executable {
             srcDeviceStatus.temperatureAbnormalStatus;
       }
 
-      deviceService.createAlarmLog(destDeviceStatus, prevStatusTime, prevStatus, asset);
+      deviceService.createAlarmLog(destDeviceStatus, asset);
       isUpdated = true;
     }
 
@@ -745,8 +747,8 @@ public class TemperatureService extends ServiceImpl implements Executable {
     //Close old alarm log, if exists
     try {
       AlarmLog
-          oldAlarmLog = AlarmLog.getAlarmLogForDeviceAndSensorId(assetMapping.asset,
-          monitoredAssetStatus.statusUpdatedTime, monitoredAssetStatus.sensorId,
+          oldAlarmLog = alarmLogService.getOpenAlarmLogForDeviceAndMPId(assetMapping.asset,
+          monitoredAssetStatus.locationId,
           AlarmLog.TEMP_ALARM, null);
       oldAlarmLog.endTime = monitoringAssetStatus.statusUpdatedTime;
       oldAlarmLog.update();

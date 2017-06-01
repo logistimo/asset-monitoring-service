@@ -62,6 +62,7 @@ public class TemperatureEventService extends ServiceImpl implements Executable {
   private static final TemperatureService
       temperatureService =
       ServiceFactory.getService(TemperatureService.class);
+  private static final AlarmLogService alarmLogService = ServiceFactory.getService(AlarmLogService.class);
 
   @Override
   public void process(String object, Map<String, Object> options) throws Exception {
@@ -286,8 +287,8 @@ public class TemperatureEventService extends ServiceImpl implements Executable {
     try {
       AlarmLog
           oldAlarmLog =
-          AlarmLog.getOpenAlarmLogs(assetMapping.asset, deviceStatus.statusUpdatedTime,
-              assetMapping.monitoringPositionId);
+          alarmLogService.getOpenAlarmLogForDeviceAndMPId(assetMapping.asset,
+              assetMapping.monitoringPositionId, AlarmLog.TEMP_ALARM, null);
       oldAlarmLog.endTime = relatedAssetStatus.statusUpdatedTime;
       oldAlarmLog.update();
 
