@@ -123,6 +123,8 @@ public class DeviceService extends ServiceImpl {
   private static final TemperatureService
       temperatureService =
       ServiceFactory.getService(TemperatureService.class);
+  private static final AlarmLogService alarmLogService = ServiceFactory.getService(AlarmLogService.class);
+
   private static final AlarmService alarmService = ServiceFactory.getService(AlarmService.class);
   private static final String APN_PUSH_URL = "logistimo.apn_push.url";
   private static final String ADMIN_PUSH_URL = "logistimo.admin_push.url";
@@ -2086,6 +2088,8 @@ public class DeviceService extends ServiceImpl {
                   DeviceStatus monitoringAssetStatus = null;
                   DeviceStatus monitoredAssetStatus = null;
                   DeviceStatus parentDeviceStatus = null;
+                  int statusUpdateTime = (int)
+                      (System.currentTimeMillis() / 1000);
                   for (String statusKey : AssetStatusConstants.ASSET_SENSOR_STATUS_KEYS) {
                     try {
                       monitoringAssetStatus =
@@ -2096,6 +2100,7 @@ public class DeviceService extends ServiceImpl {
                         monitoringAssetStatus.status = AssetStatusConstants.STATUS_OK;
                         monitoringAssetStatus.temperatureAbnormalStatus =
                             AssetStatusConstants.STATUS_OK;
+                        monitoringAssetStatus.statusUpdatedTime = statusUpdateTime;
                         monitoringAssetStatus.update();
                       } else {
                         monitoredAssetStatus.status =
@@ -2143,7 +2148,9 @@ public class DeviceService extends ServiceImpl {
                               assetMapModel.getsId());
                   parentDeviceStatus.status = AssetStatusConstants.STATUS_OK;
                   parentDeviceStatus.temperatureAbnormalStatus = AssetStatusConstants.STATUS_OK;
+                  parentDeviceStatus.statusUpdatedTime = statusUpdateTime;
                   parentDeviceStatus.update();
+                  createAlarmLog(parentDeviceStatus,parentDevice);
                   //postDeviceStatus(parentDevice, parentDeviceStatus);
                 } catch (NoResultException e) {
                   LOGGER.warn("Mapping device not found: {}, {}", assetMapModel.getvId(),
@@ -2478,8 +2485,13 @@ public class DeviceService extends ServiceImpl {
                     && (status.temperatureAbnormalStatus > finalStatus.temperatureAbnormalStatus
                     || status.statusUpdatedTime > finalStatus.statusUpdatedTime))) {
           finalStatus = status;
-        } else if (Objects.equals(statusKey, AssetStatusConstants.ACTIVITY_STATUS_KEY)
-            && status.status < finalStatus.status) {
+        } else if (
+            Objects.equals(statusKey, AssetStatusConstants.ACTIVITY_STATUS_KEY)
+            &&
+                (status.status < finalStatus.status ||
+                  (Objects.equals(status.status, finalStatus.status)
+                    && status.statusUpdatedTime > finalStatus.statusUpdatedTime))
+            ) {
           finalStatus = status;
         }
       }
@@ -2499,8 +2511,7 @@ public class DeviceService extends ServiceImpl {
           currentOverallStatus.copyStatus(finalStatus);
           currentOverallStatus.update();
 
-          createAlarmLog(currentOverallStatus, previousStatusUpdatedTime,
-              previousStatus, device);
+          createAlarmLog(currentOverallStatus, device);
         }
       }
     } catch (NoResultException e) {
@@ -2511,10 +2522,8 @@ public class DeviceService extends ServiceImpl {
   /**
    * Creates the alarm log for the given device status and closes the older alarm log
    */
-  public void createAlarmLog(DeviceStatus deviceStatus, Integer oldStatusUpdatedTime,
-                             Integer oldStatus, Device device) {
-    if (deviceStatus != null && oldStatusUpdatedTime != null && oldStatus != null
-        && device != null) {
+  public void createAlarmLog(DeviceStatus deviceStatus, Device device) {
+    if (deviceStatus != null && device != null) {
       AlarmLog newAlarmLog;
       Integer
           alarmType =
@@ -2526,20 +2535,20 @@ public class DeviceService extends ServiceImpl {
               : getDeviceAlarmType(deviceStatus);
 
       try {
+        AlarmLog oldAlarmLog;
         if (StringUtils.isNotEmpty(deviceStatus.sensorId)) {
-          AlarmLog oldAlarmLog = AlarmLog.getAlarmLogForDeviceAndSensorId(device,
-              oldStatusUpdatedTime, deviceStatus.sensorId, alarmType, deviceAlarmType);
-          oldAlarmLog.endTime = deviceStatus.statusUpdatedTime;
-          oldAlarmLog.updatedOn = new Date();
-          oldAlarmLog.update();
-        } else {
-          AlarmLog
-              parentAlarmLog =
-              AlarmLog.getParentAlarmLog(device, alarmType, deviceAlarmType, oldStatusUpdatedTime);
-          parentAlarmLog.endTime = deviceStatus.statusUpdatedTime;
-          parentAlarmLog.updatedOn = new Date();
-          parentAlarmLog.update();
+          oldAlarmLog = alarmLogService.getOpenAlarmLogForDeviceAndSensorId(device,
+              deviceStatus.sensorId, alarmType, deviceAlarmType);
+        } else if (deviceStatus.locationId != null) {
+          oldAlarmLog =
+              alarmLogService.getOpenAlarmLogForDeviceAndMPId(device, deviceStatus.locationId,
+                  alarmType, deviceAlarmType);
+        }else{
+          oldAlarmLog =
+              alarmLogService.getOpenParentAlarmLog(device, alarmType, deviceAlarmType);
         }
+        oldAlarmLog.endTime = deviceStatus.statusUpdatedTime;
+        oldAlarmLog.update();
       } catch (NoResultException e) {
         //do nothing
       }
@@ -2556,7 +2565,6 @@ public class DeviceService extends ServiceImpl {
       }
       newAlarmLog.deviceAlarmType = deviceAlarmType;
       newAlarmLog.startTime = deviceStatus.statusUpdatedTime;
-      newAlarmLog.updatedOn = new Date();
       newAlarmLog.device = device;
       newAlarmLog.sensorId = deviceStatus.sensorId;
       newAlarmLog.temperatureAbnormalType = deviceStatus.temperatureAbnormalStatus;
