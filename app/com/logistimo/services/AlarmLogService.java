@@ -28,6 +28,8 @@ import com.logistimo.db.Device;
 
 import java.util.List;
 
+import javax.persistence.NoResultException;
+
 /**
  * Created by charan on 01/06/17.
  */
@@ -72,8 +74,8 @@ public class AlarmLogService extends ServiceImpl {
    * @return final alarm log
    */
   protected AlarmLog fixMultipleOpenAlarmLogs(List<AlarmLog> alarmLogs) {
-    if(alarmLogs.isEmpty()){
-      return null;
+    if(alarmLogs == null || alarmLogs.isEmpty()){
+      throw new NoResultException();
     }else if(alarmLogs.size()==1){
       return alarmLogs.get(0);
     }
