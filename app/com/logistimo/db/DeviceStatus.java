@@ -150,9 +150,9 @@ public class DeviceStatus {
     JPA.em().remove(this);
   }
 
-  public void copyStatus(DeviceStatus deviceStatus) {
+  public void copyStatus(DeviceStatus deviceStatus, Integer latestStatusUpdateTime) {
     this.status = deviceStatus.status;
-    this.statusUpdatedTime = deviceStatus.statusUpdatedTime;
+    this.statusUpdatedTime = latestStatusUpdateTime;
     this.temperature = deviceStatus.temperature;
     this.temperatureAbnormalStatus = deviceStatus.temperatureAbnormalStatus;
     this.temperatureUpdatedTime = deviceStatus.temperatureUpdatedTime;
