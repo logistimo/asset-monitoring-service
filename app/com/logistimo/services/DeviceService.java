@@ -2474,25 +2474,33 @@ public class DeviceService extends ServiceImpl {
           DeviceStatus.getDeviceStatuses(device, statusKey);
       DeviceStatus finalStatus = null;
       DeviceStatus currentOverallStatus = null;
+      Integer latestStatusUpdateTime = null;
       for (DeviceStatus status : statuses) {
         if (status.sensorId == null && status.locationId == null) {
           currentOverallStatus = status;
-        } else if (finalStatus == null) {
-          finalStatus = status;
-        } else if (Objects.equals(statusKey, AssetStatusConstants.TEMP_STATUS_KEY) &&
-            (status.status > finalStatus.status ||
-                Objects.equals(status.status, finalStatus.status)
-                    && (status.temperatureAbnormalStatus > finalStatus.temperatureAbnormalStatus
-                    || status.statusUpdatedTime > finalStatus.statusUpdatedTime))) {
-          finalStatus = status;
-        } else if (
-            Objects.equals(statusKey, AssetStatusConstants.ACTIVITY_STATUS_KEY)
-            &&
-                (status.status < finalStatus.status ||
-                  (Objects.equals(status.status, finalStatus.status)
-                    && status.statusUpdatedTime > finalStatus.statusUpdatedTime))
-            ) {
-          finalStatus = status;
+        } else {
+          if (finalStatus == null) {
+            finalStatus = status;
+            latestStatusUpdateTime = status.statusUpdatedTime;
+          } else if (Objects.equals(statusKey, AssetStatusConstants.TEMP_STATUS_KEY) &&
+              (status.status > finalStatus.status ||
+                  Objects.equals(status.status, finalStatus.status)
+                      && (status.temperatureAbnormalStatus > finalStatus.temperatureAbnormalStatus
+                      || status.statusUpdatedTime > finalStatus.statusUpdatedTime))) {
+            finalStatus = status;
+          } else if (
+              Objects.equals(statusKey, AssetStatusConstants.ACTIVITY_STATUS_KEY)
+                  &&
+                  (status.status < finalStatus.status ||
+                      (Objects.equals(status.status, finalStatus.status)
+                          && status.statusUpdatedTime > finalStatus.statusUpdatedTime))
+              ) {
+            finalStatus = status;
+          }
+
+          if(status.statusUpdatedTime > latestStatusUpdateTime){
+            latestStatusUpdateTime = status.statusUpdatedTime;
+          }
         }
       }
 
@@ -2508,7 +2516,7 @@ public class DeviceService extends ServiceImpl {
                 finalStatus.temperatureAbnormalStatus)) {
           Integer previousStatusUpdatedTime = currentOverallStatus.statusUpdatedTime;
           Integer previousStatus = currentOverallStatus.status;
-          currentOverallStatus.copyStatus(finalStatus);
+          currentOverallStatus.copyStatus(finalStatus, latestStatusUpdateTime);
           currentOverallStatus.update();
 
           createAlarmLog(currentOverallStatus, device);
