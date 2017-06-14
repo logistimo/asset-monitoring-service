@@ -493,7 +493,12 @@ public class DeviceService extends ServiceImpl {
             getOrCreateDeviceStatus(device, null, null, AssetStatusConstants.CONFIG_STATUS_KEY,
                 null);
         deviceStatus.statusUpdatedTime = (int) (System.currentTimeMillis() / 1000);
-        deviceStatus.status = 1;
+        deviceStatus.status = AssetStatusConstants.CONFIG_STATUS_PULLED;
+        DeviceStatus pullConfigStatusRequest = getOrCreateDeviceStatus(device, null, null, AssetStatusConstants.CONFIG_STATUS_KEY_PULL_REQUEST, null);
+        if(pullConfigStatusRequest != null && AssetStatusConstants.CONFIG_PULL_REQUEST_SENT == pullConfigStatusRequest.status) {
+          deviceStatus.statusUpdatedBy = pullConfigStatusRequest.statusUpdatedBy;
+          pullConfigStatusRequest.delete();
+        }
         deviceStatus.update();
       } catch (NoResultException e) {
         LOGGER.info("Configuration status not available for device: {}, {}", device.vendorId,
@@ -503,7 +508,7 @@ public class DeviceService extends ServiceImpl {
       if (deviceStatus == null) {
         deviceStatus = new DeviceStatus();
         deviceStatus.statusUpdatedTime = (int) (System.currentTimeMillis() / 1000);
-        deviceStatus.status = 1;
+        deviceStatus.status = AssetStatusConstants.CONFIG_STATUS_PULLED;
         deviceStatus.device = device;
         deviceStatus.save();
       }
@@ -1016,6 +1021,7 @@ public class DeviceService extends ServiceImpl {
           DeviceStatusModel deviceStatusModel = new DeviceStatusModel();
           deviceStatusModel.st = deviceStatus.status;
           deviceStatusModel.stut = deviceStatus.statusUpdatedTime;
+          deviceStatusModel.stub = deviceStatus.statusUpdatedBy;
           deviceResponse.cfg = deviceStatusModel;
         } else if (deviceStatus.statusKey.equals(AssetStatusConstants.WORKING_STATUS_KEY)) {
           DeviceStatusModel deviceStatusModel = new DeviceStatusModel();
@@ -1404,6 +1410,8 @@ public class DeviceService extends ServiceImpl {
 
   public void pushConfigToDevice(ConfigurationPushRequest configurationPushRequest)
       throws LogistimoException, IOException {
+    DeviceStatus deviceStatus = null;
+    Integer status = AssetStatusConstants.CONFIG_STATUS_PUSHED;
     DeviceConfigurationPushStatus
         deviceConfigurationPushStatus =
         new DeviceConfigurationPushStatus();
@@ -1437,25 +1445,17 @@ public class DeviceService extends ServiceImpl {
             ConfigurationRequest data = getDeviceConfiguration(device).data;
             configurationPushRequest.data = data;
 
-            DeviceStatus deviceStatus = null;
             try {
               deviceStatus =
                   getOrCreateDeviceStatus(device, null, null,
                       AssetStatusConstants.CONFIG_STATUS_KEY, null);
               deviceStatus.statusUpdatedTime = (int) (System.currentTimeMillis() / 1000);
-              deviceStatus.status = 2;
+              deviceStatus.status = AssetStatusConstants.CONFIG_STATUS_PUSHED;
+              deviceStatus.statusUpdatedBy = configurationPushRequest.stub;
               deviceStatus.update();
             } catch (NoResultException e) {
               LOGGER.info("Configuration status not available for device: {}, {}", device.vendorId,
                   device.deviceId);
-            }
-
-            if (deviceStatus == null) {
-              deviceStatus = new DeviceStatus();
-              deviceStatus.statusUpdatedTime = (int) (System.currentTimeMillis() / 1000);
-              deviceStatus.status = 2;
-              deviceStatus.device = device;
-              deviceStatus.save();
             }
           } else if (configurationPushRequest.typ == 0 && (configurationPushRequest.url == null
               || configurationPushRequest.url.isEmpty())) {
@@ -1482,8 +1482,34 @@ public class DeviceService extends ServiceImpl {
               configurationPushRequest.url =
                   Play.application().configuration().getString(CONFIG_PULL_URL);
             }
+            try {
+              deviceStatus = getOrCreateDeviceStatus(device, null, null,
+                  AssetStatusConstants.CONFIG_STATUS_KEY_PULL_REQUEST,
+                  null);
+              deviceStatus.statusUpdatedTime = (int) (System.currentTimeMillis() / 1000);
+              deviceStatus.status = AssetStatusConstants.CONFIG_PULL_REQUEST_SENT;;
+              deviceStatus.statusUpdatedBy = configurationPushRequest.stub;
+              deviceStatus.update();
+            } catch (NoResultException e) {
+              LOGGER.info("Configuration status not available for device: {}, {}", device.vendorId,
+                  device.deviceId);
+              status = AssetStatusConstants.CONFIG_PULL_REQUEST_SENT;
+            }
           }
 
+          if(deviceStatus == null) {
+            deviceStatus = new DeviceStatus();
+            deviceStatus.statusUpdatedTime = (int) (System.currentTimeMillis() / 1000);
+            deviceStatus.status = status;
+            deviceStatus.statusUpdatedBy = configurationPushRequest.stub;
+            if(AssetStatusConstants.CONFIG_PULL_REQUEST_SENT == deviceStatus.status) {
+              deviceStatus.statusKey = AssetStatusConstants.CONFIG_STATUS_KEY_PULL_REQUEST;
+            } else {
+              deviceStatus.statusKey = AssetStatusConstants.CONFIG_STATUS_KEY;
+            }
+            deviceStatus.device = device;
+            deviceStatus.save();
+          }
           configurationPushRequest.dvs.add(
               new DeviceDetails(
                   configurationPushRequest.dId,

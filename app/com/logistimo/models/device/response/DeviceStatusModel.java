@@ -36,6 +36,8 @@ public class DeviceStatusModel {
 
   public Integer stut;
 
+  public String stub;
+
   private String mpId = null;
 
   private String sId = null;

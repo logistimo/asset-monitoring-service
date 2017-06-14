@@ -52,6 +52,8 @@ public class ConfigurationPushRequest {
 
   public String url;
 
+  public String stub;
+
   @Valid
   public ConfigurationRequest data;
 
