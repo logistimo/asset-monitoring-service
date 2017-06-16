@@ -493,12 +493,10 @@ public class DeviceService extends ServiceImpl {
             getOrCreateDeviceStatus(device, null, null, AssetStatusConstants.CONFIG_STATUS_KEY,
                 null);
         deviceStatus.statusUpdatedTime = (int) (System.currentTimeMillis() / 1000);
-        deviceStatus.status = AssetStatusConstants.CONFIG_STATUS_PULLED;
-        DeviceStatus pullConfigStatusRequest = getOrCreateDeviceStatus(device, null, null, AssetStatusConstants.CONFIG_STATUS_KEY_PULL_REQUEST, null);
-        if(pullConfigStatusRequest != null && AssetStatusConstants.CONFIG_PULL_REQUEST_SENT == pullConfigStatusRequest.status) {
-          deviceStatus.statusUpdatedBy = pullConfigStatusRequest.statusUpdatedBy;
-          pullConfigStatusRequest.delete();
+        if(AssetStatusConstants.CONFIG_PULL_REQUEST_SENT != deviceStatus.status) {
+          deviceStatus.statusUpdatedBy = null;
         }
+        deviceStatus.status = AssetStatusConstants.CONFIG_STATUS_PULLED;
         deviceStatus.update();
       } catch (NoResultException e) {
         LOGGER.info("Configuration status not available for device: {}, {}", device.vendorId,
@@ -1484,10 +1482,10 @@ public class DeviceService extends ServiceImpl {
             }
             try {
               deviceStatus = getOrCreateDeviceStatus(device, null, null,
-                  AssetStatusConstants.CONFIG_STATUS_KEY_PULL_REQUEST,
+                  AssetStatusConstants.CONFIG_STATUS_KEY,
                   null);
               deviceStatus.statusUpdatedTime = (int) (System.currentTimeMillis() / 1000);
-              deviceStatus.status = AssetStatusConstants.CONFIG_PULL_REQUEST_SENT;;
+              deviceStatus.status = AssetStatusConstants.CONFIG_PULL_REQUEST_SENT;
               deviceStatus.statusUpdatedBy = configurationPushRequest.stub;
               deviceStatus.update();
             } catch (NoResultException e) {
@@ -1502,11 +1500,7 @@ public class DeviceService extends ServiceImpl {
             deviceStatus.statusUpdatedTime = (int) (System.currentTimeMillis() / 1000);
             deviceStatus.status = status;
             deviceStatus.statusUpdatedBy = configurationPushRequest.stub;
-            if(AssetStatusConstants.CONFIG_PULL_REQUEST_SENT == deviceStatus.status) {
-              deviceStatus.statusKey = AssetStatusConstants.CONFIG_STATUS_KEY_PULL_REQUEST;
-            } else {
-              deviceStatus.statusKey = AssetStatusConstants.CONFIG_STATUS_KEY;
-            }
+            deviceStatus.statusKey = AssetStatusConstants.CONFIG_STATUS_KEY;
             deviceStatus.device = device;
             deviceStatus.save();
           }
