@@ -39,9 +39,14 @@ import javax.validation.constraints.NotNull;
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ConfigurationPushRequest {
+  /**
+   * Vendor id
+   */
   @NotEmpty
   public String vId;
-
+  /**
+   * Device id
+   */
   @NotEmpty
   public String dId;
 
@@ -49,9 +54,14 @@ public class ConfigurationPushRequest {
 
   @NotNull
   public Integer typ = 1;
-
+  /**
+   * Url to pull the configuration
+   */
   public String url;
 
+  /**
+   * User last updated the device status
+   */
   public String stub;
 
   @Valid
