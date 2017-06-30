@@ -48,7 +48,7 @@ import play.mvc.With;
  */
 public class DeviceWorkingStatusMigrator extends BaseController {
 
-  private final static Logger.ALogger LOGGER = Logger.of(DeviceWorkingStatusMigrator.class);
+  private static final Logger.ALogger LOGGER = Logger.of(DeviceWorkingStatusMigrator.class);
   private static final TaskService taskService = ServiceFactory.getService(TaskService.class);
   private static final int MAX_RESULT = 500;
 
@@ -59,7 +59,9 @@ public class DeviceWorkingStatusMigrator extends BaseController {
     while (true) {
       List<DeviceStatus>
           ds =
-          JPA.em().createQuery("from DeviceStatus where statusKey = 'wsk'", DeviceStatus.class)
+          JPA.em()
+              .createQuery("from DeviceStatus where statusKey = 'wsk' and device.assetType.id != 4",
+                  DeviceStatus.class)
               .setFirstResult(si)
               .setMaxResults(MAX_RESULT)
               .getResultList();
@@ -72,7 +74,7 @@ public class DeviceWorkingStatusMigrator extends BaseController {
         deviceEvent.type = DeviceEventPushModel.DEVICE_EVENT_WORKING_STATUS;
         try {
           taskService.produceMessage(
-              new TaskOptions(
+              new TaskOptions<>(
                   TaskType.BACKGROUND_TASK.getValue(),
                   PushAlertService.class,
                   LogistimoUtils.toJson(new DeviceEventPushModel(deviceEvent)),

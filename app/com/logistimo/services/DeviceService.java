@@ -447,7 +447,7 @@ public class DeviceService extends ServiceImpl {
               TaskType.BACKGROUND_TASK.getValue(),
               PushAlertService.class,
               LogistimoUtils.toJson(new DeviceEventPushModel(deviceEvent)),
-              null
+              null, 10_000
           )
       );
     } catch (ServiceException e) {
