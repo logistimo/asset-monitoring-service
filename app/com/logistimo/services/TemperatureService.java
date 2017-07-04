@@ -408,7 +408,8 @@ public class TemperatureService extends ServiceImpl implements Executable {
                                              Device rootDevice,
                                              DevicePowerTransition devicePowerTransition,
                                              Integer source) throws LogistimoException {
-    if (temperature.time < 0 || temperature.tmp == null) {
+    if (temperature.tmp == null
+        || LogistimoUtils.isValidTime(temperature.time)) {
       throw new LogistimoException("Invalid temperature reading.");
     }
 
