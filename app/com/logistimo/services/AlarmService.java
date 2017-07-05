@@ -60,6 +60,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.persistence.NoResultException;
 
@@ -372,7 +373,7 @@ public class AlarmService extends ServiceImpl {
    */
   private List<DeviceAlarm> toDeviceAlarms(AlarmRequest alarmRequest, Device device)
       throws LogistimoException {
-    List<DeviceAlarm> deviceAlarms = new ArrayList<DeviceAlarm>();
+    List<DeviceAlarm> deviceAlarms = new ArrayList<>();
 
     //For multi sensor devices
     List<AssetMapping> assetMappingList = null;
@@ -562,6 +563,10 @@ public class AlarmService extends ServiceImpl {
       }
     }
 
+    deviceAlarms = deviceAlarms.stream()
+        .filter(alarm -> LogistimoUtils.isValidTime(alarm.time))
+        .collect(Collectors.toList());
+
     if (deviceAlarms.size() == 0) {
       throw new LogistimoException("No Alarm details found in request.");
     }
@@ -575,10 +580,10 @@ public class AlarmService extends ServiceImpl {
    */
   private List<AlarmLog> toAlarmLog(AlarmRequest alarmRequest, Device device)
       throws LogistimoException {
-    List<AlarmLog> alarmLogs = new ArrayList<AlarmLog>();
+    List<AlarmLog> alarmLogs = new ArrayList<>();
 
     AlarmLog alarmLog;
-    if (alarmRequest.dvc.batt != null) {
+    if (alarmRequest.dvc.batt != null && LogistimoUtils.isValidTime(alarmRequest.dvc.batt.time)) {
       closePreviousAlarmLog(AlarmLog.DEVICE_ALARM, BATTERY_ALARM, alarmRequest.dvc.batt.time,
           alarmRequest.sId,
           device);
@@ -591,7 +596,7 @@ public class AlarmService extends ServiceImpl {
       alarmLogs.add(alarmLog);
     }
 
-    if (alarmRequest.dvc.dCon != null) {
+    if (alarmRequest.dvc.dCon != null && LogistimoUtils.isValidTime(alarmRequest.dvc.dCon.time)) {
       closePreviousAlarmLog(AlarmLog.DEVICE_ALARM, DEVICE_CONNECTION_ALARM,
           alarmRequest.dvc.dCon.time, alarmRequest.sId, device);
       alarmLog = new AlarmLog(AlarmLog.DEVICE_ALARM, alarmRequest.dvc.dCon.time);
@@ -603,7 +608,7 @@ public class AlarmService extends ServiceImpl {
       alarmLogs.add(alarmLog);
     }
 
-    if (alarmRequest.dvc.poa != null) {
+    if (alarmRequest.dvc.poa != null && LogistimoUtils.isValidTime(alarmRequest.dvc.poa.time)) {
       closePreviousAlarmLog(AlarmLog.DEVICE_ALARM, POWER_OUTAGE_ALARM, alarmRequest.dvc.poa.time,
           alarmRequest.sId, device);
       alarmLog = new AlarmLog(AlarmLog.DEVICE_ALARM, alarmRequest.dvc.poa.time);
@@ -615,7 +620,7 @@ public class AlarmService extends ServiceImpl {
       alarmLogs.add(alarmLog);
     }
 
-    if (alarmRequest.dvc.xSns != null) {
+    if (alarmRequest.dvc.xSns != null && LogistimoUtils.isValidTime(alarmRequest.dvc.xSns.time)) {
       closePreviousAlarmLog(AlarmLog.DEVICE_ALARM, SENSOR_CONNECTION_ALARM,
           alarmRequest.dvc.xSns.time, alarmRequest.sId, device);
       alarmLog = new AlarmLog(AlarmLog.DEVICE_ALARM, alarmRequest.dvc.xSns.time);
@@ -626,33 +631,23 @@ public class AlarmService extends ServiceImpl {
       alarmLog.startTime = alarmRequest.dvc.xSns.time;
       alarmLog.updatedOn = new Date();
       alarmLogs.add(alarmLog);
-
-            /*if(alarmRequest.sId != null && !alarmRequest.sId.isEmpty()){
-                try{
-                    alarmLog = new AlarmLog(AlarmLog.DEVICE_ALARM, alarmRequest.dvc.xSns.time);
-                    alarmLog.deviceAlarmStatus = alarmRequest.dvc.xSns.stat;
-                    alarmLog.deviceAlarmType = SENSOR_CONNECTION_ALARM;
-                    alarmLog.device = deviceService.findDevice(device.vendorId, LogistimoUtils.generateVirtualDeviceId(device.deviceId, alarmRequest.sId));
-                    alarmLogs.add(alarmLog);
-                }catch (NoResultException e){
-                    throw new LogistimoException("Sensor " + alarmRequest.sId + " not found for the device: " + device.deviceId + " "  + device.vendorId);
-                }
-            }*/
     }
 
     if (alarmRequest.dvc.errs != null && alarmRequest.dvc.errs.size() > 0) {
       for (DeviceErrorRequest deviceErrorRequest : alarmRequest.dvc.errs) {
-        alarmLog = new AlarmLog(AlarmLog.DEVICE_ALARM, deviceErrorRequest.time);
-        alarmLog.deviceFirmwareErrorCode = deviceErrorRequest.code;
-        alarmLog.deviceAlarmType = FIRMWARE_ALARM;
-        alarmLog.device = device;
-        alarmLog.startTime = deviceErrorRequest.time;
-        alarmLog.updatedOn = new Date();
-        alarmLogs.add(alarmLog);
+        if(LogistimoUtils.isValidTime(deviceErrorRequest.time)) {
+          alarmLog = new AlarmLog(AlarmLog.DEVICE_ALARM, deviceErrorRequest.time);
+          alarmLog.deviceFirmwareErrorCode = deviceErrorRequest.code;
+          alarmLog.deviceAlarmType = FIRMWARE_ALARM;
+          alarmLog.device = device;
+          alarmLog.startTime = deviceErrorRequest.time;
+          alarmLog.updatedOn = new Date();
+          alarmLogs.add(alarmLog);
+        }
       }
     }
 
-    if (alarmRequest.dvc.iAct != null) {
+    if (alarmRequest.dvc.iAct != null && LogistimoUtils.isValidTime(alarmRequest.dvc.iAct.time)) {
       closePreviousAlarmLog(AlarmLog.DEVICE_ALARM, DEVICE_NODATA_ALARM, alarmRequest.dvc.iAct.time,
           alarmRequest.sId, device);
       alarmLog = new AlarmLog(AlarmLog.DEVICE_ALARM, alarmRequest.dvc.iAct.time);

@@ -229,4 +229,8 @@ public class LogistimoUtils {
     calendar.setTimeInMillis(date.getTime());
     return calendar.getTimeInMillis();
   }
+
+  public static boolean isValidTime(long timestamp) {
+    return timestamp > 0 && timestamp <= (System.currentTimeMillis() / 1000) + 43_200;
+  }
 }
