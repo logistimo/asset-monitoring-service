@@ -2364,7 +2364,7 @@ public class DeviceService extends ServiceImpl {
         innerQueryStr =
             "select DISTINCT device_id from device_status where status_key = 'dsk_4' and device_id in("
                 + innerQueryStr + ")"
-                + "group by device_id having max(status) = 0";
+                + "group by device_id having min(status) = 0";
 
         innerQueryStr =
             "select device_id from device_status where status_key = '"
@@ -2385,14 +2385,13 @@ public class DeviceService extends ServiceImpl {
         innerQueryStr =
             "select DISTINCT device_id from device_status where status_key = '"
                 + AssetStatusConstants.ACTIVITY_STATUS_KEY
-                + "' and status > 0"
-                + " and status_ut <= " + alarmSince
-                + " and device_id in(" + innerQueryStr + ")";
+                + "' and status_ut <= " + alarmSince
+                + " and device_id in(" + innerQueryStr + ") group by device_id having min(status) = 1";
       } else if (alarmType == 4) {
         innerQueryStr =
             "select DISTINCT device_id from device_status where status_key = 'dsk_4' and device_id in("
                 + innerQueryStr + ")"
-                + "group by device_id having max(status) = 0";
+                + "group by device_id having min(status) = 0";
 
         Integer aty = null;
         if (assetType != null) {
@@ -2404,7 +2403,7 @@ public class DeviceService extends ServiceImpl {
                   + AssetStatusConstants.DEVICE_ALARM_STATUS_KEYS_CSV
                   + ")"
                   + " and device_id in(" + innerQueryStr
-                  + ") group by device_id having max(status) = 0";
+                  + ") group by device_id having min(status) = 0";
         } else {
           innerQueryStr =
               "select DISTINCT device_id from device_status where status_key = '"
