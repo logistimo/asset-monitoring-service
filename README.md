@@ -23,6 +23,7 @@ Pre-requisites
 * MariaDB 10.1.23
 * Redis
 * ActiveMQ 5.14
+* Zookeeper
 * Play framework
 
 Modules
