@@ -72,6 +72,9 @@ public class DeviceStatus {
   @Column(name = "temperature_abnormal_status")
   public Integer temperatureAbnormalStatus = AssetStatusConstants.STATUS_OK;
 
+  @Column(name = "status_ub")
+  public String statusUpdatedBy;
+
   @ManyToOne
   public Device device;
 

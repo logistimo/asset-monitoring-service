@@ -85,6 +85,7 @@ public interface AssetStatusConstants {
   Integer CONFIG_STATUS_NOT_CONFIGURED = STATUS_OK;
   Integer CONFIG_STATUS_PULLED = 1;
   Integer CONFIG_STATUS_PUSHED = 2;
+  Integer CONFIG_PULL_REQUEST_SENT = 3;
 
   //Working status constants
   String WORKING_STATUS_KEY = "wsk";

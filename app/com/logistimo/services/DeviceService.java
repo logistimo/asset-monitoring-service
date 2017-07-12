@@ -493,7 +493,10 @@ public class DeviceService extends ServiceImpl {
             getOrCreateDeviceStatus(device, null, null, AssetStatusConstants.CONFIG_STATUS_KEY,
                 null);
         deviceStatus.statusUpdatedTime = (int) (System.currentTimeMillis() / 1000);
-        deviceStatus.status = 1;
+        if(AssetStatusConstants.CONFIG_PULL_REQUEST_SENT != deviceStatus.status) {
+          deviceStatus.statusUpdatedBy = null;
+        }
+        deviceStatus.status = AssetStatusConstants.CONFIG_STATUS_PULLED;
         deviceStatus.update();
       } catch (NoResultException e) {
         LOGGER.info("Configuration status not available for device: {}, {}", device.vendorId,
@@ -503,7 +506,7 @@ public class DeviceService extends ServiceImpl {
       if (deviceStatus == null) {
         deviceStatus = new DeviceStatus();
         deviceStatus.statusUpdatedTime = (int) (System.currentTimeMillis() / 1000);
-        deviceStatus.status = 1;
+        deviceStatus.status = AssetStatusConstants.CONFIG_STATUS_PULLED;
         deviceStatus.device = device;
         deviceStatus.save();
       }
@@ -1016,6 +1019,7 @@ public class DeviceService extends ServiceImpl {
           DeviceStatusModel deviceStatusModel = new DeviceStatusModel();
           deviceStatusModel.st = deviceStatus.status;
           deviceStatusModel.stut = deviceStatus.statusUpdatedTime;
+          deviceStatusModel.stub = deviceStatus.statusUpdatedBy;
           deviceResponse.cfg = deviceStatusModel;
         } else if (deviceStatus.statusKey.equals(AssetStatusConstants.WORKING_STATUS_KEY)) {
           DeviceStatusModel deviceStatusModel = new DeviceStatusModel();
@@ -1404,110 +1408,110 @@ public class DeviceService extends ServiceImpl {
 
   public void pushConfigToDevice(ConfigurationPushRequest configurationPushRequest)
       throws LogistimoException, IOException {
-    DeviceConfigurationPushStatus
-        deviceConfigurationPushStatus =
-        new DeviceConfigurationPushStatus();
+    DeviceStatus deviceStatus = null;
+    Integer status = AssetStatusConstants.CONFIG_STATUS_PUSHED;
+
+    Device device;
     try {
-      Device device = findDevice(configurationPushRequest.vId, configurationPushRequest.dId);
-      deviceConfigurationPushStatus.device = device;
-
-      String
-          countryCode =
-          getDeviceMetaDataValueAsString(device, DeviceMetaAppendix.LOCALE_COUNTRYCODE);
-      if (countryCode == null) {
-        countryCode = LogistimoConstant.DEFAULT_COUNTRY_CODE;
-      }
-
-      if (!Arrays.asList(Play.application().configuration().getString(SUPPORT_CONFIG_PUSH_VENDORS)
-          .split(LogistimoConstant.SUPPORT_VENDOR_SEP)).contains(configurationPushRequest.vId)) {
-        LOGGER.warn("Error while pushing configuration. Feature not supported for device: {}, {}",
-            device.vendorId, device.deviceId);
-        throw new LogistimoException(Messages.get(FEATURE_NOT_SUPPORTED));
-      }
-
-      String
-          phoneNumber =
-          getDeviceMetaDataValueAsString(device, DeviceMetaAppendix.GSM_SIM_PHN_NUMBER);
-      if (phoneNumber != null) {
-        try {
-          String
-              requestUrl =
-              Play.application().configuration().getString(CONFIG_PUSH_URL + "." + device.vendorId);
-          if (configurationPushRequest.typ == 1 && configurationPushRequest.data == null) {
-            ConfigurationRequest data = getDeviceConfiguration(device).data;
-            configurationPushRequest.data = data;
-
-            DeviceStatus deviceStatus = null;
-            try {
-              deviceStatus =
-                  getOrCreateDeviceStatus(device, null, null,
-                      AssetStatusConstants.CONFIG_STATUS_KEY, null);
-              deviceStatus.statusUpdatedTime = (int) (System.currentTimeMillis() / 1000);
-              deviceStatus.status = 2;
-              deviceStatus.update();
-            } catch (NoResultException e) {
-              LOGGER.info("Configuration status not available for device: {}, {}", device.vendorId,
-                  device.deviceId);
-            }
-
-            if (deviceStatus == null) {
-              deviceStatus = new DeviceStatus();
-              deviceStatus.statusUpdatedTime = (int) (System.currentTimeMillis() / 1000);
-              deviceStatus.status = 2;
-              deviceStatus.device = device;
-              deviceStatus.save();
-            }
-          } else if (configurationPushRequest.typ == 0 && (configurationPushRequest.url == null
-              || configurationPushRequest.url.isEmpty())) {
-            DeviceConfiguration deviceConfiguration = null;
-            DeviceConfigurationResponse deviceConfigurationResponse = null;
-            try {
-              deviceConfiguration = DeviceConfiguration.getDeviceConfiguration(device);
-              deviceConfigurationResponse = toDeviceConfigurationResponse(deviceConfiguration);
-            } catch (NoResultException e) {
-              //do nothing
-            }
-
-            if (deviceConfiguration != null
-                && deviceConfigurationResponse != null
-                && deviceConfigurationResponse.data != null
-                && deviceConfigurationResponse.data.comm != null
-                && deviceConfigurationResponse.data.comm.cfgUrl != null
-                && !deviceConfigurationResponse.data.comm.cfgUrl.isEmpty()) {
-              configurationPushRequest.url = deviceConfigurationResponse.data.comm.cfgUrl;
-            } else {
-              LOGGER.info(
-                  "Configuration/Configuration URL not defined for device: {} {}, picking system configuration pull URL.",
-                  device.deviceId, device.vendorId);
-              configurationPushRequest.url =
-                  Play.application().configuration().getString(CONFIG_PULL_URL);
-            }
-          }
-
-          configurationPushRequest.dvs.add(
-              new DeviceDetails(
-                  configurationPushRequest.dId,
-                  phoneNumber,
-                  countryCode));
-
-          smsService.sendSMS(requestUrl, configurationPushRequest);
-          deviceConfigurationPushStatus.status = DeviceRequestStatus.SMS_SENT;
-          deviceConfigurationPushStatus.sent_time = new Date();
-          deviceConfigurationPushStatus.save();
-        } catch (NoResultException e) {
-          LOGGER.warn("Error while pushing configuration, configuration not found", e);
-          throw new NoResultException("Configuration not found for device.");
-        }
-      } else {
-        LOGGER.warn("Error while pushing configuration. Invalid mobile number");
-        throw new LogistimoException(Messages.get(INVALID_DEVICE_PHONE_NUMBER));
-      }
+      device = findDevice(configurationPushRequest.vId, configurationPushRequest.dId);
     } catch (NoResultException e) {
       LOGGER.warn("Error while pushing configuration, device not found: {}, {}",
           configurationPushRequest.vId,
           configurationPushRequest.dId, e);
       throw new NoResultException(Messages.get(LogistimoConstant.DEVICES_NOT_FOUND));
     }
+
+    String
+        countryCode =
+        getDeviceMetaDataValueAsString(device, DeviceMetaAppendix.LOCALE_COUNTRYCODE,
+            LogistimoConstant.DEFAULT_COUNTRY_CODE);
+
+    if (!Arrays.asList(Play.application().configuration().getString(SUPPORT_CONFIG_PUSH_VENDORS)
+        .split(LogistimoConstant.SUPPORT_VENDOR_SEP)).contains(configurationPushRequest.vId)) {
+      LOGGER.warn("Error while pushing configuration. Feature not supported for device: {}, {}",
+          device.vendorId, device.deviceId);
+      throw new LogistimoException(Messages.get(FEATURE_NOT_SUPPORTED));
+    }
+
+    String
+        phoneNumber =
+        getDeviceMetaDataValueAsString(device, DeviceMetaAppendix.GSM_SIM_PHN_NUMBER);
+    if (phoneNumber == null) {
+      LOGGER.warn("Error while pushing configuration. Invalid mobile number");
+      throw new LogistimoException(Messages.get(INVALID_DEVICE_PHONE_NUMBER));
+    }
+
+    String
+        requestUrl =
+        Play.application().configuration().getString(CONFIG_PUSH_URL + "." + device.vendorId);
+    if (configurationPushRequest.typ == 1 && configurationPushRequest.data == null) {
+      ConfigurationRequest data = getDeviceConfiguration(device).data;
+      configurationPushRequest.data = data;
+      status = AssetStatusConstants.CONFIG_STATUS_PUSHED;
+    } else if (configurationPushRequest.typ == 0 && (configurationPushRequest.url == null
+        || configurationPushRequest.url.isEmpty())) {
+      DeviceConfiguration deviceConfiguration = null;
+      DeviceConfigurationResponse deviceConfigurationResponse = null;
+      try {
+        deviceConfiguration = DeviceConfiguration.getDeviceConfiguration(device);
+        deviceConfigurationResponse = toDeviceConfigurationResponse(deviceConfiguration);
+        status = AssetStatusConstants.CONFIG_PULL_REQUEST_SENT;
+      } catch (NoResultException e) {
+        //do nothing
+      }
+
+      if (deviceConfiguration != null
+          && deviceConfigurationResponse != null
+          && deviceConfigurationResponse.data != null
+          && deviceConfigurationResponse.data.comm != null
+          && deviceConfigurationResponse.data.comm.cfgUrl != null
+          && !deviceConfigurationResponse.data.comm.cfgUrl.isEmpty()) {
+        configurationPushRequest.url = deviceConfigurationResponse.data.comm.cfgUrl;
+      } else {
+        LOGGER.info(
+            "Configuration/Configuration URL not defined for device: {} {}, picking system configuration pull URL.",
+            device.deviceId, device.vendorId);
+        configurationPushRequest.url =
+            Play.application().configuration().getString(CONFIG_PULL_URL);
+      }
+      status = AssetStatusConstants.CONFIG_PULL_REQUEST_SENT;
+    } else {
+      throw new LogistimoException("Invalid push request, type should be either 1 or 0");
+    }
+
+    configurationPushRequest.dvs.add(
+        new DeviceDetails(
+            configurationPushRequest.dId,
+            phoneNumber,
+            countryCode));
+
+    smsService.sendSMS(requestUrl, configurationPushRequest);
+
+    updateDeviceStatus(configurationPushRequest.stub, status, device);
+
+    saveDeviceConfigPushStatus(device);
+  }
+
+  private void saveDeviceConfigPushStatus(Device device) {
+    DeviceConfigurationPushStatus
+        deviceConfigurationPushStatus =
+        new DeviceConfigurationPushStatus();
+    deviceConfigurationPushStatus.device = device;
+    deviceConfigurationPushStatus.status = DeviceRequestStatus.SMS_SENT;
+    deviceConfigurationPushStatus.sent_time = new Date();
+    deviceConfigurationPushStatus.save();
+  }
+
+  private void updateDeviceStatus(String statusUpdatedBy, Integer status,
+                                  Device device) {
+    DeviceStatus deviceStatus;
+    deviceStatus = getOrCreateDeviceStatus(device, null, null,
+        AssetStatusConstants.CONFIG_STATUS_KEY,
+        null);
+    deviceStatus.statusUpdatedTime = (int) (System.currentTimeMillis() / 1000);
+    deviceStatus.status = status;
+    deviceStatus.statusUpdatedBy = statusUpdatedBy;
+    deviceStatus.update();
   }
 
   public void pushAPNSettingsToDevice(APNPushRequest apnPushRequest) throws LogistimoException {
@@ -1945,6 +1949,14 @@ public class DeviceService extends ServiceImpl {
       return getDeviceMetaByKey(device, key).value;
     } catch (NoResultException e) {
       return null;
+    }
+  }
+
+  public String getDeviceMetaDataValueAsString(Device device, String key, String defaultValue) {
+    try {
+      return getDeviceMetaByKey(device, key).value;
+    } catch (NoResultException e) {
+      return defaultValue;
     }
   }
 
