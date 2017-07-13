@@ -2068,6 +2068,7 @@ public class DeviceService extends ServiceImpl {
                 closePreviousAlarmLogs(device);
                 closePreviousAlarmLogs(monitoringDevice);
                 updateOverallDeviceStatus(device, AssetStatusConstants.TEMP_STATUS_KEY);
+                updateOverallDeviceStatus(device, AssetStatusConstants.ACTIVITY_STATUS_KEY);
 
               } catch (NoResultException ignored) {
                 //do nothing
