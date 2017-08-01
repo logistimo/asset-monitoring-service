@@ -22,14 +22,14 @@
 #the commercial license, please contact us at opensource@logistimo.com
 
 sed -ri "/Jad\/Jar download servlet/,+4d" $TOMCAT_HOME/webapps/ROOT/WEB-INF/web.xml \
-        && sed -ri "$ a tomcat.util.http.parser.HttpParser.requestTargetAllow=|{}" $TOMCAT_HOME/conf/catalina.properties \
-        && sed -ri "s/8080/$AMS_PORT/g" $TOMCAT_HOME/conf/server.xml
+        && sed -ri "$ a tomcat.util.http.parser.HttpParser.requestTargetAllow=|{}" $TOMCAT_HOME/conf/catalina.properties
 
 if [[ "$SENTINEL_HOST" != "" ]]
 then
-        sed -ri "s~<\!\-\- <Context sessionCookiePath=\"\/\" crossContext=\"true\"> \-\->~<Context sessionCookiePath=\"\/\" crossContext=\"true\">~g;s~<\!\-\- <Valve className~<Valve className~g;s~sentinels=\"\"\/> \-\->~sentinels=\"$SENTINEL_HOST\"\/>~g;s~host=\"localhost\"~host=\"$REDIS_HOST\"~g;s~sentinelMaster=\"\"~sentinelMaster=\"$SENTINEL_MASTER\"~g" $TOMCAT_HOME/conf/context.xml
-        sed -ri "/<Context>/d" $TOMCAT_HOME/conf/context.xml
+envsubst < $TOMCAT_HOME/conf/context.xml.template > $TOMCAT_HOME/conf/context.xml
 fi
+
+envsubst < $TOMCAT_HOME/conf/server.xml.template > $TOMCAT_HOME/conf/server.xml
 
 envsubst < $TOMCAT_HOME/webapps/ROOT/WEB-INF/classes/application.conf.template  > $TOMCAT_HOME/webapps/ROOT/WEB-INF/classes/application.conf
 

@@ -36,7 +36,9 @@ RUN  wget -P $TOMCAT_HOME/lib/ http://central.maven.org/maven2/org/apache/common
         && wget -P $TOMCAT_HOME/lib/ http://central.maven.org/maven2/redis/clients/jedis/2.5.2/jedis-2.5.2.jar \
         && wget -P $TOMCAT_HOME/lib/ http://central.maven.org/maven2/com/bluejeans/tomcat-redis-session-manager/2.0.0/tomcat-redis-session-manager-2.0.0.jar
 
-ADD dockerfiles/context.xml $TOMCAT_HOME/conf/
+ADD dockerfiles/context.xml.template $TOMCAT_HOME/conf/
+
+ADD dockerfiles/server.xml.template $TOMCAT_HOME/conf/
 
 RUN unzip -o $TOMCAT_HOME/webapps/$warname \
         -d $TOMCAT_HOME/webapps/ROOT/ \
