@@ -29,7 +29,7 @@
 # This must be changed for production, but we recommend not changing it in this file.
 #
 # See http://www.playframework.com/documentation/latest/ApplicationSecret for more details.
-application.secret = "X0FIbIBUHmTNV0SpYdTfJsISTUMnM59UDSTfrbcTTk8iMRh4wpjHf99fXYDotlt5"
+application.secret = "$APP_SECRET"
 
 # The application languages
 # ~~~~~
