@@ -97,10 +97,10 @@ logger.application = INFO
 
 # Logistimo Variables
 page.size = 50
-admin.password = zWujmKE2GdkY9b
-logistimo.pushtempalerts.url = $PUSH_TEMP_ALERT
-logistimo.pushalarmalerts.url = $PUSH_ALARM_ALERTS
-logistimo.pushevent.url = $PUSH_EVENT
+admin.password = $ADMIN_PASS
+logistimo.pushtempalerts.url = "$PUSH_TEMP_ALERT"
+logistimo.pushalarmalerts.url = "$PUSH_ALARM_ALERTS"
+logistimo.pushevent.url = "$PUSH_EVENT"
 
 #SMS Service URLs - Berlinger
 logistimo.sent_status_request.url.berlinger = "http://localhost:8090/temp/%vid%/%did%?country=%country%&phone=%phone%"
@@ -109,11 +109,11 @@ logistimo.apn_push.url.berlinger = "http://localhost:8090/devices/apn?country=%c
 logistimo.config_push.url.berlinger = "http://localhost:8090/devices/config"
 
 #SMS Service URLs - Nexleaf
-logistimo.apn_push.url.nexleaf = $APN_PUSH
-logistimo.config_push.url.nexleaf = $CONFIG_PUSH_NXL
+logistimo.apn_push.url.nexleaf = "$APN_PUSH"
+logistimo.config_push.url.nexleaf = "$CONFIG_PUSH_NXL"
 
 #SMS Service URLs - Nimble wireless
-logistimo.config_push.url.nimblewireless = $LS_CONFIG_PUSH
+logistimo.config_push.url.nimblewireless = "$LS_CONFIG_PUSH"
 
 #SMS Service supporting vendors
 logistimo.support.apn_push.vendors = "berlinger,nexleaf"
@@ -133,13 +133,13 @@ akka.actor.debug.receive = on
 Play2WarKeys.explodedJar=true
 Play2WarKeys.targetName=tms-SNAPSHOT.war
 
-activemq.url = $ACTIVEMQ_HOST
+activemq.url = "$ACTIVEMQ_HOST"
 
 # Cron Scheduler
 cron.zoo.path=/amsCronLeader
 
 #Default Zookeeper properties
-zoo.servers=$ZKR_HOST
+zoo.servers="$ZKR_HOST"
 zoo.timeout=3000
 status.path=""
 
