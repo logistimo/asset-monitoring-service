@@ -62,6 +62,7 @@ ENV MYSQL_HOST_URL="jdbc:mysql://localhost:3306/logistimo_tms" \
 	SENTINEL_HOST= \
 	SENTINEL_MASTER= \
 	APP_SECRET=logisitmo \
+	ADMIN_PASS=logistimo \
 	JAVA_XMS=1024m \
         JAVA_XMX=1024m \
         JMX_AGENT_PORT=8088
