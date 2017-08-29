@@ -529,3 +529,6 @@ alter table devices_tags drop foreign key fkfe22c23b352e371f;
 alter table devices_tags drop foreign key fkfe22c23b7a5e790f;
 alter table temperature_sensors drop foreign key temperature_sensors_device_id_fkey;
 alter table temperature_statistics drop foreign key temperature_statistics_fk;
+
+#221
+alter table device_status add column status_ub VARCHAR(255);
