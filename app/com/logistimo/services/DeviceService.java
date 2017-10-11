@@ -2066,7 +2066,10 @@ public class DeviceService extends ServiceImpl {
                   assetMapping.delete();
                 }
                 closePreviousAlarmLogs(device);
-                closePreviousAlarmLogs(monitoringDevice);
+                //this can be case when we are creating asset mapping involving new assets
+                if (null != monitoringDevice) {
+                  closePreviousAlarmLogs(monitoringDevice);
+                }
                 updateOverallDeviceStatus(device, AssetStatusConstants.TEMP_STATUS_KEY);
                 updateOverallDeviceStatus(device, AssetStatusConstants.ACTIVITY_STATUS_KEY);
 
