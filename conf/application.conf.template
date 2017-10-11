@@ -103,10 +103,10 @@ logistimo.pushalarmalerts.url = "$PUSH_ALARM_ALERTS"
 logistimo.pushevent.url = "$PUSH_EVENT"
 
 #SMS Service URLs - Berlinger
-logistimo.sent_status_request.url.berlinger = "http://localhost:8090/temp/%vid%/%did%?country=%country%&phone=%phone%"
-logistimo.admin_push.url.berlinger = "http://localhost:8090/devices/admin?country=%country%&phone=%phone%"
-logistimo.apn_push.url.berlinger = "http://localhost:8090/devices/apn?country=%country%&phone=%phone%"
-logistimo.config_push.url.berlinger = "http://localhost:8090/devices/config"
+logistimo.sent_status_request.url.berlinger = "$BER_SENT_STATUS_REQUEST"
+logistimo.admin_push.url.berlinger = "$BER_ADMIN_PUSH_URL"
+logistimo.apn_push.url.berlinger = "$BER_APN_PUSH_URL"
+logistimo.config_push.url.berlinger = "$BER_CONFIG_PUSH_URL"
 
 #SMS Service URLs - Nexleaf
 logistimo.apn_push.url.nexleaf = "$APN_PUSH"
