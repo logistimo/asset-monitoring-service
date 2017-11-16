@@ -47,12 +47,12 @@ RUN unzip -o $TOMCAT_HOME/webapps/$warname \
 ENV MYSQL_HOST_URL="jdbc:mysql://localhost:3306/logistimo_tms" \
 	MYSQL_USER=logistimo \
 	MYSQL_PASS=logistimo \
-	PUSH_TEMP_ALERT="http://localhost:8090/tempmonitoring?a=logtemp" \
+	PUSH_TEMP_ALERTS="http://localhost:8090/tempmonitoring?a=logtemp" \
 	PUSH_ALARM_ALERTS="http://localhost:8090/tempmonitoring?a=logdevicealarms" \
 	PUSH_EVENT="http://localhost:8090/s2/api/assetstatus/" \
-	APN_PUSH="http://localhost:8090/smsservice/devices/apn?country=%country%&phone=%phone%" \
+	APN_PUSH_NXL="http://localhost:8090/smsservice/devices/apn?country=%country%&phone=%phone%" \
 	CONFIG_PUSH_NXL="http://localhost:8090/smsservice/devices/config" \
-	LS_CONFIG_PUSH="http://localhost:8090/v2/config" \
+	LS_CONFIG_PULL="http://localhost:8090/v2/config" \
 	BER_SENT_STATUS_REQUEST="http://localhost:8090/temp/%vid%/%did%?country=%country%&phone=%phone%" \
 	BER_ADMIN_PUSH_URL="http://localhost:8090/devices/admin?country=%country%&phone=%phone%" \
 	BER_APN_PUSH_URL="http://localhost:8090/devices/apn?country=%country%&phone=%phone%" \
@@ -68,8 +68,8 @@ ENV MYSQL_HOST_URL="jdbc:mysql://localhost:3306/logistimo_tms" \
 	APP_SECRET=logisitmo \
 	ADMIN_PASS=logistimo \
 	JAVA_XMS=1024m \
-        JAVA_XMX=1024m \
-        JMX_AGENT_PORT=8088
+	JAVA_XMX=1024m \
+	JMX_AGENT_PORT=8088
 
 ENV JAVA_OPTS $JAVA_OPTS
 
