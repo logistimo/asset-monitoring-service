@@ -98,7 +98,7 @@ logger.application = INFO
 # Logistimo Variables
 page.size = 50
 admin.password = $ADMIN_PASS
-logistimo.pushtempalerts.url = "$PUSH_TEMP_ALERT"
+logistimo.pushtempalerts.url = "$PUSH_TEMP_ALERTS"
 logistimo.pushalarmalerts.url = "$PUSH_ALARM_ALERTS"
 logistimo.pushevent.url = "$PUSH_EVENT"
 
@@ -109,11 +109,11 @@ logistimo.apn_push.url.berlinger = "$BER_APN_PUSH_URL"
 logistimo.config_push.url.berlinger = "$BER_CONFIG_PUSH_URL"
 
 #SMS Service URLs - Nexleaf
-logistimo.apn_push.url.nexleaf = "$APN_PUSH"
+logistimo.apn_push.url.nexleaf = "$APN_PUSH_NXL"
 logistimo.config_push.url.nexleaf = "$CONFIG_PUSH_NXL"
 
 #SMS Service URLs - Nimble wireless
-logistimo.config_push.url.nimblewireless = "$LS_CONFIG_PUSH"
+logistimo.config_push.url.nimblewireless = "http://198.57.226.173:8080/iristracking/v1.0/deviceconfig/logistimo"
 
 #SMS Service supporting vendors
 logistimo.support.apn_push.vendors = "berlinger,nexleaf"
@@ -125,7 +125,7 @@ logistimo.support.config_push.vendors = "berlinger,nexleaf,nimblewireless"
 #logistimo.apn_push.url = "http://localhost:9010/devices/apn?country=%country%&phone=%phone%"
 #logistimo.admin_push.url = "http://localhost:9010/devices/admin?country=%country%&phone=%phone%"
 #logistimo.config_push.url = "http://localhost:9010/devices/config?country=%country%&phone=%phone%"
-logistimo.config_pull.url = "http://localhost:8090/v2/config"
+logistimo.config_pull.url = "$LS_CONFIG_PULL"
 
 akka.default-dispatcher.fork-join-executor.pool-size-max = 64
 akka.actor.debug.receive = on
