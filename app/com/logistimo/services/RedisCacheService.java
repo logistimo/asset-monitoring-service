@@ -297,4 +297,15 @@ public class RedisCacheService extends ServiceImpl {
       throw e;
     }
   }
+
+  public void ping () {
+    Jedis jedis = null;
+    try {
+      jedis = pool.getResource();
+      jedis.ping();
+    }catch (Exception e) {
+      pool.returnBrokenResource(jedis);
+      throw e;
+    }
+  }
 }

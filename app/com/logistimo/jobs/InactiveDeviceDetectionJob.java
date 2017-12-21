@@ -23,10 +23,13 @@
 
 package com.logistimo.jobs;
 
+import com.codahale.metrics.Meter;
+import com.codahale.metrics.Timer;
 import com.logistimo.db.AssetType;
 import com.logistimo.db.Device;
 import com.logistimo.db.DeviceStatus;
 import com.logistimo.exception.ServiceException;
+import com.logistimo.healthcheck.MetricsUtil;
 import com.logistimo.models.alarm.request.AlarmLoggingRequest;
 import com.logistimo.models.alarm.request.AlarmRequest;
 import com.logistimo.models.alarm.request.DeviceAlarmRequest;
@@ -61,7 +64,15 @@ public class InactiveDeviceDetectionJob implements Job {
   private static final DeviceService deviceService = ServiceFactory.getService(DeviceService.class);
   private static final AlarmService alarmService = ServiceFactory.getService(AlarmService.class);
 
+  private static final Meter
+      inactMeter = MetricsUtil.getMeter(InactiveDeviceDetectionJob.class,"inactivedevice.job.meter");
+  private static final Timer
+      inactTimer = MetricsUtil.getTimer(InactiveDeviceDetectionJob.class,"inactivedevice.job.timer");
+
+
   private void doJob() {
+    inactMeter.mark();
+    Timer.Context context = inactTimer.time();
     try {
       final List<Device> deviceList = new ArrayList<>(1);
       JPA.withTransaction(() -> deviceList.addAll(deviceService.getActiveSensorDevices()));
@@ -163,6 +174,8 @@ public class InactiveDeviceDetectionJob implements Job {
       }
     } catch (Throwable e) {
       LOGGER.error("Error while running inactive device detection job", e);
+    } finally {
+      context.stop();
     }
   }
 

@@ -836,13 +836,6 @@ public class DeviceService extends ServiceImpl {
               assetMapModelMap));
     }
 
-    if (deviceList.size() > 0) {
-      taggedDeviceResponse.setnAbnormalTemp(getAbnormalDeviceCount(deviceList));
-      taggedDeviceResponse
-          .setnAbnormalDevices(alarmService.getAbnormalAlarmCountForDevices(deviceList));
-      taggedDeviceResponse.setnIActDevices(Device.getInactiveCountForDevices(deviceList));
-    }
-
     return taggedDeviceResponse;
   }
 

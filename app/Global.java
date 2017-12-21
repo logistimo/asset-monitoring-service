@@ -22,9 +22,16 @@
  * the commercial license, please contact us at opensource@logistimo.com
  */
 
+import com.codahale.metrics.JmxReporter;
+import com.codahale.metrics.Meter;
+import com.codahale.metrics.MetricRegistry;
+import com.logistimo.controllers.BaseController;
+import com.logistimo.healthcheck.MetricsUtil;
 import com.logistimo.utils.CronLeaderElection;
 import com.logistimo.utils.LogistimoConstant;
-import com.logistimo.controllers.BaseController;
+
+import java.lang.reflect.Method;
+
 import play.Application;
 import play.GlobalSettings;
 import play.Logger;
@@ -35,29 +42,36 @@ import play.mvc.Action;
 import play.mvc.Http;
 import play.mvc.Result;
 
-import java.lang.reflect.Method;
-
 public class Global extends GlobalSettings {
     private static final Logger.ALogger LOGGER = Logger.of(Global.class);
+
+    public static MetricRegistry metrics;
+
+    public static JmxReporter reporter;
 
     @Override
     public void onStart(Application app) {
         super.onStart(app);
-
         //Starting cron leader election.
         CronLeaderElection.start();
+        //configuring metrics
+        configureMetrics();
     }
 
     @Override
     public void onStop(Application app) {
         super.onStop(app);
-
         //Stopping cron leader election.
         CronLeaderElection.stop();
+        //closing JmxReporter
+        if (null != reporter) {
+            reporter.close();
+        }
     }
 
     @Override
     public F.Promise<Result> onBadRequest(Http.RequestHeader request, String error) {
+        logMeterMetrics(request);
         return F.Promise.pure(BaseController.prepareResult(Http.Status.BAD_REQUEST, request.getQueryString("callback"), error));
     }
 
@@ -102,11 +116,33 @@ public class Global extends GlobalSettings {
         if (request.method().equals("GET")){
                 LOGGER.info(request.getClass().toString());
         }
+        logMeterMetrics(request);
         return super.onRequest(request, actionMethod);
     }
 
     @Override
     public F.Promise<Result> onError(Http.RequestHeader request, Throwable t) {
+        logMeterMetrics(request);
         return F.Promise.pure(BaseController.prepareResult(Http.Status.BAD_REQUEST, request.getQueryString("callback"), t.getMessage()));
     }
+
+    private void configureMetrics () {
+        metrics = MetricsUtil.getRegistry();
+        reporter = JmxReporter.forRegistry(metrics).build();
+        reporter.start();
+    }
+
+    private void logMeterMetrics (Http.Request request) {
+        logMeterMetrics(request.path(),null);
+    }
+    private void logMeterMetrics (Http.RequestHeader requestHeader) {
+        logMeterMetrics(requestHeader.path(),"error.");
+    }
+
+    private void logMeterMetrics (String path, String prefix) {
+        Meter meter = MetricsUtil.getMeter(Http.Request.class,prefix != null ?prefix+path : path);
+        meter.mark();
+    }
+
+
 }
