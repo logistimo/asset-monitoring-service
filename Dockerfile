@@ -83,4 +83,6 @@ RUN chmod +x /docker-entrypoint.sh
 
 EXPOSE 8080-8090
 
+WORKDIR="/usr/local/tomcat"
+
 CMD ["/docker-entrypoint.sh"]
