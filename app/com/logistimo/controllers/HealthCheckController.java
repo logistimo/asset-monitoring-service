@@ -22,13 +22,13 @@ public class HealthCheckController extends Controller {
       checkDB();
       checkCache();
       return status(SUCCESS, Json.toJson(new BaseResponse("AMS service up and running!")));
-    } catch (Exception e) {
+    } catch (Throwable e) {
       return status(ERROR, Json.toJson(new BaseResponse("Issue with AMS service, Please check!")));
     }
   }
 
-  private static void checkDB () {
-    JPA.em().createNativeQuery("SELECT 1").executeUpdate();
+  private static void checkDB () throws Throwable {
+    JPA.withTransaction(() -> JPA.em().createNativeQuery("SELECT 1").getMaxResults());
   }
 
   private static void checkCache () {

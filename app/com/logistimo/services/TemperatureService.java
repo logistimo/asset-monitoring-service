@@ -107,8 +107,8 @@ public class TemperatureService extends ServiceImpl implements Executable {
       "logistimo.support.status_request.vendors";
   private static final String FEATURE_NOT_SUPPORTED = "feature_not_supported";
 
-  private static final Meter tempMeter = MetricsUtil.getMeter(TemperatureService.class,"log.temp");
-  private static final Timer tempTimer = MetricsUtil.getTimer(TemperatureService.class,"log.temp");
+  private static final Meter tempMeter = MetricsUtil.getMeter(TemperatureService.class,"log.temp.meter");
+  private static final Timer tempTimer = MetricsUtil.getTimer(TemperatureService.class,"log.temp.timer");
 
   @Override
   public void process(String content, Map<String, Object> options) throws Exception {
