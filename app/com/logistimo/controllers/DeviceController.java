@@ -57,9 +57,9 @@ public class DeviceController extends BaseController {
   private static final ALogger LOGGER = Logger.of(DeviceController.class);
   private static DeviceService deviceService = ServiceFactory.getService(DeviceService.class);
   private static final Meter
-      meter = MetricsUtil.getMeter(DeviceController.class,"get.recentalarm");
+      meter = MetricsUtil.getMeter(DeviceController.class,"get.recentalarm.meter");
   private static final Timer
-      timer = MetricsUtil.getTimer(DeviceController.class,"get.recentalarm");
+      timer = MetricsUtil.getTimer(DeviceController.class,"get.recentalarm.timer");
 
   @Transactional(readOnly = true)
   @With(ReadSecuredAction.class)

@@ -37,7 +37,6 @@ import com.logistimo.models.temperature.response.TemperatureResponse;
 import com.logistimo.models.v1.request.ReadingRequest;
 import com.logistimo.services.ServiceFactory;
 import com.logistimo.services.TaskService;
-import com.logistimo.services.TemperatureEventService;
 import com.logistimo.services.TemperatureService;
 import com.logistimo.utils.AssetStatusConstants;
 import com.logistimo.utils.LogistimoConstant;
@@ -70,9 +69,9 @@ public class TemperatureController extends BaseController {
   private static final String MSG_STATUS_REQUEST_SENT = "status_sms_sent";
 
   private static final Meter
-      meter = MetricsUtil.getMeter(TemperatureController.class,"post.temp");
+      meter = MetricsUtil.getMeter(TemperatureController.class,"post.temp.meter");
   private static final Timer
-      timer = MetricsUtil.getTimer(TemperatureController.class,"post.temp");
+      timer = MetricsUtil.getTimer(TemperatureController.class,"post.temp.timer");
 
   /**
    * @return

@@ -67,8 +67,8 @@ public class TemperatureEventService extends ServiceImpl implements Executable {
       ServiceFactory.getService(TemperatureService.class);
   private static final AlarmLogService alarmLogService = ServiceFactory.getService(AlarmLogService.class);
 
-  private static final Meter tempEventMeter = MetricsUtil.getMeter(TemperatureEventService.class,"log.tempevent");
-  private static final Timer tempEventTimer = MetricsUtil.getTimer(TemperatureEventService.class,"log.tempevent");
+  private static final Meter tempEventMeter = MetricsUtil.getMeter(TemperatureEventService.class,"log.tempevent.meter");
+  private static final Timer tempEventTimer = MetricsUtil.getTimer(TemperatureEventService.class,"log.tempevent.timer");
 
   @Override
   public void process(String object, Map<String, Object> options) throws Exception {

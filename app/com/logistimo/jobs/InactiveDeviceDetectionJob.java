@@ -65,9 +65,9 @@ public class InactiveDeviceDetectionJob implements Job {
   private static final AlarmService alarmService = ServiceFactory.getService(AlarmService.class);
 
   private static final Meter
-      inactMeter = MetricsUtil.getMeter(InactiveDeviceDetectionJob.class,"inactivedevice.job");
+      inactMeter = MetricsUtil.getMeter(InactiveDeviceDetectionJob.class,"inactivedevice.job.meter");
   private static final Timer
-      inactTimer = MetricsUtil.getTimer(InactiveDeviceDetectionJob.class,"inactivedevice.job");
+      inactTimer = MetricsUtil.getTimer(InactiveDeviceDetectionJob.class,"inactivedevice.job.timer");
 
 
   private void doJob() {

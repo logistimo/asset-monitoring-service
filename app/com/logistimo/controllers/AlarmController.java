@@ -44,9 +44,9 @@ public class AlarmController extends BaseController {
   private static final ALogger LOGGER = Logger.of(AlarmController.class);
   private static final AlarmService alarmService = ServiceFactory.getService(AlarmService.class);
   private static final Meter
-      meter = MetricsUtil.getMeter(AlarmController.class,"post.alarm");
+      meter = MetricsUtil.getMeter(AlarmController.class,"post.alarm.meter");
   private static final Timer
-      timer = MetricsUtil.getTimer(AlarmController.class,"post.alarm");
+      timer = MetricsUtil.getTimer(AlarmController.class,"post.alarm.timer");
 
   @Transactional
   public static Result createAlarm(String callback) {
