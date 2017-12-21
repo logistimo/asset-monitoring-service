@@ -24,11 +24,6 @@
 sed -ri "/Jad\/Jar download servlet/,+4d" $TOMCAT_HOME/webapps/ROOT/WEB-INF/web.xml \
         && sed -ri "$ a tomcat.util.http.parser.HttpParser.requestTargetAllow=|{}" $TOMCAT_HOME/conf/catalina.properties
 
-if [[ "$SENTINEL_HOST" != "" ]]
-then
-envsubst < $TOMCAT_HOME/conf/context.xml.template > $TOMCAT_HOME/conf/context.xml
-fi
-
 envsubst < $TOMCAT_HOME/conf/server.xml.template > $TOMCAT_HOME/conf/server.xml
 
 envsubst < $TOMCAT_HOME/webapps/ROOT/WEB-INF/classes/application.conf.template  > $TOMCAT_HOME/webapps/ROOT/WEB-INF/classes/application.conf
