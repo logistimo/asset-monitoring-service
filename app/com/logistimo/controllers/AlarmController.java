@@ -23,6 +23,9 @@
 
 package com.logistimo.controllers;
 
+import com.codahale.metrics.Meter;
+import com.codahale.metrics.Timer;
+import com.logistimo.healthcheck.MetricsUtil;
 import com.logistimo.models.alarm.request.AlarmLoggingRequest;
 import com.logistimo.models.alarm.response.AlarmLoggingResponse;
 import com.logistimo.services.AlarmService;
@@ -40,10 +43,16 @@ import play.mvc.With;
 public class AlarmController extends BaseController {
   private static final ALogger LOGGER = Logger.of(AlarmController.class);
   private static final AlarmService alarmService = ServiceFactory.getService(AlarmService.class);
+  private static final Meter
+      meter = MetricsUtil.getMeter(AlarmController.class,"post.alarm");
+  private static final Timer
+      timer = MetricsUtil.getTimer(AlarmController.class,"post.alarm");
 
   @Transactional
   public static Result createAlarm(String callback) {
 
+    meter.mark();
+    Timer.Context context = timer.time();
     AlarmLoggingRequest alarmLoggingRequest;
     try {
       alarmLoggingRequest = getValidatedObject(request().body().asJson()
@@ -67,6 +76,8 @@ public class AlarmController extends BaseController {
     } catch (Exception e) {
       LOGGER.error("Error while logging alarms", e);
       return prepareResult(INTERNAL_SERVER_ERROR, callback, e.getMessage());
+    } finally {
+      context.stop();
     }
   }
 

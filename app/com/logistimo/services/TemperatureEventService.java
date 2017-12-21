@@ -23,12 +23,15 @@
 
 package com.logistimo.services;
 
+import com.codahale.metrics.Meter;
+import com.codahale.metrics.Timer;
 import com.logistimo.db.AlarmLog;
 import com.logistimo.db.AssetMapping;
 import com.logistimo.db.Device;
 import com.logistimo.db.DeviceMetaData;
 import com.logistimo.db.DeviceStatus;
 import com.logistimo.exception.ServiceException;
+import com.logistimo.healthcheck.MetricsUtil;
 import com.logistimo.models.device.common.DeviceEventPushModel;
 import com.logistimo.models.task.TaskOptions;
 import com.logistimo.models.task.TaskType;
@@ -64,13 +67,19 @@ public class TemperatureEventService extends ServiceImpl implements Executable {
       ServiceFactory.getService(TemperatureService.class);
   private static final AlarmLogService alarmLogService = ServiceFactory.getService(AlarmLogService.class);
 
+  private static final Meter tempEventMeter = MetricsUtil.getMeter(TemperatureEventService.class,"log.tempevent");
+  private static final Timer tempEventTimer = MetricsUtil.getTimer(TemperatureEventService.class,"log.tempevent");
+
   @Override
   public void process(String object, Map<String, Object> options) throws Exception {
+
+    tempEventMeter.mark();
     if (options != null && options.get(EVENT_TYPE) != null
         && options.get(STATE_UPDATED_TIME) != null
         && options.get(VENDOR_ID) != null && options.get(DEVICE_ID) != null) {
       LockUtil.LockStatus
           status = null;
+      Timer.Context context = tempEventTimer.time();
       try {
         status =
             LockUtil.lock("LOCK_" + options.get(VENDOR_ID) + "_" + LogistimoUtils.extractDeviceId(
@@ -164,6 +173,7 @@ public class TemperatureEventService extends ServiceImpl implements Executable {
               "LOCK_" + options.get(VENDOR_ID) + "_" + LogistimoUtils.extractDeviceId(
                   (String) options.get(DEVICE_ID)));
         }
+        context.stop();
       }
     }
   }

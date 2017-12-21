@@ -23,7 +23,10 @@
 
 package com.logistimo.controllers;
 
+import com.codahale.metrics.Meter;
+import com.codahale.metrics.Timer;
 import com.logistimo.exception.LogistimoException;
+import com.logistimo.healthcheck.MetricsUtil;
 import com.logistimo.models.asset.AssetRegistrationRelationModel;
 import com.logistimo.models.device.request.APNPushRequest;
 import com.logistimo.models.device.request.AdminPushRequest;
@@ -53,6 +56,10 @@ import play.mvc.With;
 public class DeviceController extends BaseController {
   private static final ALogger LOGGER = Logger.of(DeviceController.class);
   private static DeviceService deviceService = ServiceFactory.getService(DeviceService.class);
+  private static final Meter
+      meter = MetricsUtil.getMeter(DeviceController.class,"get.recentalarm");
+  private static final Timer
+      timer = MetricsUtil.getTimer(DeviceController.class,"get.recentalarm");
 
   @Transactional(readOnly = true)
   @With(ReadSecuredAction.class)
@@ -186,6 +193,8 @@ public class DeviceController extends BaseController {
                                                  Integer workingStatus, Integer alarmType,
                                                  Integer alarmDuration, Integer awr,
                                                  int pageNumber, int pageSize, String callback) {
+    meter.mark();
+    Timer.Context context = timer.time();
     try {
       tagName = decodeParameter(tagName);
       return prepareResult(OK, callback, Json.toJson(deviceService
@@ -197,8 +206,9 @@ public class DeviceController extends BaseController {
     } catch (Exception e) {
       LOGGER.error("Error while finding tagged device", e);
       return prepareResult(INTERNAL_SERVER_ERROR, callback, e.getMessage());
+    } finally {
+      context.stop();
     }
-
   }
 
   @Transactional(readOnly = true)

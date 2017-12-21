@@ -23,6 +23,8 @@
 
 package com.logistimo.services;
 
+import com.codahale.metrics.Meter;
+import com.codahale.metrics.Timer;
 import com.logistimo.dao.DevicePowerTransitionDAO;
 import com.logistimo.db.AlarmLog;
 import com.logistimo.db.AssetMapping;
@@ -35,6 +37,7 @@ import com.logistimo.db.DeviceTemperatureRequest;
 import com.logistimo.db.TemperatureReading;
 import com.logistimo.exception.LogistimoException;
 import com.logistimo.exception.ServiceException;
+import com.logistimo.healthcheck.MetricsUtil;
 import com.logistimo.models.alarm.request.AlarmLoggingRequest;
 import com.logistimo.models.alarm.request.AlarmRequest;
 import com.logistimo.models.alarm.request.DeviceAlarmRequest;
@@ -104,29 +107,39 @@ public class TemperatureService extends ServiceImpl implements Executable {
       "logistimo.support.status_request.vendors";
   private static final String FEATURE_NOT_SUPPORTED = "feature_not_supported";
 
+  private static final Meter tempMeter = MetricsUtil.getMeter(TemperatureService.class,"log.temp");
+  private static final Timer tempTimer = MetricsUtil.getTimer(TemperatureService.class,"log.temp");
+
   @Override
   public void process(String content, Map<String, Object> options) throws Exception {
+
+    tempMeter.mark();
     if (content != null) {
-      Integer chSource = AssetStatusConstants.GPRS;
-      if (options != null && options.get("source") != null) {
-        chSource = (Integer) options.get("source");
-      }
-      TemperatureLoggingRequest
-          temperatureLoggingRequest =
-          LogistimoUtils.getValidatedObject(content, TemperatureLoggingRequest.class);
-      TemperatureLoggingResponse
-          temperatureLoggingResponse =
-          logReadings(temperatureLoggingRequest, chSource);
-      if (temperatureLoggingResponse.errs.size() == temperatureLoggingRequest.data.size()) {
-        LOGGER.warn(
-            "No device(s) found: {}, and input data: {}" + temperatureLoggingResponse.toString(),
-            temperatureLoggingRequest.toString());
-      } else if (temperatureLoggingResponse.errs.size() > 0
-          || temperatureLoggingResponse.errTmps.size() > 0) {
-        LOGGER.warn("Partial content: {}, data: {}", temperatureLoggingResponse.toString(),
-            temperatureLoggingRequest.toString());
-      } else {
-        LOGGER.info("Temperature processing completed successfully.");
+      Timer.Context context = tempTimer.time();
+      try {
+        Integer chSource = AssetStatusConstants.GPRS;
+        if (options != null && options.get("source") != null) {
+          chSource = (Integer) options.get("source");
+        }
+        TemperatureLoggingRequest
+            temperatureLoggingRequest =
+            LogistimoUtils.getValidatedObject(content, TemperatureLoggingRequest.class);
+        TemperatureLoggingResponse
+            temperatureLoggingResponse =
+            logReadings(temperatureLoggingRequest, chSource);
+        if (temperatureLoggingResponse.errs.size() == temperatureLoggingRequest.data.size()) {
+          LOGGER.warn(
+              "No device(s) found: {}, and input data: {}" + temperatureLoggingResponse.toString(),
+              temperatureLoggingRequest.toString());
+        } else if (temperatureLoggingResponse.errs.size() > 0
+            || temperatureLoggingResponse.errTmps.size() > 0) {
+          LOGGER.warn("Partial content: {}, data: {}", temperatureLoggingResponse.toString(),
+              temperatureLoggingRequest.toString());
+        } else {
+          LOGGER.info("Temperature processing completed successfully.");
+        }
+      } finally {
+        context.stop();
       }
     }
   }

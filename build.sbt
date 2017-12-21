@@ -45,7 +45,9 @@ libraryDependencies ++= Seq(
   "org.json" % "json" % "20090211",
   "org.apache.zookeeper" % "zookeeper" % "3.4.6",
   "redis.clients" % "jedis" % "2.6.2",
-  "commons-pool" % "commons-pool" % "1.6"
+  "commons-pool" % "commons-pool" % "1.6",
+  "io.dropwizard.metrics" % "metrics-core" % "3.2.5",
+  "io.dropwizard.metrics" % "metrics-healthchecks" % "3.2.5"
 )
 
 Play2WarPlugin.play2WarSettings

@@ -23,7 +23,10 @@
 
 package com.logistimo.controllers;
 
+import com.codahale.metrics.Meter;
+import com.codahale.metrics.Timer;
 import com.logistimo.exception.LogistimoException;
+import com.logistimo.healthcheck.MetricsUtil;
 import com.logistimo.models.common.BaseResponse;
 import com.logistimo.models.task.TaskOptions;
 import com.logistimo.models.task.TaskType;
@@ -34,6 +37,7 @@ import com.logistimo.models.temperature.response.TemperatureResponse;
 import com.logistimo.models.v1.request.ReadingRequest;
 import com.logistimo.services.ServiceFactory;
 import com.logistimo.services.TaskService;
+import com.logistimo.services.TemperatureEventService;
 import com.logistimo.services.TemperatureService;
 import com.logistimo.utils.AssetStatusConstants;
 import com.logistimo.utils.LogistimoConstant;
@@ -65,6 +69,11 @@ public class TemperatureController extends BaseController {
   private static final TaskService taskService = ServiceFactory.getService(TaskService.class);
   private static final String MSG_STATUS_REQUEST_SENT = "status_sms_sent";
 
+  private static final Meter
+      meter = MetricsUtil.getMeter(TemperatureController.class,"post.temp");
+  private static final Timer
+      timer = MetricsUtil.getTimer(TemperatureController.class,"post.temp");
+
   /**
    * @return
    */
@@ -74,6 +83,8 @@ public class TemperatureController extends BaseController {
     TemperatureLoggingRequest temperatureLoggingRequest;
     Integer chSource = AssetStatusConstants.GPRS;
     Map<String, Object> source = null;
+    meter.mark();
+    Timer.Context context = timer.time();
     try {
       temperatureLoggingRequest =
           getValidatedObject(request().body().asJson(), TemperatureLoggingRequest.class);
@@ -128,6 +139,8 @@ public class TemperatureController extends BaseController {
     } catch (Exception e) {
       LOGGER.error("Error while logging temperature readings", e);
       return prepareResult(Http.Status.INTERNAL_SERVER_ERROR, callback, e.getMessage());
+    } finally {
+      context.stop();
     }
   }
 

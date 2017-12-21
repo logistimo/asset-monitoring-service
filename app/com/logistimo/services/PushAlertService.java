@@ -23,6 +23,9 @@
 
 package com.logistimo.services;
 
+import com.codahale.metrics.Meter;
+import com.logistimo.healthcheck.MetricsUtil;
+
 import org.apache.commons.codec.binary.Base64;
 
 import java.security.GeneralSecurityException;
@@ -45,6 +48,7 @@ public class PushAlertService extends ServiceImpl implements Executable {
   private static MessagingService
       messagingService =
       ServiceFactory.getService(MessagingService.class);
+  private static final Meter pushAlertMeter = MetricsUtil.getMeter(PushAlertService.class,"push.alert");
 
   public static String generatehmac(String data) {
     return hmac("X0FIbIBUHmTNV0SpYdTfJsISTUMnM59UDSTfrbcTTk8iMRh4wpjHf99fXYDotlt5", data);
@@ -69,6 +73,7 @@ public class PushAlertService extends ServiceImpl implements Executable {
 
   @Override
   public void process(String content, Map<String, Object> options) throws Exception {
+    pushAlertMeter.mark();
     messagingService.produceMessage(PRODUCER_ID, content);
   }
 }

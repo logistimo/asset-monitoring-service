@@ -99,3 +99,6 @@ GET         /v3/app/status                                       com.logistimo.c
 
 # Migrators
 POST        /v3/status/migrator                                  com.logistimo.migrator.DeviceWorkingStatusMigrator.migrate()
+
+#healthcheck
+GET         /health                                              com.logistimo.controllers.HealthCheckController.healthCheck()
