@@ -32,10 +32,6 @@ RUN rm -rf $TOMCAT_HOME/webapps/* \
 
 ADD target/$warname $TOMCAT_HOME/webapps/
 
-RUN  wget -P $TOMCAT_HOME/lib/ http://central.maven.org/maven2/org/apache/commons/commons-pool2/2.2/commons-pool2-2.2.jar \
-        && wget -P $TOMCAT_HOME/lib/ http://central.maven.org/maven2/redis/clients/jedis/2.5.2/jedis-2.5.2.jar \
-        && wget -P $TOMCAT_HOME/lib/ http://central.maven.org/maven2/com/bluejeans/tomcat-redis-session-manager/2.0.0/tomcat-redis-session-manager-2.0.0.jar
-
 ADD dockerfiles/context.xml.template $TOMCAT_HOME/conf/
 
 ADD dockerfiles/server.xml.template $TOMCAT_HOME/conf/
@@ -83,6 +79,6 @@ RUN chmod +x /docker-entrypoint.sh
 
 EXPOSE 8080-8090
 
-WORKDIR="/usr/local/tomcat"
+WORKDIR "/usr/local/tomcat"
 
 CMD ["/docker-entrypoint.sh"]
