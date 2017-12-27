@@ -162,6 +162,12 @@ public interface AssetStatusConstants {
     add(POWER_OUTAGE_STATUS_KEY);
   }};
 
+  List<Integer> DEVICE_STATUS_PROPAGATION_TYPES = new ArrayList<Integer>() {{
+    add(BATTERY_ALARM_TYPE);
+    add(DEVICE_CONN_ALARM_TYPE);
+    add(POWER_OUTAGE_ALARM_TYPE);
+  }};
+
   String
       DEVICE_ALARM_STATUS_KEYS_CSV =
       StringUtils.join(DEVICE_ALARM_STATUS_KEYS_STRING, LogistimoConstant.COMMA);

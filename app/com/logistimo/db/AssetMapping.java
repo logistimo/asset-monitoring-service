@@ -114,6 +114,16 @@ public class AssetMapping {
         .getResultList();
   }
 
+  public static AssetMapping findMonitoredAssetMapping(Device monitoringAsset) {
+    return (AssetMapping) JPA.em()
+        .createNativeQuery("select * from asset_mapping where relatedAsset_id in (select "
+                + "relatedAsset_id from asset_mapping where asset_id = "+monitoringAsset.id+" and "
+                + "relation_type = 1) and relation_type = 2",
+            AssetMapping.class)
+        .setMaxResults(1)
+        .getSingleResult();
+  }
+
   public void save() {
     JPA.em().persist(this);
   }

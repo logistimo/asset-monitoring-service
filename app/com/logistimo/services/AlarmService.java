@@ -224,15 +224,22 @@ public class AlarmService extends ServiceImpl {
     //Updating specific device alarm for related assets
     AssetMapping assetMapping = null;
     try {
-      assetMapping =
-          AssetMapping.findAssetMappingByRelatedAssetAndType(device,
-              LogistimoConstant.MONITORED_BY);
+      if (AssetStatusConstants.DEVICE_STATUS_PROPAGATION_TYPES.contains(type)) {
+        assetMapping =
+            AssetMapping.findMonitoredAssetMapping(device);
+      } else {
+        assetMapping =
+            AssetMapping.findAssetMappingByRelatedAssetAndType(device,
+                LogistimoConstant.MONITORED_BY);
+      }
     } catch (NoResultException e) {
       //do nothing
     }
+
     if (assetMapping != null) {
       DeviceStatus relatedDeviceStatus;
-      if (assetMapping.monitoringPositionId != null) {
+      if (!AssetStatusConstants.DEVICE_STATUS_PROPAGATION_TYPES.contains(type)
+          && assetMapping.monitoringPositionId != null) {
         relatedDeviceStatus =
             deviceService.getOrCreateDeviceStatus(assetMapping.asset,
                 assetMapping.monitoringPositionId, null,
@@ -244,7 +251,6 @@ public class AlarmService extends ServiceImpl {
                 AssetStatusConstants.DEVICE_ALARM_STATUS_KEYS_MAP.get(type),
                 null);
       }
-
       return propagateDeviceStatus(relatedDeviceStatus, deviceStatus, deviceEventPushModel,
           assetMapping, type);
     }
