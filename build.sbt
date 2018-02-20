@@ -47,7 +47,12 @@ libraryDependencies ++= Seq(
   "redis.clients" % "jedis" % "2.6.2",
   "commons-pool" % "commons-pool" % "1.6",
   "io.dropwizard.metrics" % "metrics-core" % "3.2.5",
-  "io.dropwizard.metrics" % "metrics-healthchecks" % "3.2.5"
+  "io.dropwizard.metrics" % "metrics-healthchecks" % "3.2.5",
+  "junit" % "junit" % "4.12" % "test",
+  "org.powermock" % "powermock-module-junit4" % "1.5.1",
+  "org.powermock" % "powermock-api-mockito2" % "1.7.0",
+  "org.powermock" % "powermock-core" % "1.7.0",
+  "org.mockito" % "mockito-core" % "1.9.5"
 )
 
 Play2WarPlugin.play2WarSettings

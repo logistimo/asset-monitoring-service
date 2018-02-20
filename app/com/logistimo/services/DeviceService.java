@@ -324,37 +324,7 @@ public class DeviceService extends ServiceImpl {
 
           //Updating device working status, if any
           if (deviceRequest.ws != null) {
-            DeviceStatus
-                deviceStatus =
-                getOrCreateDeviceStatus(device, null, null, AssetStatusConstants.WORKING_STATUS_KEY,
-                    null);
-            if (!deviceStatus.status.equals(deviceRequest.ws.st)) {
-              int oldStatusUpdatedTime = deviceStatus.statusUpdatedTime;
-              int previousStatus = deviceStatus.status;
-              deviceStatus.status = deviceRequest.ws.st;
-              deviceStatus.statusUpdatedTime = (int) (System.currentTimeMillis() / 1000);
-              deviceStatus.update();
-              try {
-                DeviceStatusLog
-                    oldStatusLog =
-                    DeviceStatusLog.getDeviceStatusForGivenStartTime(device.id,
-                        AssetStatusConstants.WORKING_STATUS_KEY, oldStatusUpdatedTime);
-                oldStatusLog.endTime = deviceStatus.statusUpdatedTime;
-                oldStatusLog.nextStatus = deviceStatus.status;
-                oldStatusLog.update();
-              } catch (NoResultException e) {
-                //do nothing
-              }
-              DeviceStatusLog statusLog = new DeviceStatusLog(device.id);
-              statusLog.updatedBy = deviceRequest.ub;
-              statusLog.status = deviceStatus.status;
-              statusLog.statusUpdatedTime = deviceStatus.statusUpdatedTime;
-              statusLog.startTime = deviceStatus.statusUpdatedTime;
-              statusLog.previousStatus = previousStatus;
-              statusLog.updatedOn = new Date();
-              statusLog.save();
-              postDeviceStatus(device, deviceStatus);
-            }
+            updateWorkingStatus(deviceRequest.ws, device);
           }
           //Updating device meta data
           if (deviceRequest.meta != null) {
@@ -428,7 +398,7 @@ public class DeviceService extends ServiceImpl {
     return deviceCreationResponse;
   }
 
-  private void postDeviceStatus(Device device, DeviceStatus deviceStatus) {
+  public void postDeviceStatus(Device device, DeviceStatus deviceStatus) {
     DeviceEventPushModel.DeviceEvent deviceEvent = new DeviceEventPushModel.DeviceEvent();
     deviceEvent.vId = device.vendorId;
     deviceEvent.dId = device.deviceId;
@@ -2643,4 +2613,58 @@ public class DeviceService extends ServiceImpl {
     }
   }
 
+  public String updateDeviceWorkingStatus(String vendorId, String deviceId, DeviceStatusModel statusModel) {
+    if(vendorId == null || deviceId == null) {
+      return "One of the vendorId and deviceId is mandatory";
+    } else if (vendorId.length() > 50 || deviceId.length() > 100) {
+      return "vendorId, deviceId exceeds the size limit of 50 and 100 characters respectively";
+    } else {
+      Device device = Device.findDevice(vendorId, deviceId);
+      updateWorkingStatus(statusModel, device);
+    }
+    return "Device working status updated successfully";
+  }
+
+  private void updateWorkingStatus(DeviceStatusModel deviceStatusModel, Device device) {
+    DeviceStatus
+        deviceStatus =
+        getOrCreateDeviceStatus(device, null, null, AssetStatusConstants.WORKING_STATUS_KEY,
+            null);
+    if (!deviceStatus.status.equals(deviceStatusModel.st)) {
+      int oldStatusUpdatedTime = deviceStatus.statusUpdatedTime;
+      int previousStatus = deviceStatus.status;
+      deviceStatus.status = deviceStatusModel.st;
+      deviceStatus.statusUpdatedTime = getCurrentTimeInSeconds();
+      deviceStatus.statusUpdatedBy = deviceStatusModel.stub;
+      deviceStatus.update();
+      try {
+        DeviceStatusLog
+            oldStatusLog =
+            DeviceStatusLog.getDeviceStatusForGivenStartTime(device.id,
+                AssetStatusConstants.WORKING_STATUS_KEY, oldStatusUpdatedTime);
+        oldStatusLog.endTime = deviceStatus.statusUpdatedTime;
+        oldStatusLog.nextStatus = deviceStatus.status;
+        oldStatusLog.update();
+      } catch (NoResultException e) {
+        //do nothing
+      }
+      updateDeviceStatusLog(device, deviceStatusModel, deviceStatus, previousStatus);
+      postDeviceStatus(device, deviceStatus);
+    }
+  }
+
+  public void updateDeviceStatusLog(Device device, DeviceStatusModel deviceStatusModel, DeviceStatus deviceStatus, Integer previousStatus) {
+    DeviceStatusLog statusLog = new DeviceStatusLog(device.id);
+    statusLog.updatedBy = deviceStatusModel.stub;
+    statusLog.status = deviceStatus.status;
+    statusLog.statusUpdatedTime = deviceStatus.statusUpdatedTime;
+    statusLog.startTime = deviceStatus.statusUpdatedTime;
+    statusLog.previousStatus = previousStatus;
+    statusLog.updatedOn = new Date();
+    statusLog.save();
+  }
+
+  public int getCurrentTimeInSeconds() {
+    return (int) (System.currentTimeMillis() / 1000);
+  }
 }
