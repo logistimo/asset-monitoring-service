@@ -40,6 +40,7 @@ import com.logistimo.models.device.request.TagRegisterRequest;
 import com.logistimo.models.device.response.DeviceCreationResponse;
 import com.logistimo.models.device.response.DeviceDeleteResponse;
 import com.logistimo.models.device.response.DeviceReadyUpdateResponse;
+import com.logistimo.models.device.response.DeviceStatusModel;
 import com.logistimo.services.DeviceService;
 import com.logistimo.services.ServiceFactory;
 
@@ -567,6 +568,21 @@ public class DeviceController extends BaseController {
     } catch (Exception e) {
       LOGGER.error("Error while getting asset power transition for the asset: {}, {}", vendorId,
           deviceId, e);
+      return prepareResult(INTERNAL_SERVER_ERROR, callback, e.getMessage());
+    }
+  }
+
+  @Transactional
+  @With(SecuredAction.class)
+  public static Result updateDeviceWorkingStatus(String vendorId, String deviceId, String callback) {
+    try {
+      deviceId = decodeParameter(deviceId);
+      DeviceStatusModel statusModel =
+          getValidatedObject(request().body().asJson(), DeviceStatusModel.class);
+      return prepareResult(OK, callback, Json.toJson(deviceService.updateDeviceWorkingStatus(
+          vendorId, deviceId, statusModel)));
+    } catch (Exception e) {
+      LOGGER.error("Error while updating the working status of asset: {}, {}", vendorId, deviceId, e);
       return prepareResult(INTERNAL_SERVER_ERROR, callback, e.getMessage());
     }
   }

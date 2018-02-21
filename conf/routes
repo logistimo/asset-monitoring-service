@@ -34,6 +34,7 @@ GET     /assets/*file               controllers.Assets.at(path="/public", file)
 GET         /v3/temp/:vendorId/:deviceId/:monitoringPositionId               com.logistimo.controllers.TemperatureController.getPaginatedReadingsV3(vendorId: String, deviceId: String, monitoringPositionId: Integer, page: Int ?= 1, size: Int ?= -1, callback: String ?= null)
 # GET         /v3/temp/:vendorId/:deviceId/:from/:to               com.logistimo.controllers.TemperatureController.getPaginatedReadingsBetweenV3(vendorId: String, deviceId: String, monitoringPositionId: Integer ?= null, from: Integer, to: Integer, page: Int ?= 1, size: Int ?= -1, callback: String ?= null)
 GET         /v3/temp/:vendorId/:deviceId/:monitoringPositionId/:from/:to     com.logistimo.controllers.TemperatureController.getPaginatedReadingsBetweenV3(vendorId: String, deviceId: String, monitoringPositionId: Integer, from: Integer, to: Integer, page: Int ?= 1, size: Int ?= -1, callback: String ?= null)
+POST        /v3/devices/status/:vendorId/:deviceId                           com.logistimo.controllers.DeviceController.updateDeviceWorkingStatus(vendorId: String, deviceId: String, callback: String ?= null)
 
 # v2 APIs
 GET         /                                                    com.logistimo.controllers.Application.index()
