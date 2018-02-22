@@ -193,14 +193,14 @@ public class DeviceController extends BaseController {
   public static Result getDevicesStatusByTagName(String tagName, String q, String assetType,
                                                  Integer workingStatus, Integer alarmType,
                                                  Integer alarmDuration, Integer awr,
-                                                 int pageNumber, int pageSize, String callback) {
+                                                 int pageNumber, int pageSize, Integer mType, String callback) {
     meter.mark();
     Timer.Context context = timer.time();
     try {
       tagName = decodeParameter(tagName);
       return prepareResult(OK, callback, Json.toJson(deviceService
           .getDevicesByTag(tagName, q, assetType, workingStatus, alarmType, alarmDuration, awr,
-              pageNumber, pageSize)));
+              pageNumber, pageSize, mType)));
     } catch (NoResultException e) {
       LOGGER.warn("Device not found.", e);
       return prepareResult(NOT_FOUND, callback, "Device not found - " + e.getMessage());

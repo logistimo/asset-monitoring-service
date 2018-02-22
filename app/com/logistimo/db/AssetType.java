@@ -41,7 +41,10 @@ public class AssetType {
   public static Integer TEMPERATURE_LOGGER = 1;
   public static Integer TEMP_SENSOR = 4;
   public static Integer ILR = 2;
-  public static Integer DEEP_FREEZER = 2;
+  public static Integer DEEP_FREEZER = 3;
+  public static Integer WALK_IN_COOLER = 5;
+  public static Integer WALK_IN_FREEZER = 6;
+  public static Integer FRIDGE = 7;
 
   public static Integer MONITORED_ASSET = 2;
   public static Integer MONITORING_ASSET = 1;
@@ -67,6 +70,12 @@ public class AssetType {
     return JPA.em().createQuery("from AssetType where id = ?1", AssetType.class)
         .setParameter(1, id)
         .getSingleResult();
+  }
+
+  public static String getAssetIdsByType(Integer type) {
+    String query = "select group_concat(id) from asset_type where type = " + type;
+    return JPA.em().createNativeQuery(query)
+        .getSingleResult().toString();
   }
 
   public void save() {
