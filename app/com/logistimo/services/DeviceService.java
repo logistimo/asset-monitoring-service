@@ -758,8 +758,12 @@ public class DeviceService extends ServiceImpl {
   public TaggedDeviceResponse getDevicesByTag(String tagName, String q, String assetType,
                                               Integer workingStatus, Integer alarmType,
                                               Integer alarmDuration, Integer awr, int pageNumber,
-                                              int pageSize) {
+                                              int pageSize, Integer monitoringType) {
     TaggedDeviceResponse taggedDeviceResponse = new TaggedDeviceResponse();
+    if(assetType == null && monitoringType != null) {
+      assetType = getAssetIdsByType(monitoringType);
+    }
+
     List<Device>
         deviceList =
         getDeviceForTag(tagName, q, assetType, workingStatus, alarmType, alarmDuration, awr,
@@ -2666,5 +2670,9 @@ public class DeviceService extends ServiceImpl {
 
   public int getCurrentTimeInSeconds() {
     return (int) (System.currentTimeMillis() / 1000);
+  }
+
+  public String getAssetIdsByType(Integer monitoringType) {
+    return AssetType.getAssetIdsByType(monitoringType);
   }
 }
