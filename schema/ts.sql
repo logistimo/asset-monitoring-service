@@ -147,7 +147,7 @@ CREATE TABLE `asset_type` (
 
 LOCK TABLES `asset_type` WRITE;
 /*!40000 ALTER TABLE `asset_type` DISABLE KEYS */;
-INSERT INTO `asset_type` VALUES (1,'Sensor Device',1,1,1),(2,'Fridge',1,0,2),(3,'Deep freezer',1,0,2),(4,'Temperature Sensors',1,1,0),(5,'Cold room',1,0,2),(6,'Walk In Freezer',1,0,2),(7,'Fridge',1,0,2);
+INSERT INTO `asset_type` VALUES (1,'Sensor Device',1,1,1),(2,'ILR',1,0,2),(3,'Deep freezer',1,0,2),(4,'Temperature Sensors',1,1,0),(5,'Cold room',1,0,2),(6,'Walk In Freezer',1,0,2),(7,'Fridge',1,0,2);
 /*!40000 ALTER TABLE `asset_type` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -1285,7 +1285,7 @@ CREATE TABLE `user_accounts` (
 
 LOCK TABLES `user_accounts` WRITE;
 /*!40000 ALTER TABLE `user_accounts` DISABLE KEYS */;
-INSERT INTO `user_accounts` VALUES (1,'Logistimo','0e9aa14cc9ad07fff89581c22a27cec2','logistimo',2),(4,'Logistimo','aeefa70dee9cca80f0e4db02e751c042','logistimo_admin',1);
+INSERT INTO `user_accounts` VALUES (1,'Logistimo','0e9aa14cc9ad07fff89581c22a27cec2','logistimo',2),(4,'Logistimo','0e9aa14cc9ad07fff89581c22a27cec2','logistimo_admin',1);
 /*!40000 ALTER TABLE `user_accounts` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
