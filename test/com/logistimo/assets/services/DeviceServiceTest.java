@@ -23,9 +23,12 @@
 
 package com.logistimo.assets.services;
 
+import com.logistimo.db.AssetMapping;
+import com.logistimo.db.AssetType;
 import com.logistimo.db.Device;
 import com.logistimo.db.DeviceStatus;
 import com.logistimo.db.DeviceStatusLog;
+import com.logistimo.models.asset.AssetMapModel;
 import com.logistimo.models.device.response.DeviceStatusModel;
 import com.logistimo.services.DeviceService;
 import com.logistimo.utils.AssetStatusConstants;
@@ -37,11 +40,16 @@ import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
 import static org.powermock.api.mockito.PowerMockito.doNothing;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
@@ -57,7 +65,7 @@ import static play.test.Helpers.stop;
  */
 @PowerMockIgnore("javax.management.*")
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({Device.class, DeviceStatusLog.class, DeviceStatus.class})
+@PrepareForTest({Device.class, DeviceStatusLog.class, DeviceStatus.class, AssetMapping.class})
 public class DeviceServiceTest {
   Device device;
   DeviceStatus deviceStatus;
@@ -67,6 +75,7 @@ public class DeviceServiceTest {
   Integer eventStartTime = 1504325145;
   Long deviceId = 10l;
   String updatedByUser = "testuser";
+  final String ACTIVEMQ_URL = "activemq.url";
 
   @Before
   public void setup() throws Exception {
@@ -89,7 +98,7 @@ public class DeviceServiceTest {
   @Test
   public void testUpdateDeviceWorkingStatus() throws Exception {
     Map<String,String> props = new HashMap<>();
-    props.put("activemq.url","");
+    props.put(ACTIVEMQ_URL,"");
     props.putAll(inMemoryDatabase());
     running(fakeApplication(props), () -> {
       DeviceService deviceService = spy(DeviceService.class);
@@ -120,31 +129,107 @@ public class DeviceServiceTest {
   @Test
   public void testUpdateWorkingStatusWithoutVendorId() {
     Map<String,String> props = new HashMap<>();
-    props.put("activemq.url","");
+    props.put(ACTIVEMQ_URL,"");
     props.putAll(inMemoryDatabase());
+
     running(fakeApplication(props), () -> {
-      System.out.println(2);
+
       DeviceService deviceService = spy(DeviceService.class);
       getDeviceStatusModel(3, updatedByUser);
       String result = deviceService.updateDeviceWorkingStatus(null, "ILR001", deviceStatusModel);
+
       assertEquals("One of the vendorId and deviceId is mandatory", result);
     });
     stop(fakeApplication());
+
   }
 
   @Test
   public void testUpdateWorkingStatusWithoutDeviceId() {
-    Map<String,String> props = new HashMap<>();
-    props.put("activemq.url","");
+    Map<String, String> props = new HashMap<>();
+    props.put(ACTIVEMQ_URL, "");
     props.putAll(inMemoryDatabase());
+
     running(fakeApplication(props), () -> {
-      System.out.println(3);
+
       DeviceService deviceService = spy(DeviceService.class);
       getDeviceStatusModel(3, updatedByUser);
       String result = deviceService.updateDeviceWorkingStatus("haier", null, deviceStatusModel);
+
       assertEquals("One of the vendorId and deviceId is mandatory", result);
     });
     stop(fakeApplication(props));
+
+  }
+
+  @Test
+  public void testToAssetMapModelForMonitoringAsset() {
+    Map<String, String> props = new HashMap<>();
+    props.put(ACTIVEMQ_URL, "");
+    props.putAll(inMemoryDatabase());
+
+    running(fakeApplication(props), () -> {
+
+      List<AssetMapping> assetMappingList = new ArrayList<>();
+      AssetMapping
+          assetMapping =
+          constructAssetMapping("ILR001", "haier", AssetType.ILR, "TL1", "berlinger",
+              AssetType.TEMPERATURE_LOGGER);
+      assetMappingList.add(assetMapping);
+
+      DeviceService deviceService = spy(DeviceService.class);
+      doReturn(null).when(deviceService).getDeviceMetaDatas(assetMapping.asset);
+
+      mockStatic(AssetMapping.class);
+      when(AssetMapping.findAssetRelationByAsset(any())).thenReturn(assetMappingList);
+
+      Map<Integer, AssetMapModel>
+          assetModel =
+          deviceService.toAssetMapModels(assetMappingList, true);
+
+      assertNotNull(assetModel);
+      assertEquals(assetMapping.asset.deviceId, assetModel.get(1).getdId());
+      assertEquals(assetMapping.asset.vendorId, assetModel.get(1).getvId());
+      assertEquals(assetMapping.asset.assetType.assetType, AssetType.MONITORED_ASSET);
+
+    });
+    stop(fakeApplication(props));
+
+  }
+
+  @Test
+  public void testToAssetMapModelForMonitoredAsset() {
+    Map<String, String> props = new HashMap<>();
+    props.put(ACTIVEMQ_URL, "");
+    props.putAll(inMemoryDatabase());
+
+    running(fakeApplication(props), () -> {
+
+      List<AssetMapping> assetMappingList = new ArrayList<>();
+      AssetMapping
+          assetMapping =
+          constructAssetMapping("WIC001", "bpsolar", AssetType.WALK_IN_COOLER, "TL001", "nexleaf",
+              AssetType.TEMPERATURE_LOGGER);
+      assetMappingList.add(assetMapping);
+
+      DeviceService deviceService = spy(DeviceService.class);
+      doReturn(null).when(deviceService).getDeviceMetaDatas(assetMapping.relatedAsset);
+
+      mockStatic(AssetMapping.class);
+      when(AssetMapping.findAssetRelationByAsset(any())).thenReturn(assetMappingList);
+
+      Map<Integer, AssetMapModel>
+          assetModel =
+          deviceService.toAssetMapModels(assetMappingList, false);
+
+      assertNotNull(assetModel);
+      assertEquals(assetMapping.relatedAsset.deviceId, assetModel.get(1).getdId());
+      assertEquals(assetMapping.relatedAsset.vendorId, assetModel.get(1).getvId());
+      assertEquals(assetMapping.relatedAsset.assetType.assetType, AssetType.MONITORING_ASSET);
+
+    });
+    stop(fakeApplication(props));
+
   }
 
   private void getDeviceStatus(Long id) {
@@ -164,5 +249,31 @@ public class DeviceServiceTest {
     deviceStatusModel = new DeviceStatusModel();
     deviceStatusModel.st = status;
     deviceStatusModel.stub = statusUpdatedBy;
+  }
+
+  private AssetMapping constructAssetMapping(String assetDeviceId, String assetVendorId,
+                                             Integer assetId,
+                                             String relatedAssetDeviceId,
+                                             String relatedAssetVendorId, Integer relatedAssetId) {
+
+    Device asset = new Device();
+    asset.deviceId = assetDeviceId;
+    asset.vendorId = assetVendorId;
+    asset.assetType = new AssetType();
+    asset.assetType.id = assetId;
+    asset.assetType.assetType = AssetType.MONITORED_ASSET;
+
+    Device relatedAsset = new Device();
+    relatedAsset.deviceId = relatedAssetDeviceId;
+    relatedAsset.vendorId = relatedAssetVendorId;
+    relatedAsset.assetType = new AssetType();
+    relatedAsset.assetType.id = relatedAssetId;
+    relatedAsset.assetType.assetType = AssetType.MONITORING_ASSET;
+
+    AssetMapping assetMapping = new AssetMapping();
+    assetMapping.asset = asset;
+    assetMapping.relatedAsset = relatedAsset;
+
+    return assetMapping;
   }
 }

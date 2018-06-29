@@ -798,7 +798,11 @@ public class DeviceService extends ServiceImpl {
         }
 
         try {
-          assetMapModelMap = toAssetMapModels(AssetMapping.findAssetRelationByAsset(device));
+          if(AssetType.TEMPERATURE_LOGGER == device.assetType.assetType) {
+            assetMapModelMap = toAssetMapModels(AssetMapping.findMonitoringAssetRelation(device), true);
+          } else {
+            assetMapModelMap = toAssetMapModels(AssetMapping.findAssetRelationByAsset(device));
+          }
         } catch (NoResultException e) {
           LOGGER.warn("No asset relation found for the device: {}, {}", device.vendorId,
               device.deviceId);
@@ -1903,7 +1907,7 @@ public class DeviceService extends ServiceImpl {
     }
   }
 
-  private List<DeviceMetaData> getDeviceMetaDatas(Device device) {
+  public List<DeviceMetaData> getDeviceMetaDatas(Device device) {
     return DeviceMetaData.getDeviceMetaDatas(device);
   }
 
@@ -2189,27 +2193,41 @@ public class DeviceService extends ServiceImpl {
   }
 
   private Map<Integer, AssetMapModel> toAssetMapModels(List<AssetMapping> assetMappingList) {
+    return toAssetMapModels(assetMappingList, false);
+  }
+
+  public Map<Integer, AssetMapModel> toAssetMapModels(List<AssetMapping> assetMappingList, boolean isMonitoringAsset) {
     Map<Integer, AssetMapModel> assetRelationMap = new HashMap<>(assetMappingList.size());
     int index = 1;
     for (AssetMapping assetMapping : assetMappingList) {
       AssetMapModel assetMapModel = new AssetMapModel();
       List<DeviceMetaData> deviceMetaDatas = null;
+      String deviceId = null, vendorId = null;
 
       try {
-        deviceMetaDatas = getDeviceMetaDatas(assetMapping.relatedAsset);
+        if(isMonitoringAsset) {
+          deviceMetaDatas = getDeviceMetaDatas(assetMapping.asset);
+          assetMapModel.typ = assetMapping.asset.assetType.assetType;
+          deviceId = assetMapping.asset.deviceId;
+          vendorId = assetMapping.asset.vendorId;
+        } else {
+          deviceMetaDatas = getDeviceMetaDatas(assetMapping.relatedAsset);
+          assetMapModel.typ = assetMapping.relatedAsset.assetType.assetType;
+          deviceId = assetMapping.relatedAsset.deviceId;
+          if(assetMapping.relatedAsset.assetType.id.equals(AssetType.TEMP_SENSOR)) {
+            deviceId = LogistimoUtils.extractDeviceId(deviceId);
+          }
+          vendorId = assetMapping.relatedAsset.vendorId;
+        }
       } catch (NoResultException e) {
         LOGGER.warn("No device meta data found for the device: {}, {}",
             assetMapping.relatedAsset.vendorId, assetMapping.relatedAsset.deviceId);
       }
 
-      assetMapModel.setdId(
-          assetMapping.relatedAsset.assetType.id.equals(AssetType.TEMP_SENSOR) ? LogistimoUtils
-              .extractDeviceId(assetMapping.relatedAsset.deviceId)
-              : assetMapping.relatedAsset.deviceId);
-      assetMapModel.setvId(assetMapping.relatedAsset.vendorId);
+      assetMapModel.setdId(deviceId);
+      assetMapModel.setvId(vendorId);
       assetMapModel.isP = assetMapping.isPrimary;
       assetMapModel.mpId = assetMapping.monitoringPositionId;
-      assetMapModel.typ = assetMapping.relationType;
       assetMapModel.setsId(
           assetMapping.relatedAsset.assetType.id.equals(AssetType.TEMP_SENSOR) ? LogistimoUtils
               .extractSensorId(assetMapping.relatedAsset.deviceId) : null);
