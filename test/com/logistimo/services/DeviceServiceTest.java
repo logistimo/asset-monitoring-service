@@ -21,7 +21,7 @@
  * the commercial license, please contact us at opensource@logistimo.com
  */
 
-package com.logistimo.assets.services;
+package com.logistimo.services;
 
 import com.logistimo.db.AssetMapping;
 import com.logistimo.db.AssetType;
@@ -30,7 +30,6 @@ import com.logistimo.db.DeviceStatus;
 import com.logistimo.db.DeviceStatusLog;
 import com.logistimo.models.asset.AssetMapModel;
 import com.logistimo.models.device.response.DeviceStatusModel;
-import com.logistimo.services.DeviceService;
 import com.logistimo.utils.AssetStatusConstants;
 
 import org.junit.Before;

@@ -1907,7 +1907,7 @@ public class DeviceService extends ServiceImpl {
     }
   }
 
-  public List<DeviceMetaData> getDeviceMetaDatas(Device device) {
+  protected List<DeviceMetaData> getDeviceMetaDatas(Device device) {
     return DeviceMetaData.getDeviceMetaDatas(device);
   }
 
@@ -2196,7 +2196,7 @@ public class DeviceService extends ServiceImpl {
     return toAssetMapModels(assetMappingList, false);
   }
 
-  public Map<Integer, AssetMapModel> toAssetMapModels(List<AssetMapping> assetMappingList, boolean isMonitoringAsset) {
+  protected Map<Integer, AssetMapModel> toAssetMapModels(List<AssetMapping> assetMappingList, boolean isMonitoringAsset) {
     Map<Integer, AssetMapModel> assetRelationMap = new HashMap<>(assetMappingList.size());
     int index = 1;
     for (AssetMapping assetMapping : assetMappingList) {
