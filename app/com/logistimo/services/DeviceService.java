@@ -169,7 +169,11 @@ public class DeviceService extends ServiceImpl {
     }
 
     try {
-      assetMapModelMap = toAssetMapModels(AssetMapping.findAssetRelationByAsset(device));
+      if(AssetType.TEMPERATURE_LOGGER == device.assetType.assetType) {
+        assetMapModelMap = toAssetMapModels(AssetMapping.findMonitoringAssetRelation(device), true);
+      } else {
+        assetMapModelMap = toAssetMapModels(AssetMapping.findAssetRelationByAsset(device));
+      }
     } catch (NoResultException e) {
       LOGGER.warn("No asset relation found for the device: {}, {}", vendorId, deviceId);
     }
