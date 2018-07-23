@@ -65,6 +65,9 @@ ENV MYSQL_HOST_URL="jdbc:mysql://localhost:3306/logistimo_tms" \
 	ADMIN_PASS=logistimo \
 	JAVA_XMS=1024m \
 	JAVA_XMX=1024m \
+	SERVICE_NAME=logi-ams \
+    APM_SERVER_URL=localhost:8200 \
+    APM_AGENT_VER=0.6.0 \
 	JMX_AGENT_PORT=8088
 
 ENV JAVA_OPTS $JAVA_OPTS
