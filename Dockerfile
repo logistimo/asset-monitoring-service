@@ -65,11 +65,14 @@ ENV MYSQL_HOST_URL="jdbc:mysql://localhost:3306/logistimo_tms" \
 	ADMIN_PASS=logistimo \
 	JAVA_XMS=1024m \
 	JAVA_XMX=1024m \
+	SERVICE_NAME=logi-ams \
+    APM_SERVER_URL=localhost:8200 \
 	JMX_AGENT_PORT=8088
 
 ENV JAVA_OPTS $JAVA_OPTS
 
-RUN cd $TOMCAT_HOME && wget http://repo1.maven.org/maven2/io/prometheus/jmx/jmx_prometheus_javaagent/0.7/jmx_prometheus_javaagent-0.7.jar
+RUN cd $TOMCAT_HOME && wget http://repo1.maven.org/maven2/io/prometheus/jmx/jmx_prometheus_javaagent/0.7/jmx_prometheus_javaagent-0.7.jar \
+	&& wget http://repo1.maven.org/maven2/co/elastic/apm/elastic-apm-agent/0.6.0/elastic-apm-agent-0.6.0.jar
 
 ADD dockerfiles/jmx_exporter.json $TOMCAT_HOME/jmx_exporter.json
 
