@@ -122,8 +122,9 @@ public class Global extends GlobalSettings {
 
     @Override
     public F.Promise<Result> onError(Http.RequestHeader request, Throwable t) {
+        LOGGER.error(Messages.get(LogistimoConstant.SERVER_ERROR_RESPONSE)+" "+t.getMessage(),t);
         logMeterMetrics(request);
-        return F.Promise.pure(BaseController.prepareResult(Http.Status.BAD_REQUEST, request.getQueryString("callback"), t.getMessage()));
+        return F.Promise.pure(BaseController.prepareResult(Http.Status.INTERNAL_SERVER_ERROR, request.getQueryString("callback"), Messages.get(LogistimoConstant.SERVER_ERROR_RESPONSE)));
     }
 
     private void configureMetrics () {

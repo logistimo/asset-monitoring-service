@@ -28,12 +28,14 @@ import com.logistimo.models.stats.response.StatsLoggingResponse;
 import com.logistimo.models.v1.request.StatsRequest;
 import com.logistimo.services.ServiceFactory;
 import com.logistimo.services.StatsService;
+import com.logistimo.utils.LogistimoConstant;
 
 import javax.persistence.NoResultException;
 
 import play.Logger;
 import play.Logger.ALogger;
 import play.db.jpa.Transactional;
+import play.i18n.Messages;
 import play.libs.Json;
 import play.mvc.Result;
 import play.mvc.With;
@@ -49,8 +51,8 @@ public class StatsController extends BaseController {
       dailyStatsLoggingRequest = getValidatedObject(request().body().asJson()
           , DailyStatsLoggingRequest.class);
     } catch (Exception e) {
-      LOGGER.warn("Error while parsing the stats request", e);
-      return prepareResult(BAD_REQUEST, callback, "Error parsing the request" + e.getMessage());
+      LOGGER.warn("Error while parsing the stats request - " + e.getMessage(), e);
+      return prepareResult(BAD_REQUEST, callback, "Error parsing the request");
     }
 
     try {
@@ -66,11 +68,11 @@ public class StatsController extends BaseController {
       }
       return prepareResult(CREATED, callback, "Daily stats posted successfully.");
     } catch (NoResultException e) {
-      LOGGER.warn("Error while logging stats", e);
-      return prepareResult(NOT_FOUND, callback, e.getMessage());
+      LOGGER.warn("Error while logging stats - " + e.getMessage(), e);
+      return prepareResult(NOT_FOUND, callback, "Error while logging stats");
     } catch (Exception e) {
-      LOGGER.error("Error while logging daily stats", e);
-      return prepareResult(INTERNAL_SERVER_ERROR, callback, e.getMessage());
+      LOGGER.error("Error while logging daily stats - " + e.getMessage(), e);
+      return prepareResult(INTERNAL_SERVER_ERROR, callback, Messages.get(LogistimoConstant.SERVER_ERROR_RESPONSE));
     }
   }
 
@@ -81,8 +83,8 @@ public class StatsController extends BaseController {
     try {
       statsRequest = Json.fromJson(request().body().asJson(), StatsRequest.class);
     } catch (Exception e) {
-      LOGGER.warn("Error while parsing the stats request", e);
-      return prepareResult(BAD_REQUEST, callback, "Error parsing the request" + e.getMessage());
+      LOGGER.warn("Error while parsing the stats request - " + e.getMessage(), e);
+      return prepareResult(BAD_REQUEST, callback, "Error parsing the request");
     }
 
     try {
@@ -93,11 +95,11 @@ public class StatsController extends BaseController {
       statsService.postDailyStatsV1(statsRequest);
       return prepareResult(OK, callback, "Daily Stats posted successfully.");
     } catch (NoResultException e) {
-      LOGGER.warn(e.getMessage());
+      LOGGER.warn("Error while logging daily stats - v1 - "  + e.getMessage(), e);
       return prepareResult(NOT_FOUND, callback, e.getMessage());
     } catch (Exception e) {
-      LOGGER.error("Error while logging daily stats - v1", e);
-      return prepareResult(INTERNAL_SERVER_ERROR, callback, e.getMessage());
+      LOGGER.error("Error while logging daily stats - v1 - " + e.getMessage(), e);
+      return prepareResult(INTERNAL_SERVER_ERROR, callback, Messages.get(LogistimoConstant.SERVER_ERROR_RESPONSE));
     }
   }
 
@@ -110,8 +112,8 @@ public class StatsController extends BaseController {
       return prepareResult(OK, callback, Json.toJson(
           statsService.getStatsByDevice(vendorId, deviceId, sid, pageNumber, pageSize)));
     } catch (Exception e) {
-      LOGGER.error("Error while generating stats by device", e);
-      return prepareResult(INTERNAL_SERVER_ERROR, callback, e.getMessage());
+      LOGGER.error("Error while generating stats by device - " + e.getMessage(), e);
+      return prepareResult(INTERNAL_SERVER_ERROR, callback, Messages.get(LogistimoConstant.SERVER_ERROR_RESPONSE));
     }
   }
 
@@ -124,8 +126,8 @@ public class StatsController extends BaseController {
       return prepareResult(OK, callback, Json.toJson(statsService
           .getStatsByDeviceAndRange(vendorId, deviceId, sid, from, to, pageNumber, pageSize)));
     } catch (Exception e) {
-      LOGGER.error("Error while generating stats by tag", e);
-      return prepareResult(INTERNAL_SERVER_ERROR, callback, e.getMessage());
+      LOGGER.error("Error while generating stats by tag - " + e.getMessage(), e);
+      return prepareResult(INTERNAL_SERVER_ERROR, callback, Messages.get(LogistimoConstant.SERVER_ERROR_RESPONSE));
     }
   }
 }

@@ -34,3 +34,7 @@ status_sms_sent=Status request SMS sent.
 #Validation messages
 invalid_device_phone_number=SIM number invalid, update device details.
 feature_not_supported=Feature not supported for requested vendor.
+
+# internal server error message
+server.error.response=System error occurred. Please contact your administrator.
+server.error.partresponse=Error occurred:
