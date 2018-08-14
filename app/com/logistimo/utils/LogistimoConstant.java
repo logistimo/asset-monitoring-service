@@ -36,6 +36,9 @@ public interface LogistimoConstant {
   String REQUEST_INVALID_CONTENT_TYPE = "request.invalid.content_type";
   String REQUEST_EMPTY_CONTENT_TYPE = "request.empty.content_type";
 
+  String SERVER_ERROR_RESPONSE = "server.error.response";
+  String SERVER_ERROR_PARTRESPONSE = "server.error.partresponse";
+
   //Devices
   String DEVICES_NOT_FOUND = "device.not_found";
 
