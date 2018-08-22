@@ -43,6 +43,7 @@ import com.logistimo.models.device.response.DeviceReadyUpdateResponse;
 import com.logistimo.models.device.response.DeviceStatusModel;
 import com.logistimo.services.DeviceService;
 import com.logistimo.services.ServiceFactory;
+import com.logistimo.utils.LogistimoConstant;
 
 import javax.persistence.NoResultException;
 
@@ -69,11 +70,11 @@ public class DeviceController extends BaseController {
       deviceId = decodeParameter(deviceId);
       return prepareResult(OK, callback, Json.toJson(deviceService.getDevice(vendorId, deviceId)));
     } catch (NoResultException e) {
-      LOGGER.warn(Messages.get("device.not_found"), e);
-      return prepareResult(NOT_FOUND, callback, e.getMessage());
+      LOGGER.warn(Messages.get("device.not_found") + e.getMessage(), e);
+      return prepareResult(NOT_FOUND, callback, Messages.get("device.not_found"));
     } catch (Exception e) {
-      LOGGER.error("Error while finding device", e);
-      return prepareResult(INTERNAL_SERVER_ERROR, callback, e.getMessage());
+      LOGGER.error("Error while finding device - " + e.getMessage(), e);
+      return prepareResult(INTERNAL_SERVER_ERROR, callback, Messages.get(LogistimoConstant.SERVER_ERROR_RESPONSE));
     }
   }
 
@@ -84,11 +85,11 @@ public class DeviceController extends BaseController {
       deviceId = decodeParameter(deviceId);
       return prepareResult(OK, callback, Json.toJson(deviceService.getDevice(vendorId, deviceId)));
     } catch (NoResultException e) {
-      LOGGER.warn(Messages.get("device.not_found"), e);
-      return prepareResult(NOT_FOUND, callback, e.getMessage());
+      LOGGER.warn(Messages.get("device.not_found") + e.getMessage(), e);
+      return prepareResult(NOT_FOUND, callback, Messages.get("device.not_found"));
     } catch (Exception e) {
-      LOGGER.error("Error while finding device", e);
-      return prepareResult(INTERNAL_SERVER_ERROR, callback, e.getMessage());
+      LOGGER.error("Error while finding device - " + e.getMessage(), e);
+      return prepareResult(INTERNAL_SERVER_ERROR, callback, Messages.get(LogistimoConstant.SERVER_ERROR_RESPONSE));
     }
   }
 
@@ -101,11 +102,11 @@ public class DeviceController extends BaseController {
       return prepareResult(OK, callback,
           Json.toJson(deviceService.getDeviceRecentAlarms(vendorId, deviceId, sid, page, size)));
     } catch (NoResultException e) {
-      LOGGER.warn(Messages.get("device.not_found"), e);
-      return prepareResult(NOT_FOUND, callback, e.getMessage());
+      LOGGER.warn(Messages.get("device.not_found") + e.getMessage(), e);
+      return prepareResult(NOT_FOUND, callback, Messages.get("device.not_found"));
     } catch (Exception e) {
-      LOGGER.error("Error while finding device", e);
-      return prepareResult(INTERNAL_SERVER_ERROR, callback, e.getMessage());
+      LOGGER.error("Error while finding device - " + e.getMessage(), e);
+      return prepareResult(INTERNAL_SERVER_ERROR, callback, Messages.get(LogistimoConstant.SERVER_ERROR_RESPONSE));
     }
   }
 
@@ -117,8 +118,8 @@ public class DeviceController extends BaseController {
       deviceRegisterRequest =
           getValidatedObject(request().body().asJson(), DeviceRegisterRequest.class);
     } catch (Exception e) {
-      LOGGER.warn("Error while parsing device registration request data", e);
-      return prepareResult(BAD_REQUEST, callback, "Error parsing data - " + e.getMessage());
+      LOGGER.warn("Error while parsing device registration request data - " + e.getMessage(), e);
+      return prepareResult(BAD_REQUEST, callback, "Error while parsing device registration request data");
     }
 
     try {
@@ -132,8 +133,8 @@ public class DeviceController extends BaseController {
       }
       return prepareResult(CREATED, callback, "Device created/updated successfully.");
     } catch (Exception e) {
-      LOGGER.error("Error while creating device", e);
-      return prepareResult(INTERNAL_SERVER_ERROR, callback, e.getMessage());
+      LOGGER.error("Error while creating device - " + e.getMessage(), e);
+      return prepareResult(INTERNAL_SERVER_ERROR, callback, Messages.get(LogistimoConstant.SERVER_ERROR_RESPONSE));
     }
   }
 
@@ -161,8 +162,8 @@ public class DeviceController extends BaseController {
       }
       return prepareResult(OK, callback, "Devices deleted successfully.");
     } catch (Exception e) {
-      LOGGER.error("Error while deleting device", e);
-      return prepareResult(INTERNAL_SERVER_ERROR, callback, e.getMessage());
+      LOGGER.error("Error while deleting device - " + e.getMessage(), e);
+      return prepareResult(INTERNAL_SERVER_ERROR, callback, Messages.get(LogistimoConstant.SERVER_ERROR_RESPONSE));
     }
   }
 
@@ -183,8 +184,8 @@ public class DeviceController extends BaseController {
           tagRegisterRequest.data.size() + " devices received, " + numberOfDeviceUpdated
               + " tagged");
     } catch (Exception e) {
-      LOGGER.error("Error while creating tags", e);
-      return prepareResult(INTERNAL_SERVER_ERROR, callback, e.getMessage());
+      LOGGER.error("Error while creating tags - " + e.getMessage(), e);
+      return prepareResult(INTERNAL_SERVER_ERROR, callback, Messages.get(LogistimoConstant.SERVER_ERROR_RESPONSE));
     }
   }
 
@@ -202,11 +203,11 @@ public class DeviceController extends BaseController {
           .getDevicesByTag(tagName, q, assetType, workingStatus, alarmType, alarmDuration, awr,
               pageNumber, pageSize, mType)));
     } catch (NoResultException e) {
-      LOGGER.warn("Device not found.", e);
-      return prepareResult(NOT_FOUND, callback, "Device not found - " + e.getMessage());
+      LOGGER.warn("Device not found - " + e.getMessage(), e);
+      return prepareResult(NOT_FOUND, callback, "Device not found.");
     } catch (Exception e) {
-      LOGGER.error("Error while finding tagged device", e);
-      return prepareResult(INTERNAL_SERVER_ERROR, callback, e.getMessage());
+      LOGGER.error("Error while finding tagged device - " + e.getMessage(), e);
+      return prepareResult(INTERNAL_SERVER_ERROR, callback, Messages.get(LogistimoConstant.SERVER_ERROR_RESPONSE));
     } finally {
       context.stop();
     }
@@ -221,11 +222,11 @@ public class DeviceController extends BaseController {
       return prepareResult(OK, callback,
           Json.toJson(deviceService.getAbnormalDevicesByTags(tagName, pageNumber, pageSize)));
     } catch (NoResultException e) {
-      LOGGER.warn("Device not found.", e);
-      return prepareResult(NOT_FOUND, callback, "Device not found - " + e.getMessage());
+      LOGGER.warn("Device not found - " + e.getMessage(), e);
+      return prepareResult(NOT_FOUND, callback, "Device not found.");
     } catch (Exception e) {
-      LOGGER.error("Error while reading alarms", e);
-      return prepareResult(INTERNAL_SERVER_ERROR, callback, e.getMessage());
+      LOGGER.error("Error while reading alarms - " + e.getMessage(), e);
+      return prepareResult(INTERNAL_SERVER_ERROR, callback, Messages.get(LogistimoConstant.SERVER_ERROR_RESPONSE));
     }
   }
 
@@ -242,11 +243,11 @@ public class DeviceController extends BaseController {
             Json.toJson(deviceService.getTaggedDeviceCountResponse(tagPattern)));
       }
     } catch (NoResultException e) {
-      LOGGER.warn("Device not found.", e);
-      return prepareResult(NOT_FOUND, callback, "Device not found - " + e.getMessage());
+      LOGGER.warn("Device not found - " + e.getMessage(), e);
+      return prepareResult(NOT_FOUND, callback, "Device not found.");
     } catch (Exception e) {
-      LOGGER.error("Error while reading alarms", e);
-      return prepareResult(INTERNAL_SERVER_ERROR, callback, e.getMessage());
+      LOGGER.error("Error while reading alarms - " + e.getMessage(), e);
+      return prepareResult(INTERNAL_SERVER_ERROR, callback, Messages.get(LogistimoConstant.SERVER_ERROR_RESPONSE));
     }
   }
 
@@ -258,11 +259,11 @@ public class DeviceController extends BaseController {
       return prepareResult(OK, callback,
           Json.toJson(deviceService.searchDeviceStatusByParentTag(tagName)));
     } catch (NoResultException e) {
-      LOGGER.warn("Device not found.", e);
-      return prepareResult(NOT_FOUND, callback, "Device not found - " + e.getMessage());
+      LOGGER.warn("Device not found - " + e.getMessage(), e);
+      return prepareResult(NOT_FOUND, callback, "Device not found.");
     } catch (Exception e) {
-      LOGGER.error("Error while reading alarms", e);
-      return prepareResult(INTERNAL_SERVER_ERROR, callback, e.getMessage());
+      LOGGER.error("Error while reading alarms - " + e.getMessage(), e);
+      return prepareResult(INTERNAL_SERVER_ERROR, callback, Messages.get(LogistimoConstant.SERVER_ERROR_RESPONSE));
     }
   }
 
@@ -282,14 +283,14 @@ public class DeviceController extends BaseController {
       deviceService.addDeviceConfiguration(deviceConfigurationRequest);
       return prepareResult(CREATED, callback, "Device configuration posted successfully.");
     } catch (LogistimoException e) {
-      LOGGER.warn("Error while posting device configuration", e);
-      return prepareResult(BAD_REQUEST, callback, e.getMessage());
+      LOGGER.warn("Error while posting device configuration - " + e.getMessage(), e);
+      return prepareResult(BAD_REQUEST, callback, "Error while posting device configuration");
     } catch (NoResultException e) {
-      LOGGER.warn("Error while posting device configuration, device not found", e);
-      return prepareResult(NOT_FOUND, callback, e.getMessage());
+      LOGGER.warn("Error while posting device configuration, device not found - " + e.getMessage(), e);
+      return prepareResult(NOT_FOUND, callback, "Error while posting device configuration, device not found");
     } catch (Exception e) {
-      LOGGER.error("Error while posting device configuration", e);
-      return prepareResult(INTERNAL_SERVER_ERROR, callback, e.getMessage());
+      LOGGER.error("Error while posting device configuration - " + e.getMessage(), e);
+      return prepareResult(INTERNAL_SERVER_ERROR, callback, Messages.get(LogistimoConstant.SERVER_ERROR_RESPONSE));
     }
   }
 
@@ -300,11 +301,11 @@ public class DeviceController extends BaseController {
       return prepareResult(OK, callback,
           Json.toJson(deviceService.getDeviceConfiguration(vendorId, deviceId, true)));
     } catch (NoResultException e) {
-      LOGGER.warn("Error while reading device configuration", e);
-      return prepareResult(NOT_FOUND, callback, e.getMessage());
+      LOGGER.warn("Error while reading device configuration -  " + e.getMessage(), e);
+      return prepareResult(NOT_FOUND, callback, "Error while reading device configuration");
     } catch (Exception e) {
-      LOGGER.error("Error while reading device configuration", e);
-      return prepareResult(INTERNAL_SERVER_ERROR, callback, e.getMessage());
+      LOGGER.error("Error while reading device configuration - " + e.getMessage(), e);
+      return prepareResult(INTERNAL_SERVER_ERROR, callback, Messages.get(LogistimoConstant.SERVER_ERROR_RESPONSE));
     }
   }
 
@@ -316,11 +317,11 @@ public class DeviceController extends BaseController {
       return prepareResult(OK, callback,
           Json.toJson(deviceService.getDeviceConfiguration(vendorId, deviceId, false)));
     } catch (NoResultException e) {
-      LOGGER.warn("Error while reading device configuration", e);
-      return prepareResult(NOT_FOUND, callback, e.getMessage());
+      LOGGER.warn("Error while reading device configuration -  " + e.getMessage(), e);
+      return prepareResult(NOT_FOUND, callback, "Error while reading device configuration");
     } catch (Exception e) {
-      LOGGER.error("Error while reading device configuration", e);
-      return prepareResult(INTERNAL_SERVER_ERROR, callback, e.getMessage());
+      LOGGER.error("Error while reading device configuration -  " + e.getMessage(), e);
+      return prepareResult(INTERNAL_SERVER_ERROR, callback, Messages.get(LogistimoConstant.SERVER_ERROR_RESPONSE));
 
     }
   }
@@ -331,11 +332,11 @@ public class DeviceController extends BaseController {
       return prepareResult(OK, callback,
           Json.toJson(deviceService.getDeviceConfigurationByTagName(tagName)));
     } catch (NoResultException e) {
-      LOGGER.warn("Error while reading device configuration by tag", e);
-      return prepareResult(NOT_FOUND, callback, e.getMessage());
+      LOGGER.warn("Error while reading device configuration -  " + e.getMessage(), e);
+      return prepareResult(NOT_FOUND, callback, "Error while reading device configuration");
     } catch (Exception e) {
-      LOGGER.error("Error while reading device configuration", e);
-      return prepareResult(INTERNAL_SERVER_ERROR, callback, e.getMessage());
+      LOGGER.error("Error while reading device configuration -  " + e.getMessage(), e);
+      return prepareResult(INTERNAL_SERVER_ERROR, callback, Messages.get(LogistimoConstant.SERVER_ERROR_RESPONSE));
     }
   }
 
@@ -346,8 +347,8 @@ public class DeviceController extends BaseController {
       deviceReadyUpdateRequest =
           getValidatedObject(request().body().asJson(), DeviceReadyUpdateRequest.class);
     } catch (Exception e) {
-      LOGGER.warn("Error while parsing device ready request data", e);
-      return prepareResult(BAD_REQUEST, callback, "Error parsing data - " + e.getMessage());
+      LOGGER.warn("Error while parsing device ready request data - " + e.getMessage(), e);
+      return prepareResult(BAD_REQUEST, callback, "Error while parsing device ready request data");
     }
 
     try {
@@ -363,7 +364,7 @@ public class DeviceController extends BaseController {
       return prepareResult(CREATED, callback, "Device status updated successfully.");
     } catch (Exception e) {
       LOGGER.error("Error while updating device ready status", e);
-      return prepareResult(INTERNAL_SERVER_ERROR, callback, e.getMessage());
+      return prepareResult(INTERNAL_SERVER_ERROR, callback, Messages.get(LogistimoConstant.SERVER_ERROR_RESPONSE));
     }
   }
 
@@ -375,22 +376,22 @@ public class DeviceController extends BaseController {
       configurationPushRequest =
           getValidatedObject(request().body().asJson(), ConfigurationPushRequest.class);
     } catch (Exception e) {
-      LOGGER.warn("Error while parsing config push request data", e);
-      return prepareResult(BAD_REQUEST, callback, "Error parsing data - " + e.getMessage());
+      LOGGER.warn("Error while parsing config push request data - " + e.getMessage(), e);
+      return prepareResult(BAD_REQUEST, callback, "Error while parsing config push request data");
     }
 
     try {
       deviceService.pushConfigToDevice(configurationPushRequest);
       return prepareResult(CREATED, callback, "Device configuration/URL pushed successfully.");
     } catch (NoResultException e) {
-      LOGGER.warn("Error while pushing config", e);
-      return prepareResult(NOT_FOUND, callback, e.getMessage());
+      LOGGER.warn("Error while pushing config - " + e.getMessage(), e);
+      return prepareResult(NOT_FOUND, callback, "Error while pushing config");
     } catch (LogistimoException e) {
-      LOGGER.warn("Error while pushing config", e);
-      return prepareResult(BAD_REQUEST, callback, e.getMessage());
+      LOGGER.warn("Error while pushing config - " + e.getMessage(), e);
+      return prepareResult(BAD_REQUEST, callback, "Error while pushing config");
     } catch (Exception e) {
-      LOGGER.error("Error while pushing config", e);
-      return prepareResult(INTERNAL_SERVER_ERROR, callback, e.getMessage());
+      LOGGER.error("Error while pushing config - " + e.getMessage(), e);
+      return prepareResult(INTERNAL_SERVER_ERROR, callback, Messages.get(LogistimoConstant.SERVER_ERROR_RESPONSE));
     }
   }
 
@@ -409,11 +410,11 @@ public class DeviceController extends BaseController {
       deviceService.pushAPNSettingsToDevice(apnPushRequest);
       return prepareResult(CREATED, callback, "APN Settings pushed successfully.");
     } catch (LogistimoException e) {
-      LOGGER.warn("Error while pushing apn settings", e);
-      return prepareResult(BAD_REQUEST, callback, e.getMessage());
+      LOGGER.warn("Error while pushing apn settings - " + e.getMessage(), e);
+      return prepareResult(BAD_REQUEST, callback, "Error while pushing apn settings");
     } catch (Exception e) {
-      LOGGER.error("Error while pushing apn settings", e);
-      return prepareResult(INTERNAL_SERVER_ERROR, callback, e.getMessage());
+      LOGGER.error("Error while pushing apn settings - " + e.getMessage(), e);
+      return prepareResult(INTERNAL_SERVER_ERROR, callback, Messages.get(LogistimoConstant.SERVER_ERROR_RESPONSE));
     }
   }
 
@@ -424,19 +425,19 @@ public class DeviceController extends BaseController {
     try {
       adminPushRequest = getValidatedObject(request().body().asJson(), AdminPushRequest.class);
     } catch (LogistimoException e) {
-      LOGGER.warn("Error while pushing admin settings", e);
-      return prepareResult(BAD_REQUEST, callback, e.getMessage());
+      LOGGER.warn("Error while parsing admin settings - " + e.getMessage(), e);
+      return prepareResult(BAD_REQUEST, callback,"Error while parsing admin settings");
     } catch (Exception e) {
-      LOGGER.warn("Error while parsing admin push request data", e);
-      return prepareResult(BAD_REQUEST, callback, e.getMessage());
+      LOGGER.warn("Error while pushing admin settings - " + e.getMessage(), e);
+      return prepareResult(BAD_REQUEST, callback, "Error while pushing admin settings");
     }
 
     try {
       deviceService.pushAdminSettingsToDevice(adminPushRequest);
       return prepareResult(CREATED, callback, "Admin Settings pushed successfully.");
     } catch (Exception e) {
-      LOGGER.error("Error while pushing admin settings", e);
-      return prepareResult(INTERNAL_SERVER_ERROR, callback, e.getMessage());
+      LOGGER.error("Error while pushing admin settings - " + e.getMessage(), e);
+      return prepareResult(INTERNAL_SERVER_ERROR, callback, Messages.get(LogistimoConstant.SERVER_ERROR_RESPONSE));
     }
   }
 
@@ -447,16 +448,16 @@ public class DeviceController extends BaseController {
       deviceSMSStatusRequest =
           getValidatedObject(request().body().asJson(), DeviceSMSStatusRequest.class);
     } catch (Exception e) {
-      LOGGER.warn("Error while parsing config push status request data", e);
-      return prepareResult(BAD_REQUEST, callback, e.getMessage());
+      LOGGER.warn("Error while parsing config push status request data - " + e.getMessage(), e);
+      return prepareResult(BAD_REQUEST, callback, "Error while parsing config push status request data");
     }
 
     try {
       deviceService.updateConfigSentStatus(deviceSMSStatusRequest);
       return prepareResult(CREATED, callback, "Config sent status updated successfully.");
     } catch (Exception e) {
-      LOGGER.error("Error while parsing config push status request data", e);
-      return prepareResult(INTERNAL_SERVER_ERROR, callback, e.getMessage());
+      LOGGER.error("Error while parsing config push status request data - " + e.getMessage(), e);
+      return prepareResult(INTERNAL_SERVER_ERROR, callback, Messages.get(LogistimoConstant.SERVER_ERROR_RESPONSE));
     }
   }
 
@@ -467,7 +468,7 @@ public class DeviceController extends BaseController {
       deviceSMSStatusRequest =
           getValidatedObject(request().body().asJson(), DeviceSMSStatusRequest.class);
     } catch (Exception e) {
-      LOGGER.warn("Error while parsing Admin push status request data", e);
+      LOGGER.warn("Error while parsing Admin push status request data - " + e.getMessage(), e);
       return prepareResult(BAD_REQUEST, callback, e.getMessage());
     }
 
@@ -475,8 +476,8 @@ public class DeviceController extends BaseController {
       deviceService.updateAdminSentStatus(deviceSMSStatusRequest);
       return prepareResult(CREATED, callback, "Admin push status updated successfully.");
     } catch (Exception e) {
-      LOGGER.error("Error while parsing Admin push status request data", e);
-      return prepareResult(INTERNAL_SERVER_ERROR, callback, e.getMessage());
+      LOGGER.error("Error while pushing Admin push status request data - " + e.getMessage(), e);
+      return prepareResult(INTERNAL_SERVER_ERROR, callback, Messages.get(LogistimoConstant.SERVER_ERROR_RESPONSE));
     }
   }
 
@@ -488,10 +489,11 @@ public class DeviceController extends BaseController {
       return prepareResult(OK, callback,
           Json.toJson(deviceService.getAPNSettings(vendorId, deviceId)));
     } catch (NoResultException e) {
-      return prepareResult(NOT_FOUND, callback, e.getMessage());
+      LOGGER.warn("Error while getting APN Settings - " + e.getMessage(), e);
+      return prepareResult(NOT_FOUND, callback, "Error while getting APN Settings");
     } catch (Exception e) {
-      LOGGER.error("Error while getting APN Settings", e);
-      return prepareResult(INTERNAL_SERVER_ERROR, callback, e.getMessage());
+      LOGGER.error("Error while getting APN Settings - " + e.getMessage(), e);
+      return prepareResult(INTERNAL_SERVER_ERROR, callback, Messages.get(LogistimoConstant.SERVER_ERROR_RESPONSE));
     }
   }
 
@@ -503,10 +505,11 @@ public class DeviceController extends BaseController {
       return prepareResult(OK, callback,
           Json.toJson(deviceService.getAdminSettings(vendorId, deviceId)));
     } catch (NoResultException e) {
-      return prepareResult(NOT_FOUND, callback, e.getMessage());
+      LOGGER.warn("Error while getting Admin Settings - " + e.getMessage(), e);
+      return prepareResult(NOT_FOUND, callback, "Error while getting Admin Settings");
     } catch (Exception e) {
-      LOGGER.error("Error while getting Admin Settings", e);
-      return prepareResult(INTERNAL_SERVER_ERROR, callback, e.getMessage());
+      LOGGER.error("Error while getting Admin Settings - " + e.getMessage(), e);
+      return prepareResult(INTERNAL_SERVER_ERROR, callback, Messages.get(LogistimoConstant.SERVER_ERROR_RESPONSE));
     }
   }
 
@@ -527,11 +530,11 @@ public class DeviceController extends BaseController {
       deviceService.createOrUpdateAssetMapping(assetRegistrationRelationModel);
       return prepareResult(CREATED, callback, "Asset mapping created successfully.");
     } catch (NoResultException e) {
-      LOGGER.warn("Error while creating asset mapping", e);
-      return prepareResult(NOT_FOUND, callback, e.getMessage());
+      LOGGER.warn("Error while creating asset mapping - " + e.getMessage(), e);
+      return prepareResult(NOT_FOUND, callback, "Error while creating asset mapping");
     } catch (Exception e) {
       LOGGER.error("Error while creating asset mapping", e);
-      return prepareResult(INTERNAL_SERVER_ERROR, callback, e.getMessage());
+      return prepareResult(INTERNAL_SERVER_ERROR, callback, Messages.get(LogistimoConstant.SERVER_ERROR_RESPONSE));
     }
   }
 
@@ -545,11 +548,11 @@ public class DeviceController extends BaseController {
     } catch (NoResultException e) {
       LOGGER
           .warn("Error while getting asset relation for the asset: {}, {}", vendorId, deviceId, e);
-      return prepareResult(NOT_FOUND, callback, e.getMessage());
+      return prepareResult(NOT_FOUND, callback, "Error while getting asset relation for the asset");
     } catch (Exception e) {
       LOGGER
           .error("Error while getting asset relation for the asset: {}, {}", vendorId, deviceId, e);
-      return prepareResult(INTERNAL_SERVER_ERROR, callback, e.getMessage());
+      return prepareResult(INTERNAL_SERVER_ERROR, callback, Messages.get(LogistimoConstant.SERVER_ERROR_RESPONSE));
     }
   }
 
@@ -564,11 +567,11 @@ public class DeviceController extends BaseController {
     } catch (NoResultException e) {
       LOGGER.warn("Error while getting asset power transition for the asset: {}, {}", vendorId,
           deviceId, e);
-      return prepareResult(NOT_FOUND, callback, e.getMessage());
+      return prepareResult(NOT_FOUND, callback, "Error while getting asset power transition for the asset");
     } catch (Exception e) {
       LOGGER.error("Error while getting asset power transition for the asset: {}, {}", vendorId,
           deviceId, e);
-      return prepareResult(INTERNAL_SERVER_ERROR, callback, e.getMessage());
+      return prepareResult(INTERNAL_SERVER_ERROR, callback, Messages.get(LogistimoConstant.SERVER_ERROR_RESPONSE));
     }
   }
 

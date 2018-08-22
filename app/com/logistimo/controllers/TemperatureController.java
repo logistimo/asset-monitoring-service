@@ -97,8 +97,8 @@ public class TemperatureController extends BaseController {
         }
       }
     } catch (Exception e) {
-      LOGGER.warn(e.getMessage());
-      return prepareResult(Http.Status.BAD_REQUEST, callback, e.getMessage());
+      LOGGER.warn("Bad request payload - " + e.getMessage(), e);
+      return prepareResult(Http.Status.BAD_REQUEST, callback, "Bad request payload");
     }
 
     try {
@@ -136,8 +136,8 @@ public class TemperatureController extends BaseController {
         return prepareResult(Http.Status.BAD_REQUEST, callback, "Invalid Temperature Reading.");
       }
     } catch (Exception e) {
-      LOGGER.error("Error while logging temperature readings", e);
-      return prepareResult(Http.Status.INTERNAL_SERVER_ERROR, callback, e.getMessage());
+      LOGGER.error("Error while logging temperature readings - " + e.getMessage(), e);
+      return prepareResult(Http.Status.INTERNAL_SERVER_ERROR, callback, Messages.get(LogistimoConstant.SERVER_ERROR_RESPONSE));
     } finally {
       context.stop();
     }
@@ -189,8 +189,8 @@ public class TemperatureController extends BaseController {
             "Invalid Temperature Reading : " + readingRequest.toString());
       }
     } catch (Exception e) {
-      LOGGER.error("Error while logging temperature readings", e);
-      return prepareResult(Http.Status.INTERNAL_SERVER_ERROR, callback, e.getMessage());
+      LOGGER.error("Error while logging temperature readings - " + e.getMessage(), e);
+      return prepareResult(Http.Status.INTERNAL_SERVER_ERROR, callback, Messages.get(LogistimoConstant.SERVER_ERROR_RESPONSE));
     }
   }
 
@@ -206,11 +206,11 @@ public class TemperatureController extends BaseController {
               vendorId, deviceId, sid, pageNumber, pageSize, -1, -1);
       return prepareResult(Http.Status.OK, callback, Json.toJson(temperatureReadingResponse));
     } catch (NoResultException e) {
-      LOGGER.warn("No Temperature Reading for device %s and vendor %s", deviceId, vendorId);
-      return prepareResult(Http.Status.NOT_FOUND, callback, e.getMessage());
+      LOGGER.warn("No Temperature Reading for device %s and vendor %s", deviceId, vendorId, e);
+      return prepareResult(Http.Status.NOT_FOUND, callback, "No Temperature Reading for device " + deviceId +" and vendor "+ vendorId);
     } catch (Exception e) {
-      LOGGER.error("Error while retrieving temperatures", e);
-      return prepareResult(Http.Status.INTERNAL_SERVER_ERROR, callback, e.getMessage());
+      LOGGER.error("Error while retrieving temperatures - " + e.getMessage(), e);
+      return prepareResult(Http.Status.INTERNAL_SERVER_ERROR, callback, Messages.get(LogistimoConstant.SERVER_ERROR_RESPONSE));
     }
   }
 
@@ -226,11 +226,11 @@ public class TemperatureController extends BaseController {
               vendorId, deviceId, mpId, pageNumber, pageSize, -1, -1);
       return prepareResult(Http.Status.OK, callback, Json.toJson(temperatureReadingResponse));
     } catch (NoResultException e) {
-      LOGGER.warn("No Temperature Reading for device %s and vendor %s", deviceId, vendorId);
-      return prepareResult(Http.Status.NOT_FOUND, callback, e.getMessage());
+      LOGGER.warn("No Temperature Reading for device %s and vendor %s", deviceId, vendorId, e);
+      return prepareResult(Http.Status.NOT_FOUND, callback, "No Temperature Reading for device " + deviceId +" and vendor "+ vendorId);
     } catch (Exception e) {
-      LOGGER.error("Error while retrieving temperatures", e);
-      return prepareResult(Http.Status.INTERNAL_SERVER_ERROR, callback, e.getMessage());
+      LOGGER.error("Error while retrieving temperatures - " + e.getMessage(), e);
+      return prepareResult(Http.Status.INTERNAL_SERVER_ERROR, callback, Messages.get(LogistimoConstant.SERVER_ERROR_RESPONSE));
     }
   }
 
@@ -251,7 +251,7 @@ public class TemperatureController extends BaseController {
       return prepareResult(Http.Status.NOT_FOUND, callback, e.getMessage());
     } catch (Exception e) {
       LOGGER.error("Error while retrieving temperatures", e);
-      return prepareResult(Http.Status.INTERNAL_SERVER_ERROR, callback, e.getMessage());
+      return prepareResult(Http.Status.INTERNAL_SERVER_ERROR, callback, Messages.get(LogistimoConstant.SERVER_ERROR_RESPONSE));
     }
   }
 
@@ -269,10 +269,10 @@ public class TemperatureController extends BaseController {
       return prepareResult(Http.Status.OK, callback, Json.toJson(temperatureReadingResponse));
     } catch (NoResultException e) {
       LOGGER.warn("No Temperature Reading for device %s and vendor %s", deviceId, vendorId, e);
-      return prepareResult(Http.Status.NOT_FOUND, callback, e.getMessage());
+      return prepareResult(Http.Status.NOT_FOUND, callback, "No Temperature Reading for device " + deviceId +" and vendor "+ vendorId);
     } catch (Exception e) {
-      LOGGER.error("Error while retrieving temperatures", e);
-      return prepareResult(Http.Status.INTERNAL_SERVER_ERROR, callback, e.getMessage());
+      LOGGER.error("Error while retrieving temperatures - " + e.getMessage(), e);
+      return prepareResult(Http.Status.INTERNAL_SERVER_ERROR, callback, Messages.get(LogistimoConstant.SERVER_ERROR_RESPONSE));
     }
   }
 
@@ -291,10 +291,10 @@ public class TemperatureController extends BaseController {
           Json.toJson(toTemperatureReadingResponseV1(temperatureReadingResponse)));
     } catch (NoResultException e) {
       LOGGER.warn("No Temperature Reading for device %s and vendor %s", deviceId, vendorId, e);
-      return prepareResult(Http.Status.NOT_FOUND, callback, e.getMessage());
+      return prepareResult(Http.Status.NOT_FOUND, callback,"No Temperature Reading for device " + deviceId +" and vendor "+ vendorId);
     } catch (Exception e) {
-      LOGGER.error("Error while retrieving temperatures", e);
-      return prepareResult(Http.Status.INTERNAL_SERVER_ERROR, callback, e.getMessage());
+      LOGGER.error("Error while retrieving temperatures - " +e.getMessage(), e);
+      return prepareResult(Http.Status.INTERNAL_SERVER_ERROR, callback, Messages.get(LogistimoConstant.SERVER_ERROR_RESPONSE));
     }
   }
 
@@ -313,11 +313,11 @@ public class TemperatureController extends BaseController {
       return prepareResult(Http.Status.OK, callback,
           Json.toJson(toTemperatureReadingResponseV1(temperatureReadingResponse)));
     } catch (NoResultException e) {
-      LOGGER.warn("No Temperature Reading for device %s and vendor %s", deviceId, vendorId);
-      return prepareResult(Http.Status.NOT_FOUND, callback, e.getMessage());
+      LOGGER.warn("No Temperature Reading for device %s and vendor %s", deviceId, vendorId, e);
+      return prepareResult(Http.Status.NOT_FOUND, callback, "No Temperature Reading for device " + deviceId +" and vendor "+ vendorId);
     } catch (Exception e) {
-      LOGGER.error("Error while retrieving temperatures", e);
-      return prepareResult(Http.Status.INTERNAL_SERVER_ERROR, callback, e.getMessage());
+      LOGGER.error("Error while retrieving temperatures - " + e.getMessage(), e);
+      return prepareResult(Http.Status.INTERNAL_SERVER_ERROR, callback, Messages.get(LogistimoConstant.SERVER_ERROR_RESPONSE));
     }
   }
 
@@ -331,10 +331,10 @@ public class TemperatureController extends BaseController {
               tagName, pageNumber, pageSize)));
     } catch (NoResultException e) {
       LOGGER.warn("No Temperature Reading for tagName %s", tagName, e);
-      return prepareResult(Http.Status.NOT_FOUND, callback, e.getMessage());
+      return prepareResult(Http.Status.NOT_FOUND, callback, "No Temperature Reading for tagName " + tagName);
     } catch (Exception e) {
-      LOGGER.error("Error while retrieving temperatures", e);
-      return prepareResult(Http.Status.INTERNAL_SERVER_ERROR, callback, e.getMessage());
+      LOGGER.error("Error while retrieving temperatures - " + e.getMessage(), e);
+      return prepareResult(Http.Status.INTERNAL_SERVER_ERROR, callback, Messages.get(LogistimoConstant.SERVER_ERROR_RESPONSE));
     }
   }
 
@@ -353,11 +353,11 @@ public class TemperatureController extends BaseController {
       return prepareResult(Http.Status.NOT_FOUND, callback,
           Messages.get(LogistimoConstant.DEVICES_NOT_FOUND));
     } catch (LogistimoException e) {
-      LOGGER.warn("Error while getting device current temperature", e);
-      return prepareResult(Http.Status.INTERNAL_SERVER_ERROR, callback, e.getMessage());
+      LOGGER.warn("Error while getting device current temperature - " + e.getMessage(), e);
+      return prepareResult(Http.Status.INTERNAL_SERVER_ERROR, callback, Messages.get(LogistimoConstant.SERVER_ERROR_RESPONSE));
     } catch (Exception e) {
-      LOGGER.error("Error while getting device current temperature", e);
-      return prepareResult(Http.Status.INTERNAL_SERVER_ERROR, callback, e.getMessage());
+      LOGGER.error("Error while getting device current temperature - " +e.getMessage(), e);
+      return prepareResult(Http.Status.INTERNAL_SERVER_ERROR, callback, Messages.get(LogistimoConstant.SERVER_ERROR_RESPONSE));
     }
   }
 

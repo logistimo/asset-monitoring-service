@@ -26,12 +26,14 @@ package com.logistimo.controllers;
 import com.logistimo.models.user.request.AddApiConsumerRequest;
 import com.logistimo.services.ServiceFactory;
 import com.logistimo.services.UserService;
+import com.logistimo.utils.LogistimoConstant;
 
 import javax.persistence.NoResultException;
 
 import play.Logger;
 import play.Logger.ALogger;
 import play.db.jpa.Transactional;
+import play.i18n.Messages;
 import play.libs.Json;
 import play.mvc.Result;
 import play.mvc.With;
@@ -50,7 +52,7 @@ public class AdminController extends BaseController {
       addApiConsumerRequest =
           getValidatedObject(request().body().asJson(), AddApiConsumerRequest.class);
     } catch (Exception e) {
-      LOGGER.warn("Bad Request - Invalid JSON", e);
+      LOGGER.warn("Bad Request - Invalid JSON " + e.getMessage(), e);
       return prepareResult(BAD_REQUEST, callback, e.getMessage());
     }
 
@@ -64,8 +66,8 @@ public class AdminController extends BaseController {
         return prepareResult(CREATED, callback, "User account created.");
       }
     } catch (Exception e) {
-      LOGGER.error("Error while creating user account", e);
-      return prepareResult(INTERNAL_SERVER_ERROR, callback, e.getMessage());
+      LOGGER.error("Error while creating user account:" + e.getMessage(), e);
+      return prepareResult(INTERNAL_SERVER_ERROR, callback, Messages.get(LogistimoConstant.SERVER_ERROR_RESPONSE));
     }
 
   }
@@ -76,8 +78,8 @@ public class AdminController extends BaseController {
     try {
       return prepareResult(OK, callback, Json.toJson(userService.getAllUsers()));
     } catch (NoResultException e) {
-      LOGGER.warn("No users found");
-      return prepareResult(NO_CONTENT, callback, "No users found - " + e.getMessage());
+      LOGGER.warn("No users found - " + e.getMessage(),e);
+      return prepareResult(NO_CONTENT, callback, "No users found.");
     }
   }
 }

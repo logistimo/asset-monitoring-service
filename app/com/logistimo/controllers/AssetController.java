@@ -27,11 +27,13 @@ import com.logistimo.exception.LogistimoException;
 import com.logistimo.models.asset.AssetRegistrationModel;
 import com.logistimo.services.AssetService;
 import com.logistimo.services.ServiceFactory;
+import com.logistimo.utils.LogistimoConstant;
 
 import javax.persistence.NoResultException;
 
 import play.Logger;
 import play.db.jpa.Transactional;
+import play.i18n.Messages;
 import play.libs.Json;
 import play.mvc.Result;
 import play.mvc.With;
@@ -51,7 +53,6 @@ public class AssetController extends BaseController {
       assetRegistrationModel =
           getValidatedObject(request().body().asJson(), AssetRegistrationModel.class);
     } catch (LogistimoException e) {
-      //TODO
       return prepareResult(BAD_REQUEST, callback, "Error parsing the request" + e.getMessage());
     }
 
@@ -59,11 +60,11 @@ public class AssetController extends BaseController {
       assetService.createOrUpdateAssets(assetRegistrationModel);
       return prepareResult(CREATED, callback, "Asset created successfully.");
     } catch (NoResultException e) {
-      LOGGER.warn("Error while creating asset", e);
-      return prepareResult(NOT_FOUND, callback, e.getMessage());
+      LOGGER.warn("Error while creating asset: " + e.getMessage(), e);
+      return prepareResult(NOT_FOUND, callback, "Error while creating asset");
     } catch (Exception e) {
-      LOGGER.error("Error while creating asset", e);
-      return prepareResult(INTERNAL_SERVER_ERROR, callback, e.getMessage());
+      LOGGER.error("Error while creating asset: " + e.getMessage(), e);
+      return prepareResult(INTERNAL_SERVER_ERROR, callback, Messages.get(LogistimoConstant.SERVER_ERROR_RESPONSE));
     }
   }
 
@@ -77,8 +78,8 @@ public class AssetController extends BaseController {
       LOGGER.warn("Asset not found : {}, {}", mancId, assetId);
       return prepareResult(NOT_FOUND, callback, "Asset not found.");
     } catch (Exception e) {
-      LOGGER.error("Error while generating stats by device", e);
-      return prepareResult(INTERNAL_SERVER_ERROR, callback, e.getMessage());
+      LOGGER.error("Error while generating stats by device: " + e.getMessage(), e);
+      return prepareResult(INTERNAL_SERVER_ERROR, callback, Messages.get(LogistimoConstant.SERVER_ERROR_RESPONSE));
     }
   }
 }

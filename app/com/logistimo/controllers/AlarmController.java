@@ -30,12 +30,14 @@ import com.logistimo.models.alarm.request.AlarmLoggingRequest;
 import com.logistimo.models.alarm.response.AlarmLoggingResponse;
 import com.logistimo.services.AlarmService;
 import com.logistimo.services.ServiceFactory;
+import com.logistimo.utils.LogistimoConstant;
 
 import javax.persistence.NoResultException;
 
 import play.Logger;
 import play.Logger.ALogger;
 import play.db.jpa.Transactional;
+import play.i18n.Messages;
 import play.libs.Json;
 import play.mvc.Result;
 import play.mvc.With;
@@ -58,9 +60,8 @@ public class AlarmController extends BaseController {
       alarmLoggingRequest = getValidatedObject(request().body().asJson()
           , AlarmLoggingRequest.class);
     } catch (Exception e) {
-      LOGGER.warn("Validation failed while posting alarm", e);
-      return prepareResult(BAD_REQUEST, callback,
-          "Error while parsing request data - " + e.getMessage());
+      LOGGER.warn("Validation failed while posting alarm: " + e.getMessage(), e);
+      return prepareResult(BAD_REQUEST, callback, "Validation failed while posting alarm");
     }
     try {
       AlarmLoggingResponse alarmLoggingResponse = alarmService.postDeviceAlarm(alarmLoggingRequest);
@@ -74,8 +75,8 @@ public class AlarmController extends BaseController {
       }
       return prepareResult(CREATED, callback, "Alarm posted successfully.");
     } catch (Exception e) {
-      LOGGER.error("Error while logging alarms", e);
-      return prepareResult(INTERNAL_SERVER_ERROR, callback, e.getMessage());
+      LOGGER.error("Error while logging alarms: " + e.getMessage(), e);
+      return prepareResult(INTERNAL_SERVER_ERROR, callback, Messages.get(LogistimoConstant.SERVER_ERROR_RESPONSE));
     } finally {
       context.stop();
     }
@@ -90,11 +91,11 @@ public class AlarmController extends BaseController {
       return prepareResult(OK, callback,
           Json.toJson(alarmService.getAlarm(vendorId, deviceId, sid, pageNumber, pageSize)));
     } catch (NoResultException e) {
-      LOGGER.warn("Error while reading alarms", e);
-      return prepareResult(NOT_FOUND, callback, e.getMessage());
+      LOGGER.warn("Error while reading alarms: " + e.getMessage(), e);
+      return prepareResult(NOT_FOUND, callback,"Error while reading alarms");
     } catch (Exception e) {
-      LOGGER.error("Error while reading alarms", e);
-      return prepareResult(INTERNAL_SERVER_ERROR, callback, e.getMessage());
+      LOGGER.error("Error while reading alarms: " + e.getMessage(), e);
+      return prepareResult(INTERNAL_SERVER_ERROR, callback, Messages.get(LogistimoConstant.SERVER_ERROR_RESPONSE));
     }
   }
 }
