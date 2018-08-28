@@ -113,9 +113,6 @@ public class Global extends GlobalSettings {
             LOGGER.info("src: " + requestSource + ",data: " + requestData);
         }
 
-        if (request.method().equals("GET")){
-                LOGGER.info(request.getClass().toString());
-        }
         logMeterMetrics(request);
         return super.onRequest(request, actionMethod);
     }
