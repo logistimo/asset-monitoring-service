@@ -134,7 +134,7 @@ public class CronLeaderElection extends ZooElectableClient {
 
         scheduler.scheduleJob(job, trigger);
       } catch (SchedulerException e) {
-        LOGGER.error("Error while initiating task service", e);
+        LOGGER.error("Error while scheduling cron job", e);
       }
 
       try {
