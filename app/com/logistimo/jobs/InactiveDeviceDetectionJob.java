@@ -74,6 +74,7 @@ public class InactiveDeviceDetectionJob implements Job {
     inactMeter.mark();
     Timer.Context context = inactTimer.time();
     try {
+      LOGGER.info("Initiating the InactiveDeviceDetectionJob");
       final List<Device> deviceList = new ArrayList<>(1);
       JPA.withTransaction(() -> deviceList.addAll(deviceService.getActiveSensorDevices()));
       long currentTime = (int) (System.currentTimeMillis() / 1000);
@@ -171,6 +172,8 @@ public class InactiveDeviceDetectionJob implements Job {
         }
 
         LOGGER.info("Inside InactiveDeviceDetectionJob - doJob(), End of execution.");
+      } else {
+        LOGGER.info("InactiveDeviceDetectionJob - No eligible devices");
       }
     } catch (Throwable e) {
       LOGGER.error("Error while running inactive device detection job", e);
