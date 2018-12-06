@@ -25,6 +25,34 @@ Pre-requisites
 * ActiveMQ 5.14
 * Zookeeper
 * Play framework
+* Docker
+* SBT
+
+Build Instructions
+------------------
+
+To build the artifact and create a docker image of the asset monitoring service, run the following commands.
+
+1. Set environment
+
+```
+export MAVEN_OPTS=-Xmx718m
+export MAVEN_HOME=/opt/apache-maven-3.5.3/
+export JAVA_HOME=/opt/java-home
+export PATH=$JAVA_HOME/bin:$PATH:$MAVEN_HOME/bin
+```
+
+2. Build the artifact
+
+```
+sbt war
+````
+
+3. Build the docker image
+
+```
+docker build --rm=true --build-arg warname=asset-monitoring-service-1.0.war -t asset-monitoring-service:latest .
+```
 
 Modules
 -------
