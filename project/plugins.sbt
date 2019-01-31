@@ -9,3 +9,7 @@ resolvers += "snapshots" at "https://oss.sonatype.org/content/repositories/snaps
 addSbtPlugin("com.typesafe.play" % "sbt-plugin" % "2.3.6")
 
 addSbtPlugin("com.github.play2war" % "play2-war-plugin" % "1.3-beta3")
+
+addSbtPlugin("org.scoverage" % "sbt-scoverage" % "1.5.1")
+
+addSbtPlugin("com.github.mwz" % "sbt-sonar" % "1.4.0")
