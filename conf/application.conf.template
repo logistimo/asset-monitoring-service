@@ -112,6 +112,11 @@ logistimo.config_push.url.berlinger = "$BER_CONFIG_PUSH_URL"
 logistimo.apn_push.url.nexleaf = "$APN_PUSH_NXL"
 logistimo.config_push.url.nexleaf = "$CONFIG_PUSH_NXL"
 
+
+#SMS Service URLs - RelyOn
+logistimo.apn_push.url.relyon = "$APN_PUSH_NXL"
+logistimo.config_push.url.relyon = "$CONFIG_PUSH_NXL"
+
 #SMS Service URLs - Nimble wireless
 logistimo.config_push.url.nimblewireless = "http://198.57.226.173:8080/iristracking/v1.0/deviceconfig/logistimo"
 
