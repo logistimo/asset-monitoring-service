@@ -55,9 +55,18 @@
             </div>
             <div class="row">
                 <div class="col-sm-12">
-                    <label for="serialNumber">Serial number: </label>
-                    <input type="text" class="form-control" id="serialNumber" placeholder="Serial number">
-                    <button type="button" class="btn btn-default" onclick="getData()">Get</button>
+                    <form class="form-inline">
+                        <label for="serialNumber">Manufacturer: </label>
+                        <select class="form-control" id="vendorId">
+                            <option value="nexleaf">Nexleaf</option>
+                            <option value="relyon">RelyOn</option>
+                            <option value="berlinger">Berlinger</option>
+                            <option value="nimblewireless">Nimble wireless</option>
+                        </select>
+                        <label for="serialNumber">Serial number: </label>
+                        <input type="text" class="form-control" id="serialNumber" placeholder="Serial number">
+                        <button type="button" class="btn btn-default" onclick="getData()">Get</button>
+                    </form>
                 </div>
             </div>
             <div class="row" style="margin-top: 10px">
@@ -66,7 +75,7 @@
                         <div class="row">
                             <div class="col-sm-12">
                                 <div class="alert alert-info">
-                                Please enter serial number.
+                                Please choose Manufacturer and serial number.
                                 </div>
                             </div>
                         </div>
@@ -76,7 +85,7 @@
         </div>
         <script>
             var xmlhttp = new XMLHttpRequest();
-            var url = "v2/devices/details/nexleaf/";
+            var url = "v2/devices/details/";
             var rowStart =  "<div class='row'><div class='col-sm-12'>";
             var rowEnd = "</div></div>";
             var deviceAlarms = {
@@ -98,8 +107,8 @@
                 "3-2": "c-red"
             };
 
-            function get(serialNumber){
-                xmlhttp.open("GET", url + serialNumber, true);
+            function get(vendorId, serialNumber){
+                xmlhttp.open("GET", url + vendorId+"/"+serialNumber, true);
                 render(document.getElementById("loader").innerHTML);
                 xmlhttp.onreadystatechange = function() {
                     if (xmlhttp.readyState == 4){
@@ -121,7 +130,7 @@
             }
 
             function getData(){
-                get(document.getElementById("serialNumber").value);
+                get(document.getElementById("vendorId").value, document.getElementById("serialNumber").value);
             }
 
             function formatDate(date){
