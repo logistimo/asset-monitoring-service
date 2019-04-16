@@ -36,7 +36,7 @@ import javax.validation.constraints.NotNull;
  * Created by kaniyarasu on 01/10/14.
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-@JsonInclude(JsonInclude.Include.NON_DEFAULT)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class ConfigurationRequest {
   @NotNull
   @Valid
