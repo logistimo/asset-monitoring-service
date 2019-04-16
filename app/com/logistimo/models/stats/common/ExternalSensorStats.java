@@ -29,7 +29,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import javax.validation.constraints.Min;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-@JsonInclude(JsonInclude.Include.NON_DEFAULT)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class ExternalSensorStats {
   public int stat = -1;
   @Min(0)

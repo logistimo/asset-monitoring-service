@@ -29,7 +29,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import javax.validation.constraints.Min;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-@JsonInclude(JsonInclude.Include.NON_DEFAULT)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class DailyStatsDeviceError {
   public String code;
 

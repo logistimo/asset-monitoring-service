@@ -24,12 +24,14 @@
 package com.logistimo.models.device.request;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 
 import org.hibernate.validator.constraints.NotEmpty;
 
 import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class TagRegisterRequest {
   @NotEmpty
   public List<DeviceRequest> data;

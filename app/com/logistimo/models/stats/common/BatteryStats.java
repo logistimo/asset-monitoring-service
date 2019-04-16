@@ -30,7 +30,7 @@ import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-@JsonInclude(JsonInclude.Include.NON_DEFAULT)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class BatteryStats {
   public Integer stat = -1;
   @NotNull

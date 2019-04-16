@@ -23,12 +23,17 @@
 
 package com.logistimo.models.device.response;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
+
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Created by kaniyarasu on 31/10/14.
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class DeviceReadyUpdateResponse {
   public List<String> errs = new ArrayList<String>();
 

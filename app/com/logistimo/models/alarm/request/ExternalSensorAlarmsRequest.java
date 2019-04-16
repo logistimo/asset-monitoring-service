@@ -30,7 +30,7 @@ import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-@JsonInclude(JsonInclude.Include.NON_DEFAULT)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class ExternalSensorAlarmsRequest {
   @Min(0)
   @Max(4)

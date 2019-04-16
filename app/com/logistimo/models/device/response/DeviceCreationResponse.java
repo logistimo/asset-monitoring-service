@@ -23,12 +23,15 @@
 
 package com.logistimo.models.device.response;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Created by kaniyarasu on 21/10/14.
  */
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class DeviceCreationResponse {
   public List<String> errs = new ArrayList<String>();
 

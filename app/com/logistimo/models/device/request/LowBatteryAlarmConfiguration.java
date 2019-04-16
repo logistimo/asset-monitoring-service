@@ -23,9 +23,14 @@
 
 package com.logistimo.models.device.request;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
+
 /**
  * Created by kaniyarasu on 11/02/16.
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class LowBatteryAlarmConfiguration {
   private Integer lmt;
 

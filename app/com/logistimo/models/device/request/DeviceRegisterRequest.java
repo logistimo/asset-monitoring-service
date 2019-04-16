@@ -24,6 +24,7 @@
 package com.logistimo.models.device.request;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 
 import org.hibernate.validator.constraints.NotEmpty;
 
@@ -32,6 +33,7 @@ import java.util.List;
 import javax.validation.Valid;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class DeviceRegisterRequest {
   @NotEmpty
   @Valid
