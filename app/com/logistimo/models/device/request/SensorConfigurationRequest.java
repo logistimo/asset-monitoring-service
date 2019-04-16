@@ -24,11 +24,13 @@
 package com.logistimo.models.device.request;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 
 /**
  * Created by kaniyarasu on 23/09/15.
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class SensorConfigurationRequest {
   public ConfigurationCommRequest comm;
   public ConfigurationHighAlarmRequest highAlarm;

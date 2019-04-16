@@ -24,6 +24,7 @@
 package com.logistimo.models.device.request;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 
 import javax.validation.constraints.Min;
 
@@ -31,6 +32,7 @@ import javax.validation.constraints.Min;
  * Created by kaniyarasu on 23/09/15.
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class ConfigurationNotifRequest {
   public Integer dur;
 

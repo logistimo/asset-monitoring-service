@@ -24,6 +24,7 @@
 package com.logistimo.models.device.request;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 
 import org.hibernate.validator.constraints.NotEmpty;
 
@@ -34,6 +35,7 @@ import javax.validation.constraints.NotNull;
  * Created by kaniyarasu on 11/11/14.
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class AdminPushRequest {
   @NotNull
   @Valid

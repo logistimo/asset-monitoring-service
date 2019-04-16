@@ -23,12 +23,15 @@
 
 package com.logistimo.models.device.response;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Created by kaniyarasu on 11/06/15.
  */
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class TaggedInactiveDeviceResponse {
   public List<DeviceResponse> data;
   private long nPages;

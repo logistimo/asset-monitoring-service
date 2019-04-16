@@ -24,6 +24,7 @@
 package com.logistimo.models.device.request;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.logistimo.models.device.common.TemperatureSensorRequest;
 import com.logistimo.models.device.response.DeviceStatusModel;
@@ -36,6 +37,7 @@ import java.util.List;
 import javax.validation.constraints.Size;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class DeviceRequest implements Serializable {
   private static final long serialVersionUID = 1L;
 
