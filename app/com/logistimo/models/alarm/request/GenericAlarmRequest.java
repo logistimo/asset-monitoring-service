@@ -33,7 +33,7 @@ import javax.validation.constraints.Min;
  * Created by kaniyarasu on 26/06/15.
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-@JsonInclude(JsonInclude.Include.NON_DEFAULT)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class GenericAlarmRequest {
   @Min(0)
   @Max(2)

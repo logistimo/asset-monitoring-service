@@ -25,7 +25,7 @@ package com.logistimo.models.alarm.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 
-@JsonInclude(JsonInclude.Include.NON_DEFAULT)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class AlarmResponse {
   public int typ = -1;
 
