@@ -2432,11 +2432,11 @@ public class DeviceService extends ServiceImpl {
     }
 
     if(Objects.nonNull(stUpdatedFrom)) {
-      queryStr += " and updatedOn >= " + LogistimoUtils.getFormattedDate(stUpdatedFrom);
+      queryStr += " and updatedOn >= '" + LogistimoUtils.getFormattedDate(stUpdatedFrom) + "'";
     }
 
     if(Objects.nonNull(stUpdatedUntil)) {
-      queryStr += " and updatedOn <= " + LogistimoUtils.getFormattedDate(stUpdatedUntil);
+      queryStr += " and updatedOn <= '" + LogistimoUtils.getFormattedDate(stUpdatedUntil) + "'";
     }
 
     if (awr > 0) {
