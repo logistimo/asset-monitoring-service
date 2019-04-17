@@ -97,7 +97,10 @@ public class Global extends GlobalSettings {
 
         if (request.method().equals("POST")) {
             if (request.headers().get(CONTENT_TYPE) != null && request.headers().get(CONTENT_TYPE).length > 0) {
-                if (!("application/json; charset=utf-8".equals(request.headers().get(CONTENT_TYPE)[0]) || "application/json".equals(request.headers().get(CONTENT_TYPE)[0]) || "text/json".equals(request.headers().get(CONTENT_TYPE)[0]))) {
+                if (!("application/json; charset=utf-8".equals(request.headers().get(CONTENT_TYPE)[0]) ||
+                    "application/json".equals(request.headers().get(CONTENT_TYPE)[0]) ||
+                    "text/json".equals(request.headers().get(CONTENT_TYPE)[0]) ||
+                    "text/plain".equals(request.headers().get(CONTENT_TYPE)[0]))) {
                     LOGGER.warn(Messages.get(LogistimoConstant.REQUEST_INVALID_CONTENT_TYPE));
                     throw new UnsupportedOperationException(Messages.get(LogistimoConstant.REQUEST_INVALID_CONTENT_TYPE)
                             + request.headers().get(CONTENT_TYPE)[0]);
@@ -121,6 +124,9 @@ public class Global extends GlobalSettings {
     public F.Promise<Result> onError(Http.RequestHeader request, Throwable t) {
         LOGGER.error(Messages.get(LogistimoConstant.SERVER_ERROR_RESPONSE)+" "+t.getMessage(),t);
         logMeterMetrics(request);
+        if(t instanceof UnsupportedOperationException) {
+          return F.Promise.pure(BaseController.prepareResult(Http.Status.BAD_REQUEST, request.getQueryString("callback"), t.getMessage()));
+        }
         return F.Promise.pure(BaseController.prepareResult(Http.Status.INTERNAL_SERVER_ERROR, request.getQueryString("callback"), Messages.get(LogistimoConstant.SERVER_ERROR_RESPONSE)));
     }
 
