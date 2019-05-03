@@ -762,8 +762,7 @@ public class DeviceService extends ServiceImpl {
   public TaggedDeviceResponse getDevicesByTag(String tagName, String q, String assetType,
                                               Integer workingStatus, Integer alarmType,
                                               Integer alarmDuration, Integer awr, int pageNumber,
-                                              int pageSize, Integer monitoringType,
-                                              String stUpdatedFrom, String stUpdatedUntil) {
+                                              int pageSize, Integer monitoringType, String modSince) {
     TaggedDeviceResponse taggedDeviceResponse = new TaggedDeviceResponse();
     if(assetType == null && monitoringType != null) {
       assetType = getAssetIdsByType(monitoringType);
@@ -771,8 +770,8 @@ public class DeviceService extends ServiceImpl {
 
     List<Device>
         deviceList =
-        getDeviceForTag(tagName, q, assetType, workingStatus, alarmType, alarmDuration, awr, stUpdatedFrom,
-            stUpdatedUntil, LogistimoUtils.transformPageNumberToPosition(pageNumber, pageSize), pageSize);
+        getDeviceForTag(tagName, q, assetType, workingStatus, alarmType, alarmDuration, awr, modSince,
+             LogistimoUtils.transformPageNumberToPosition(pageNumber, pageSize), pageSize);
 
     taggedDeviceResponse.setnDevices(deviceList.size());
     List<DeviceMetaData> deviceMetaDatas = null;
@@ -827,7 +826,7 @@ public class DeviceService extends ServiceImpl {
     TaggedDeviceResponse taggedDeviceResponse = new TaggedDeviceResponse();
     List<Device>
         deviceList =
-        getDeviceForTag(tagName, null, null, null, null, null, null,null,null,
+        getDeviceForTag(tagName, null, null, null, null, null, null,null,
             LogistimoUtils.transformPageNumberToPosition(pageNumber, pageSize), pageSize);
     List<DeviceMetaData> deviceMetaDatas = null;
     List<AssetUser> assetUsers = null;
@@ -2347,8 +2346,7 @@ public class DeviceService extends ServiceImpl {
   public List<Device> getDeviceForTag(String tagName, String q, String assetType,
                                       Integer workingStatus, Integer alarmType,
                                       Integer alarmDuration, Integer awr,
-                                      String stUpdatedFrom, String stUpdatedUntil,
-                                      Integer startingOffset, Integer size) {
+                                      String modSince, Integer startingOffset, Integer size) {
     String
         innerQueryStr =
         "select devices_id from devices_tags where tags_id in(select id from tags where tagname = '"
@@ -2431,12 +2429,8 @@ public class DeviceService extends ServiceImpl {
       queryStr += " and assetType_id in (" + assetType + ")";
     }
 
-    if(Objects.nonNull(stUpdatedFrom)) {
-      queryStr += " and updatedOn >= '" + LogistimoUtils.getFormattedDate(stUpdatedFrom) + "'";
-    }
-
-    if(Objects.nonNull(stUpdatedUntil)) {
-      queryStr += " and updatedOn <= '" + LogistimoUtils.getFormattedDate(stUpdatedUntil) + "'";
+    if(Objects.nonNull(modSince)) {
+      queryStr += " and updatedOn >= '" + LogistimoUtils.getFormattedDate(modSince) + "'";
     }
 
     if (awr > 0) {
