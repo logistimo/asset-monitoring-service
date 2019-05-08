@@ -33,6 +33,7 @@ import org.apache.commons.codec.binary.Base64;
 import org.json.JSONObject;
 
 import java.io.UnsupportedEncodingException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -232,5 +233,15 @@ public class LogistimoUtils {
 
   public static boolean isValidTime(long timestamp) {
     return timestamp > 0 && timestamp <= (System.currentTimeMillis() / 1000) + 43_200;
+  }
+
+  public static String getFormattedDate(String date) {
+    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    try {
+      return sdf.format(sdf.parse(date));
+    } catch (Exception e) {
+      LOGGER.warn("Error encountered while formatting date {}, error is  {} ", date, e.getMessage(), e);
+      return null;
+    }
   }
 }
