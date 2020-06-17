@@ -28,7 +28,9 @@ import com.logistimo.db.AssetType;
 import com.logistimo.db.Device;
 import com.logistimo.db.DeviceStatus;
 import com.logistimo.db.DeviceStatusLog;
+import com.logistimo.db.Tag;
 import com.logistimo.models.asset.AssetMapModel;
+import com.logistimo.models.device.request.DeviceRequest;
 import com.logistimo.models.device.response.DeviceStatusModel;
 import com.logistimo.utils.AssetStatusConstants;
 
@@ -44,13 +46,17 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeSet;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
-import static org.powermock.api.mockito.PowerMockito.doNothing;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.when;
 import static play.test.Helpers.fakeApplication;
@@ -62,9 +68,9 @@ import static play.test.Helpers.stop;
 /**
  * Created by smriti on 07/02/18.
  */
-@PowerMockIgnore("javax.management.*")
+@PowerMockIgnore({"javax.management.*","org.apache.commons.logging.*"})
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({Device.class, DeviceStatusLog.class, DeviceStatus.class, AssetMapping.class})
+@PrepareForTest({Device.class, DeviceStatusLog.class, DeviceStatus.class, AssetMapping.class, AssetType.class, DeviceService.class})
 public class DeviceServiceTest {
   Device device;
   DeviceStatus deviceStatus;
@@ -96,11 +102,13 @@ public class DeviceServiceTest {
 
   @Test
   public void testUpdateDeviceWorkingStatus() throws Exception {
-    Map<String,String> props = new HashMap<>();
-    props.put(ACTIVEMQ_URL,"");
-    props.putAll(inMemoryDatabase());
+    Map<String, String> props = getTestAppConfiguration();
     running(fakeApplication(props), () -> {
+
       DeviceService deviceService = spy(DeviceService.class);
+      doNothing().when(deviceService).updateDeviceStatusLog(any(), any(), any(), any());
+      doNothing().when(deviceService).postDeviceStatus(any(), any());
+
 
       getDeviceStatus(1l);
       getDeviceModel(deviceId, "ILR001", "haier");
@@ -111,8 +119,6 @@ public class DeviceServiceTest {
       mockStatic(Device.class);
       when(Device.findDevice(device.vendorId, device.deviceId)).thenReturn(device);
 
-      doNothing().when(deviceService).updateDeviceStatusLog(device, deviceStatusModel, deviceStatus, deviceStatus.status);
-      doNothing().when(deviceService).postDeviceStatus(device, deviceStatus);
 
       String result = deviceService.updateDeviceWorkingStatus(device.vendorId, device.deviceId, deviceStatusModel);
       assertEquals("Device working status updated successfully", result);
@@ -125,11 +131,17 @@ public class DeviceServiceTest {
     stop(fakeApplication());
   }
 
+  private Map<String, String> getTestAppConfiguration() {
+    Map<String, String> props = new HashMap<>();
+    props.put(ACTIVEMQ_URL, "");
+    props.put("enable.cron.election", "false");
+    props.putAll(inMemoryDatabase());
+    return props;
+  }
+
   @Test
   public void testUpdateWorkingStatusWithoutVendorId() {
-    Map<String,String> props = new HashMap<>();
-    props.put(ACTIVEMQ_URL,"");
-    props.putAll(inMemoryDatabase());
+    Map<String, String> props = getTestAppConfiguration();
 
     running(fakeApplication(props), () -> {
 
@@ -145,9 +157,7 @@ public class DeviceServiceTest {
 
   @Test
   public void testUpdateWorkingStatusWithoutDeviceId() {
-    Map<String, String> props = new HashMap<>();
-    props.put(ACTIVEMQ_URL, "");
-    props.putAll(inMemoryDatabase());
+    Map<String, String> props = getTestAppConfiguration();
 
     running(fakeApplication(props), () -> {
 
@@ -163,9 +173,7 @@ public class DeviceServiceTest {
 
   @Test
   public void testToAssetMapModelForMonitoringAsset() {
-    Map<String, String> props = new HashMap<>();
-    props.put(ACTIVEMQ_URL, "");
-    props.putAll(inMemoryDatabase());
+    Map<String, String> props = getTestAppConfiguration();
 
     running(fakeApplication(props), () -> {
 
@@ -198,9 +206,7 @@ public class DeviceServiceTest {
 
   @Test
   public void testToAssetMapModelForMonitoredAsset() {
-    Map<String, String> props = new HashMap<>();
-    props.put(ACTIVEMQ_URL, "");
-    props.putAll(inMemoryDatabase());
+    Map<String, String> props = getTestAppConfiguration();
 
     running(fakeApplication(props), () -> {
 
@@ -229,6 +235,47 @@ public class DeviceServiceTest {
     });
     stop(fakeApplication(props));
 
+  }
+
+
+  @Test
+  public void testUpdateDeviceOnRecreate() throws Exception {
+    Map<String, String> props = getTestAppConfiguration();
+    running(fakeApplication(props), () -> {
+      DeviceService deviceService = spy(DeviceService.class);
+      doNothing().when(deviceService).updateDeviceStatusLog(any(), any(), any(), any());
+      doNothing().when(deviceService).postDeviceStatus(any(), any());
+
+      getDeviceStatus(1l);
+      getDeviceModel(deviceId, "ILR001", "haier");
+      device.tags = new TreeSet<>();
+      device.tags.add(new Tag("DELETED.123456"));
+      getDeviceStatusModel(1, updatedByUser);
+
+      mockStatic(Device.class);
+      when(Device.findDevice(device.vendorId, device.deviceId)).thenReturn(device);
+
+
+      mockStatic(AssetType.class);
+
+      AssetType assetType = new AssetType();
+      assetType.id = AssetType.ILR;
+      assetType.assetType = AssetType.MONITORED_ASSET;
+      when(AssetType.getAssetType(AssetType.ILR)).thenReturn(assetType);
+
+
+      DeviceRequest deviceRequest = new DeviceRequest();
+      deviceRequest.vId = "haier";
+      deviceRequest.dId = "ILR001";
+      deviceRequest.typ = AssetType.ILR;
+      deviceService.updateDevice(deviceRequest);
+
+      verify(deviceService, times(1)).reintializeAllDeviceStatuses(any(DeviceRequest.class), any(), eq(true));
+
+      verify(deviceService, times(1)).postDeviceStatus(any(), any());
+
+    });
+    stop(fakeApplication());
   }
 
   private void getDeviceStatus(Long id) {

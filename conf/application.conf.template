@@ -142,6 +142,7 @@ activemq.url = "$ACTIVEMQ_HOST"
 
 # Cron Scheduler
 cron.zoo.path=/amsCronLeader
+enable.cron.election=true
 
 #Default Zookeeper properties
 zoo.servers="$ZKR_HOST"

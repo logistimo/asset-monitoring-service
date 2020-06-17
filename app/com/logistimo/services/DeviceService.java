@@ -88,6 +88,7 @@ import com.logistimo.utils.LogistimoConstant;
 import com.logistimo.utils.LogistimoUtils;
 import com.logistimo.utils.LogistimoValidationUtils;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.IOException;
@@ -236,160 +237,7 @@ public class DeviceService extends ServiceImpl {
             || (deviceRequest.trId != null && deviceRequest.trId.length() > 100)) {
           deviceCreationResponse.errs.add(deviceRequest.toString());
         } else {
-          Device device = null;
-          if (!StringUtils.isEmpty(deviceRequest.ovId)) {
-            //Update in vendor Id.
-            device = Device.findDevice(deviceRequest.ovId, deviceRequest.dId);
-            device.vendorId = deviceRequest.vId;
-            device.hash();
-          } else {
-            device = Device.findDevice(deviceRequest.vId, deviceRequest.dId);
-          }
-          device.tags = new TreeSet<>();
-          if (deviceRequest.tags != null) {
-            populateTags(device, deviceRequest.tags);
-          }
-          if (deviceRequest.iUs != null) {
-            device.imgUrls = StringUtils.join(deviceRequest.iUs, LogistimoConstant.COMMA);
-          }
-          if (deviceRequest.vNm != null) {
-            device.vendorName = deviceRequest.vNm;
-          }
-          if (deviceRequest.ub != null) {
-            device.updatedBy = deviceRequest.ub;
-          }
-          if (deviceRequest.getlId() != null) {
-            device.locationId = deviceRequest.getlId();
-          }
-
-          if (deviceRequest.ons != null) {
-            //Deleting asset users, if not found in ons
-            try {
-              List<AssetUser> assetUserList = AssetUser.getAssetUser(device, AssetUser.ASSET_OWNER);
-              for (AssetUser assetUser : assetUserList) {
-                if (!deviceRequest.ons.contains(assetUser.userName)) {
-                  assetUser.delete();
-                }
-              }
-            } catch (NoResultException e) {
-              //do nothing
-            }
-            for (String owner : deviceRequest.ons) {
-              AssetUser assetUser;
-              try {
-                AssetUser.getAssetUser(device, owner, AssetUser.ASSET_OWNER);
-                continue;
-              } catch (NoResultException e) {
-                //do nothing
-              }
-              assetUser = new AssetUser();
-              assetUser.device = device;
-              assetUser.userName = owner;
-              assetUser.userType = AssetUser.ASSET_OWNER;
-              assetUser.save();
-            }
-          }
-
-          if (deviceRequest.mts != null) {
-            //Deleting asset users, if not found in mts
-            try {
-              List<AssetUser>
-                  assetUserList =
-                  AssetUser.getAssetUser(device, AssetUser.ASSET_MAINTAINER);
-              for (AssetUser assetUser : assetUserList) {
-                if (!deviceRequest.mts.contains(assetUser.userName)) {
-                  assetUser.delete();
-                }
-              }
-            } catch (NoResultException e) {
-              //do nothing
-            }
-            for (String maintainer : deviceRequest.mts) {
-              AssetUser assetUser;
-              try {
-                AssetUser.getAssetUser(device, maintainer, AssetUser.ASSET_MAINTAINER);
-                continue;
-              } catch (NoResultException e) {
-                //do nothing
-              }
-              assetUser = new AssetUser();
-              assetUser.device = device;
-              assetUser.userName = maintainer;
-              assetUser.userType = AssetUser.ASSET_MAINTAINER;
-              assetUser.save();
-            }
-          }
-          try {
-            device.assetType = AssetType.getAssetType(deviceRequest.typ);
-          } catch (NoResultException e) {
-            //device.assetType = AssetType.getAssetType(1);
-          }
-          device.update();
-
-          //Updating device working status, if any
-          if (deviceRequest.ws != null) {
-            updateWorkingStatus(deviceRequest.ws, device);
-          }
-          //Updating device meta data
-          if (deviceRequest.meta != null) {
-            try {
-              List<DeviceMetaData> deviceMetaDataList = getDeviceMetaDatas(device);
-              Map<String, Object>
-                  result =
-                  new ObjectMapper().readValue(deviceRequest.meta.toString(), LinkedHashMap.class);
-              if (result != null) {
-                constructAndUpdateDeviceMetaDataFromMap(deviceMetaDataList,
-                    LogistimoUtils.constructDeviceMetaDataFromJSON(null, result), device);
-              }
-            } catch (NoResultException ignored) {
-              //do nothing
-            } catch (Exception e) {
-              LOGGER.error(
-                  "{} while extracting device meta data from json {}, updating device {}, {} without meta data",
-                  e.getMessage(), deviceRequest.meta, deviceRequest.vId, deviceRequest.dId, e);
-            }
-          }
-
-          //Initializing asset status
-          for (String assetStatusKey : device.assetType.assetType.equals(AssetType.MONITORED_ASSET)
-              ? AssetStatusConstants.MONITORED_DEVICE_STATUS_KEYS
-              : AssetStatusConstants.DEVICE_STATUS_KEYS) {
-            if (device.assetType.assetType.equals(AssetType.MONITORED_ASSET)
-                && (assetStatusKey.equals(AssetStatusConstants.ACTIVITY_STATUS_KEY)
-                || assetStatusKey.equals(AssetStatusConstants.TEMP_STATUS_KEY))) {
-              if (deviceRequest.mps != null) {
-                for (Integer monitoringPoint : deviceRequest.mps) {
-                  getOrCreateDeviceStatus(device, monitoringPoint, null, assetStatusKey,
-                      assetStatusKey.equals(AssetStatusConstants.ACTIVITY_STATUS_KEY)
-                          ? AssetStatusConstants.ACTIVITY_STATUS_INACT
-                          : AssetStatusConstants.STATUS_OK);
-                }
-
-                //Removing extra monitoring point data.
-                List<DeviceStatus> deviceStatusList = DeviceStatus.getDeviceStatus(device);
-                for (DeviceStatus deviceStatus : deviceStatusList) {
-                  if (deviceStatus.statusKey.equals(assetStatusKey) && !deviceRequest.mps
-                      .contains(deviceStatus.locationId)) {
-                    deviceStatus.delete();
-                  }
-                }
-              }
-            } else if (device.assetType.assetType.equals(AssetType.MONITORING_ASSET)
-                && AssetStatusConstants.ASSET_SENSOR_STATUS_KEYS.contains(assetStatusKey)
-                && deviceRequest.sns != null && !deviceRequest.sns.isEmpty()) {
-              for (TemperatureSensorRequest temperatureSensorRequest : deviceRequest.sns) {
-                getOrCreateDeviceStatus(device, null, temperatureSensorRequest.getsId(),
-                    assetStatusKey, null);
-              }
-            } else {
-              getOrCreateDeviceStatus(device, null, null, assetStatusKey, null);
-            }
-          }
-
-          //Updating temperature sensor details
-          if (deviceRequest.sns != null) {
-            createOrUpdateTemperatureSensors(device, deviceRequest);
-          }
+          updateDevice(deviceRequest);
         }
         continue;
       } catch (NoResultException e) {
@@ -400,6 +248,163 @@ public class DeviceService extends ServiceImpl {
     }
 
     return deviceCreationResponse;
+  }
+
+  void updateDevice(DeviceRequest deviceRequest) {
+    Device device = null;
+    if (!StringUtils.isEmpty(deviceRequest.ovId)) {
+      //Update in vendor Id.
+      device = Device.findDevice(deviceRequest.ovId, deviceRequest.dId);
+      device.vendorId = deviceRequest.vId;
+      device.hash();
+    } else {
+      device = Device.findDevice(deviceRequest.vId, deviceRequest.dId);
+    }
+    boolean isRecreate = isDeviceBeingRecreated(device);
+    device.tags = new TreeSet<>();
+    if (deviceRequest.tags != null) {
+      populateTags(device, deviceRequest.tags);
+    }
+    if (deviceRequest.iUs != null) {
+      device.imgUrls = StringUtils.join(deviceRequest.iUs, LogistimoConstant.COMMA);
+    }
+    if (deviceRequest.vNm != null) {
+      device.vendorName = deviceRequest.vNm;
+    }
+    if (deviceRequest.ub != null) {
+      device.updatedBy = deviceRequest.ub;
+    }
+    if (deviceRequest.getlId() != null) {
+      device.locationId = deviceRequest.getlId();
+    }
+
+    updateDeviceUsers(device, deviceRequest.ons, AssetUser.ASSET_OWNER);
+
+    updateDeviceUsers(device, deviceRequest.mts, AssetUser.ASSET_MAINTAINER);
+
+    try {
+      device.assetType = AssetType.getAssetType(deviceRequest.typ);
+    } catch (NoResultException e) {
+      //device.assetType = AssetType.getAssetType(1);
+    }
+    device.update();
+
+    //Updating device working status, if any
+    if (deviceRequest.ws != null) {
+      updateWorkingStatus(deviceRequest.ws, device);
+    }
+    //Updating device meta data
+    updateDeviceMetadata(deviceRequest, device);
+
+    //Initializing asset status
+    reintializeAllDeviceStatuses(deviceRequest, device, isRecreate);
+
+    //Updating temperature sensor details
+    if (deviceRequest.sns != null) {
+      createOrUpdateTemperatureSensors(device, deviceRequest);
+    }
+  }
+
+  void reintializeAllDeviceStatuses(DeviceRequest deviceRequest, Device device, boolean isRecreate) {
+    for (String assetStatusKey : device.assetType.assetType.equals(AssetType.MONITORED_ASSET)
+        ? AssetStatusConstants.MONITORED_DEVICE_STATUS_KEYS
+        : AssetStatusConstants.DEVICE_STATUS_KEYS) {
+      reinitializeDeviceStatus(deviceRequest, device, isRecreate, assetStatusKey);
+    }
+  }
+
+  private void reinitializeDeviceStatus(DeviceRequest deviceRequest, Device device, boolean isRecreate, String assetStatusKey) {
+    if (device.assetType.assetType.equals(AssetType.MONITORED_ASSET)
+        && (assetStatusKey.equals(AssetStatusConstants.ACTIVITY_STATUS_KEY)
+        || assetStatusKey.equals(AssetStatusConstants.TEMP_STATUS_KEY))) {
+      if (deviceRequest.mps != null) {
+        for (Integer monitoringPoint : deviceRequest.mps) {
+          getOrCreateDeviceStatus(device, monitoringPoint, null, assetStatusKey,
+              assetStatusKey.equals(AssetStatusConstants.ACTIVITY_STATUS_KEY)
+                  ? AssetStatusConstants.ACTIVITY_STATUS_INACT
+                  : AssetStatusConstants.STATUS_OK);
+        }
+
+        //Removing extra monitoring point data.
+        List<DeviceStatus> deviceStatusList = DeviceStatus.getDeviceStatus(device);
+        for (DeviceStatus deviceStatus : deviceStatusList) {
+          if (deviceStatus.statusKey.equals(assetStatusKey) && !deviceRequest.mps
+              .contains(deviceStatus.locationId)) {
+            deviceStatus.delete();
+          }
+        }
+      }
+    } else if (device.assetType.assetType.equals(AssetType.MONITORING_ASSET)
+        && AssetStatusConstants.ASSET_SENSOR_STATUS_KEYS.contains(assetStatusKey)
+        && deviceRequest.sns != null && !deviceRequest.sns.isEmpty()) {
+      for (TemperatureSensorRequest temperatureSensorRequest : deviceRequest.sns) {
+        getOrCreateDeviceStatus(device, null, temperatureSensorRequest.getsId(),
+            assetStatusKey, null);
+      }
+    } else {
+      DeviceStatus
+          deviceStatus =
+          getOrCreateDeviceStatus(device, null, null, assetStatusKey, null);
+
+      if (isRecreate && assetStatusKey.equals(AssetStatusConstants.WORKING_STATUS_KEY)) {
+        postDeviceStatus(device, deviceStatus);
+      }
+    }
+  }
+
+  private void updateDeviceMetadata(DeviceRequest deviceRequest, Device device) {
+    if (deviceRequest.meta != null) {
+      try {
+        List<DeviceMetaData> deviceMetaDataList = getDeviceMetaDatas(device);
+        Map<String, Object>
+            result =
+            new ObjectMapper().readValue(deviceRequest.meta.toString(), LinkedHashMap.class);
+        if (result != null) {
+          constructAndUpdateDeviceMetaDataFromMap(deviceMetaDataList,
+              LogistimoUtils.constructDeviceMetaDataFromJSON(null, result), device);
+        }
+      } catch (NoResultException ignored) {
+        //do nothing
+      } catch (Exception e) {
+        LOGGER.error(
+            "{} while extracting device meta data from json {}, updating device {}, {} without meta data",
+            e.getMessage(), deviceRequest.meta, deviceRequest.vId, deviceRequest.dId, e);
+      }
+    }
+  }
+
+  private void updateDeviceUsers(Device device, List<String> users, Integer assetUserType) {
+    if (users != null) {
+      //Deleting asset users, if not found in users
+      try {
+        List<AssetUser> assetUserList = AssetUser.getAssetUser(device, assetUserType);
+        for (AssetUser assetUser : assetUserList) {
+          if (!users.contains(assetUser.userName)) {
+            assetUser.delete();
+          }
+        }
+      } catch (NoResultException e) {
+        //do nothing
+      }
+      for (String owner : users) {
+        AssetUser assetUser;
+        try {
+          AssetUser.getAssetUser(device, owner, assetUserType);
+          continue;
+        } catch (NoResultException e) {
+          //do nothing
+        }
+        assetUser = new AssetUser();
+        assetUser.device = device;
+        assetUser.userName = owner;
+        assetUser.userType = assetUserType;
+        assetUser.save();
+      }
+    }
+  }
+
+  private boolean isDeviceBeingRecreated(Device device) {
+    return CollectionUtils.isNotEmpty(device.tags) && device.tags.first().tagName.startsWith("DELETED");
   }
 
   public void postDeviceStatus(Device device, DeviceStatus deviceStatus) {

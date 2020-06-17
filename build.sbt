@@ -8,7 +8,9 @@ lazy val `asset-management-service` = (project in file(".")).enablePlugins(PlayJ
 
 scalaVersion := "2.10.4"
 
-resolvers += "Typesafe repository" at "http://repo.typesafe.com/typesafe/releases/"
+resolvers += "Maven Central Server" at "https://repo1.maven.org/maven2"
+
+resolvers += "Typesafe repository" at "https://repo.typesafe.com/typesafe/releases/"
 
 resolvers += "snapshots" at "https://oss.sonatype.org/content/repositories/snapshots"
 
@@ -55,8 +57,14 @@ libraryDependencies ++= Seq(
   "org.mockito" % "mockito-core" % "1.9.5"
 )
 
+libraryDependencies += "com.novocode" % "junit-interface" % "0.11" % "test"
+
+
 Play2WarPlugin.play2WarSettings
 
 Play2WarKeys.servletVersion := "2.5"
 
 Play2WarKeys.explodedJar := true
+
+testOptions in Test := Seq(Tests.Argument(TestFrameworks.JUnit, "-a"))
+
