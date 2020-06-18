@@ -43,104 +43,120 @@ import play.mvc.Http;
 import play.mvc.Result;
 
 public class Global extends GlobalSettings {
-    private static final Logger.ALogger LOGGER = Logger.of(Global.class);
+  private static final Logger.ALogger LOGGER = Logger.of(Global.class);
+  private static final String ENABLE_CRON_ELECTION = "enable.cron.election";
+  private static final String ENABLE_METRICS = "enable.metrics";
 
-    public static MetricRegistry metrics;
+  public static MetricRegistry metrics;
 
-    public static JmxReporter reporter;
+  public static JmxReporter reporter;
 
-    @Override
-    public void onStart(Application app) {
-        super.onStart(app);
-        //Starting cron leader election.
-        CronLeaderElection.start();
-        //configuring metrics
-        configureMetrics();
+  @Override
+  public void onStart(Application app) {
+    super.onStart(app);
+    if (app.configuration().getBoolean(ENABLE_CRON_ELECTION, true)) {
+      //Starting cron leader election.
+      CronLeaderElection.start();
+    }
+    if (app.configuration().getBoolean(ENABLE_METRICS, true)) {
+      //configuring metrics
+      configureMetrics();
+    }
+  }
+
+  @Override
+  public void onStop(Application app) {
+    super.onStop(app);
+    if (app.configuration().getBoolean(ENABLE_CRON_ELECTION, true)) {
+      //Stopping cron leader election.
+      CronLeaderElection.stop();
+    }
+    //closing JmxReporter
+    if (null != reporter) {
+      reporter.close();
+    }
+  }
+
+  @Override
+  public F.Promise<Result> onBadRequest(Http.RequestHeader request, String error) {
+    logMeterMetrics(request);
+    return F.Promise.pure(BaseController.prepareResult(Http.Status.BAD_REQUEST, request.getQueryString("callback"), error));
+  }
+
+  @Override
+  public Action onRequest(Http.Request request, Method actionMethod) {
+    String CONTENT_TYPE = "Content-Type";
+    String REQUEST_SOURCE = "Request-Source";
+
+    if (!request.headers().containsKey(CONTENT_TYPE)) {
+      CONTENT_TYPE = "Content-type";
     }
 
-    @Override
-    public void onStop(Application app) {
-        super.onStop(app);
-        //Stopping cron leader election.
-        CronLeaderElection.stop();
-        //closing JmxReporter
-        if (null != reporter) {
-            reporter.close();
+    if (!request.headers().containsKey(CONTENT_TYPE)) {
+      CONTENT_TYPE = "content-type";
+    }
+
+    if (!request.headers().containsKey(CONTENT_TYPE)) {
+      CONTENT_TYPE = CONTENT_TYPE.toUpperCase();
+    }
+
+    if (!request.headers().containsKey(REQUEST_SOURCE)) {
+      REQUEST_SOURCE = "Request-source";
+    }
+
+    if (!request.headers().containsKey(REQUEST_SOURCE)) {
+      REQUEST_SOURCE = REQUEST_SOURCE.toUpperCase();
+    }
+
+    if (request.method().equals("POST")) {
+      if (request.headers().get(CONTENT_TYPE) != null && request.headers().get(CONTENT_TYPE).length > 0) {
+        if (!("application/json; charset=utf-8".equals(request.headers().get(CONTENT_TYPE)[0]) || "application/json"
+            .equals(request.headers().get(CONTENT_TYPE)[0]) || "text/json".equals(request.headers().get(CONTENT_TYPE)[0]))) {
+          LOGGER.warn(Messages.get(LogistimoConstant.REQUEST_INVALID_CONTENT_TYPE));
+          throw new UnsupportedOperationException(Messages.get(LogistimoConstant.REQUEST_INVALID_CONTENT_TYPE)
+              + request.headers().get(CONTENT_TYPE)[0]);
         }
+      } else {
+        LOGGER.warn(Messages.get(LogistimoConstant.REQUEST_EMPTY_CONTENT_TYPE));
+        throw new UnsupportedOperationException(Messages.get(LogistimoConstant.REQUEST_EMPTY_CONTENT_TYPE) + "***" + Json.toJson(request.headers()));
+      }
+
+      String requestSource = request.headers().get(REQUEST_SOURCE) != null && request.headers().get(REQUEST_SOURCE).length > 0
+          ? request.headers().get(REQUEST_SOURCE)[0] : "GPRS";
+      String requestData = request.body() != null ? request.body().asJson().toString() : null;
+      LOGGER.info("src: " + requestSource + ",data: " + requestData);
     }
 
-    @Override
-    public F.Promise<Result> onBadRequest(Http.RequestHeader request, String error) {
-        logMeterMetrics(request);
-        return F.Promise.pure(BaseController.prepareResult(Http.Status.BAD_REQUEST, request.getQueryString("callback"), error));
-    }
+    logMeterMetrics(request);
+    return super.onRequest(request, actionMethod);
+  }
 
-    @Override
-    public Action onRequest(Http.Request request, Method actionMethod) {
-        String CONTENT_TYPE = "Content-Type";
-        String REQUEST_SOURCE = "Request-Source";
+  @Override
+  public F.Promise<Result> onError(Http.RequestHeader request, Throwable t) {
+    LOGGER.error(Messages.get(LogistimoConstant.SERVER_ERROR_RESPONSE) + " " + t.getMessage(), t);
+    logMeterMetrics(request);
+    return F.Promise.pure(BaseController
+        .prepareResult(Http.Status.INTERNAL_SERVER_ERROR, request.getQueryString("callback"), Messages.get(LogistimoConstant.SERVER_ERROR_RESPONSE)));
+  }
 
-        if (!request.headers().containsKey(CONTENT_TYPE))
-            CONTENT_TYPE = "Content-type";
+  private void configureMetrics() {
+    metrics = MetricsUtil.getRegistry();
+    reporter = JmxReporter.forRegistry(metrics).build();
+    reporter.start();
+  }
 
-        if (!request.headers().containsKey(CONTENT_TYPE))
-            CONTENT_TYPE = "content-type";
+  private void logMeterMetrics(Http.Request request) {
+    logMeterMetrics(request.path(), null);
+  }
 
-        if (!request.headers().containsKey(CONTENT_TYPE))
-            CONTENT_TYPE = CONTENT_TYPE.toUpperCase();
+  private void logMeterMetrics(Http.RequestHeader requestHeader) {
+    logMeterMetrics(requestHeader.path(), "error.");
+  }
 
-        if (!request.headers().containsKey(REQUEST_SOURCE))
-            REQUEST_SOURCE = "Request-source";
-
-        if (!request.headers().containsKey(REQUEST_SOURCE))
-            REQUEST_SOURCE = REQUEST_SOURCE.toUpperCase();
-
-        if (request.method().equals("POST")) {
-            if (request.headers().get(CONTENT_TYPE) != null && request.headers().get(CONTENT_TYPE).length > 0) {
-                if (!("application/json; charset=utf-8".equals(request.headers().get(CONTENT_TYPE)[0]) || "application/json".equals(request.headers().get(CONTENT_TYPE)[0]) || "text/json".equals(request.headers().get(CONTENT_TYPE)[0]))) {
-                    LOGGER.warn(Messages.get(LogistimoConstant.REQUEST_INVALID_CONTENT_TYPE));
-                    throw new UnsupportedOperationException(Messages.get(LogistimoConstant.REQUEST_INVALID_CONTENT_TYPE)
-                            + request.headers().get(CONTENT_TYPE)[0]);
-                }
-            } else {
-                LOGGER.warn(Messages.get(LogistimoConstant.REQUEST_EMPTY_CONTENT_TYPE));
-                throw new UnsupportedOperationException(Messages.get(LogistimoConstant.REQUEST_EMPTY_CONTENT_TYPE) + "***" + Json.toJson(request.headers()));
-            }
-
-            String requestSource = request.headers().get(REQUEST_SOURCE) != null && request.headers().get(REQUEST_SOURCE).length > 0
-                    ? request.headers().get(REQUEST_SOURCE)[0] : "GPRS";
-            String requestData = request.body() != null ? request.body().asJson().toString() : null;
-            LOGGER.info("src: " + requestSource + ",data: " + requestData);
-        }
-
-        logMeterMetrics(request);
-        return super.onRequest(request, actionMethod);
-    }
-
-    @Override
-    public F.Promise<Result> onError(Http.RequestHeader request, Throwable t) {
-        LOGGER.error(Messages.get(LogistimoConstant.SERVER_ERROR_RESPONSE)+" "+t.getMessage(),t);
-        logMeterMetrics(request);
-        return F.Promise.pure(BaseController.prepareResult(Http.Status.INTERNAL_SERVER_ERROR, request.getQueryString("callback"), Messages.get(LogistimoConstant.SERVER_ERROR_RESPONSE)));
-    }
-
-    private void configureMetrics () {
-        metrics = MetricsUtil.getRegistry();
-        reporter = JmxReporter.forRegistry(metrics).build();
-        reporter.start();
-    }
-
-    private void logMeterMetrics (Http.Request request) {
-        logMeterMetrics(request.path(),null);
-    }
-    private void logMeterMetrics (Http.RequestHeader requestHeader) {
-        logMeterMetrics(requestHeader.path(),"error.");
-    }
-
-    private void logMeterMetrics (String path, String prefix) {
-        Meter meter = MetricsUtil.getMeter(Http.Request.class,prefix != null ?prefix+path : path);
-        meter.mark();
-    }
+  private void logMeterMetrics(String path, String prefix) {
+    Meter meter = MetricsUtil.getMeter(Http.Request.class, prefix != null ? prefix + path : path);
+    meter.mark();
+  }
 
 
 }

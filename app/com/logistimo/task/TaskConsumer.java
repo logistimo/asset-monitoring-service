@@ -31,6 +31,7 @@ import com.logistimo.services.TaskService;
 import akka.camel.CamelMessage;
 import akka.camel.javaapi.UntypedConsumerActor;
 import play.Logger;
+import play.Play;
 import play.db.jpa.JPA;
 
 /**
@@ -41,10 +42,14 @@ public class TaskConsumer extends UntypedConsumerActor {
   private static final Logger.ALogger LOGGER = Logger.of(TaskConsumer.class);
   private static final int MAX_NUMBER_OF_RETRY = 5;
 
+  private static final String
+      QUEUE_NAME =
+      Play.application().configuration().getString("queue.tms.task", "activemq:queue:tms-task");
+
   //Defaulting to task, if there is new queue should be overridden in sub class
   @Override
   public String getEndpointUri() {
-    return "activemq:queue:tms-task";
+    return QUEUE_NAME;
   }
 
   @Override

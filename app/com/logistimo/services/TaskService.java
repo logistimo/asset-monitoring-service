@@ -23,20 +23,17 @@
 
 package com.logistimo.services;
 
-import com.logistimo.db.Device;
-import com.logistimo.db.DeviceStatus;
 import com.logistimo.db.Task;
 import com.logistimo.exception.ServiceException;
 import com.logistimo.models.task.TaskOptions;
 import com.logistimo.models.task.TaskType;
-import com.logistimo.models.task.TemperatureEventType;
 import com.logistimo.task.BackgroundTaskConsumer;
 import com.logistimo.task.BackgroundTaskProducer;
 import com.logistimo.task.DataLoggerTaskConsumer;
 import com.logistimo.task.DataLoggerTaskProducer;
-import com.logistimo.utils.AssetStatusConstants;
 
 import org.apache.activemq.camel.component.ActiveMQComponent;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.HashMap;
 import java.util.List;
@@ -61,34 +58,33 @@ import scala.concurrent.duration.Duration;
  */
 @SuppressWarnings("unchecked")
 public class TaskService extends ServiceImpl {
+
   private static final Logger.ALogger LOGGER = Logger.of(TaskService.class);
-  public Map<Integer, ActorRef> producers, consumers;
+  private Map<Integer, ActorRef> producers, consumers;
   public ActorSystem system;
-  public DeviceService deviceService = ServiceFactory.getService(DeviceService.class);
 
   public TaskService() {
     producers = new HashMap<>();
     consumers = new HashMap<>();
 
-    system = ActorSystem.create("background-task-actor");
-    Camel camel = CamelExtension.get(system);
-    camel.context().addComponent("activemq",
-        ActiveMQComponent
-            .activeMQComponent(Play.application().configuration().getString("activemq.url")));
-    producers.put(TaskType.BACKGROUND_TASK.getValue(),
-        system.actorOf(Props.create(BackgroundTaskProducer.class)));
-    consumers.put(TaskType.BACKGROUND_TASK.getValue(),
-        system.actorOf(Props.create(BackgroundTaskConsumer.class)));
+    initActorSystem("background-task-actor", TaskType.BACKGROUND_TASK, BackgroundTaskProducer.class, BackgroundTaskConsumer.class);
+    initActorSystem("data-logger-task-actor", TaskType.DATA_LOGGER_TASK, DataLoggerTaskProducer.class, DataLoggerTaskConsumer.class);
 
-    system = ActorSystem.create("data-logger-task-actor");
-    camel = CamelExtension.get(system);
-    camel.context().addComponent("activemq",
-        ActiveMQComponent
-            .activeMQComponent(Play.application().configuration().getString("activemq.url")));
-    producers.put(TaskType.DATA_LOGGER_TASK.getValue(),
-        system.actorOf(Props.create(DataLoggerTaskProducer.class)));
-    consumers.put(TaskType.DATA_LOGGER_TASK.getValue(),
-        system.actorOf(Props.create(DataLoggerTaskConsumer.class)));
+  }
+
+  private void initActorSystem(String actor, TaskType taskType, Class<?> producerClass, Class<?> consumerClass) {
+    system = ActorSystem.create(actor);
+    Camel camel = CamelExtension.get(system);
+    String brokerURL = Play.application().configuration().getString("activemq.url");
+    if (StringUtils.isNotEmpty(brokerURL)) {
+      camel.context().addComponent("activemq",
+          ActiveMQComponent
+              .activeMQComponent(brokerURL));
+    }
+    producers.put(taskType.getValue(),
+        system.actorOf(Props.create(producerClass)));
+    consumers.put(taskType.getValue(),
+        system.actorOf(Props.create(consumerClass)));
   }
 
   public void init() {

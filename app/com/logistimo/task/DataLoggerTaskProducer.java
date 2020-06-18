@@ -24,10 +24,15 @@
 package com.logistimo.task;
 
 import akka.camel.javaapi.UntypedProducerActor;
+import play.Play;
 
 public class DataLoggerTaskProducer extends UntypedProducerActor {
+
+  private static final String QUEUE_NAME =
+      Play.application().configuration().getString("queue.tms.data", "activemq:queue:tms-data");
+
   public String getEndpointUri() {
-    return "activemq:queue:tms-data";
+    return QUEUE_NAME;
   }
 
   @Override

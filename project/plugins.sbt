@@ -1,8 +1,8 @@
 logLevel := Level.Warn
 
-resolvers += "Typesafe repository" at "http://repo.typesafe.com/typesafe/releases/"
+resolvers += "Typesafe repository" at "https://repo.typesafe.com/typesafe/releases/"
 
-resolvers += Resolver.url("sbt-plugin-snapshots", url("http://scalasbt.artifactoryonline.com/scalasbt/sbt-plugin-snapshots"))(Resolver.ivyStylePatterns)
+resolvers += Resolver.url("sbt-plugin-snapshots", url("https://scalasbt.artifactoryonline.com/scalasbt/sbt-plugin-snapshots"))(Resolver.ivyStylePatterns)
 
 resolvers += "snapshots" at "https://oss.sonatype.org/content/repositories/snapshots"
 
