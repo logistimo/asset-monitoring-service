@@ -23,9 +23,15 @@
 
 package com.logistimo.task;
 
+import play.Play;
+
 public class DataLoggerTaskConsumer extends TaskConsumer {
+
+  private static final String QUEUE_NAME =
+      Play.application().configuration().getString("queue.tms.data", "activemq:queue:tms-data");
+
   public String getEndpointUri() {
-    return "activemq:queue:tms-data";
+    return QUEUE_NAME;
   }
 
   public void onReceive(Object message) {

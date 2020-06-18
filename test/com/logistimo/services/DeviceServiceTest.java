@@ -135,6 +135,9 @@ public class DeviceServiceTest {
     Map<String, String> props = new HashMap<>();
     props.put(ACTIVEMQ_URL, "");
     props.put("enable.cron.election", "false");
+    props.put("queue.asset.alarms", "direct:queue:asset-alarms");
+    props.put("queue.tms.task", "direct:queue:tms-task");
+    props.put("queue.tms.data", "direct:queue:tms-data");
     props.putAll(inMemoryDatabase());
     return props;
   }
