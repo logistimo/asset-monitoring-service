@@ -31,7 +31,7 @@ public class AssetAlarmsMessageProducer extends UntypedProducerActor {
 
   private static final String
       QUEUE_NAME =
-      Play.application().configuration().getString("asset-alarms");
+      Play.application().configuration().getString("queue.asset.alarms");
 
   @Override
   public String getEndpointUri() {

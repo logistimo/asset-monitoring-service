@@ -24,10 +24,15 @@
 package com.logistimo.task;
 
 import akka.camel.javaapi.UntypedProducerActor;
+import play.Play;
 
 public class BackgroundTaskProducer extends UntypedProducerActor {
+
+  private static final String QUEUE_NAME =
+      Play.application().configuration().getString("queue.tms.task", "activemq:queue:tms-task");
+
   public String getEndpointUri() {
-    return "activemq:queue:tms-task";
+    return QUEUE_NAME;
   }
 
   @Override
