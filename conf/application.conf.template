@@ -124,7 +124,10 @@ logistimo.config_push.url.nimblewireless = "http://198.57.226.173:8080/iristrack
 logistimo.support.apn_push.vendors = "berlinger,nexleaf,relyon"
 logistimo.support.status_request.vendors = "berlinger"
 logistimo.support.admin_push.vendors = "berlinger"
-logistimo.support.config_push.vendors = "berlinger,nexleaf,nimblewireless,relyon"
+logistimo.support.config_push.vendors = "berlinger,nexleaf,nimblewireless,relyon,vaxlog"
+
+#SMS Service URLs - Vaxlog
+logistimo.config_push.url.vaxlog = "$CONFIG_PUSH_VXLG"
 
 #logistimo.sent_status_request.url = "http://localhost:9010/temp/%vid%/%did%?country=%country%&phone=%phone%"
 #logistimo.apn_push.url = "http://localhost:9010/devices/apn?country=%country%&phone=%phone%"

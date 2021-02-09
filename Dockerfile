@@ -54,6 +54,7 @@ ENV MYSQL_HOST_URL="jdbc:mysql://localhost:3306/logistimo_tms" \
 	BER_APN_PUSH_URL="http://localhost:8090/devices/apn?country=%country%&phone=%phone%" \
 	BER_CONFIG_PUSH_URL="http://localhost:8090/devices/config" \
 	ACTIVEMQ_HOST="tcp://localhost:61616" \
+	CONFIG_PUSH_VXLG="http://localhost:8090/smsservice/devices/config" \
 	ZKR_HOST="localhost:2181" \
 	REDIS_HOST=localhost \
 	REDIS_PORT=6379 \
